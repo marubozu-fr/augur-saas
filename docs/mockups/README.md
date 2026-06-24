@@ -28,7 +28,7 @@ The full written design reference will live in
 |---|--------|------|--------|-------|
 | 1 | Landing page | [`landing.html`](./landing.html) | Done | Hero, features, how-it-works, metrics + testimonials, newsletter CTA, footer. Establishes shared tokens. |
 | 2 | Pricing page | [`pricing.html`](./pricing.html) | Done | Shared header/footer from landing. Monthly/annual segmented toggle (Save 20%), 4 plan cards (Starter €29 / Pro €79 featured "Most popular" / Premium €149 / Enterprise Custom), grouped feature-comparison table with sticky header + horizontal scroll on mobile, 7-item FAQ accordion (`<details>`), closing CTA band. |
-| 3 | Auth pages | `auth.html` | Pending | Sign in / sign up / forgot password |
+| 3 | Auth pages | [`auth.html`](./auth.html) | Done | Centered card on the shared ambient-glow background + brand mark. Three views stacked for preview: sign in (email/password, remember-me, forgot link), sign up (password hint, terms checkbox, loading submit state), forgot password (request form with inline error + "check your inbox" success state). Google + GitHub OAuth buttons (Supabase Auth), show/hide password toggle. |
 | 4 | Member dashboard | `dashboard.html` | Pending | Stat family cards, tier-gating overlay, nav |
 | 5 | Stat detail | `stat-detail.html` | Pending | Probability table, sliced accordion, color-coded edge |
 | 6 | Account & billing | `account.html` | Pending | Plan info, billing, profile settings |
