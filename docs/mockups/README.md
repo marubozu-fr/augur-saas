@@ -29,7 +29,7 @@ The full written design reference will live in
 | 1 | Landing page | [`landing.html`](./landing.html) | Done | Hero, features, how-it-works, metrics + testimonials, newsletter CTA, footer. Establishes shared tokens. |
 | 2 | Pricing page | [`pricing.html`](./pricing.html) | Done | Shared header/footer from landing. Monthly/annual segmented toggle (Save 20%), 4 plan cards (Starter €29 / Pro €79 featured "Most popular" / Premium €149 / Enterprise Custom), grouped feature-comparison table with sticky header + horizontal scroll on mobile, 7-item FAQ accordion (`<details>`), closing CTA band. |
 | 3 | Auth pages | [`auth.html`](./auth.html) | Done | Centered card on the shared ambient-glow background + brand mark. Three views stacked for preview: sign in (email/password, remember-me, forgot link), sign up (password hint, terms checkbox, loading submit state), forgot password (request form with inline error + "check your inbox" success state). Google + GitHub OAuth buttons (Supabase Auth), show/hide password toggle. |
-| 4 | Member dashboard | `dashboard.html` | Pending | Stat family cards, tier-gating overlay, nav |
+| 4 | Member dashboard | [`dashboard.html`](./dashboard.html) | Done | **Establishes the member app-shell**: persistent left sidebar (Dashboard / Account / Logout + catalog categories + user card) and slim sticky top bar (tier indicator pill, NQ/ES instrument segmented control, theme toggle). Page: greeting + daily-refresh note, upgrade banner, search input + category filter chips, responsive grid of stat-family cards (name, instrument, short description, tier badge, headline edge vs baseline, N, "View stats" CTA). All four states stacked for preview: **populated** (with two locked cards inline), **loading** (shimmer skeleton grid), **empty** (no-results panel + clear-filters), **locked** (isolated tier-gated card with blurred body + overlay upgrade CTA). |
 | 5 | Stat detail | `stat-detail.html` | Pending | Probability table, sliced accordion, color-coded edge |
 | 6 | Account & billing | `account.html` | Pending | Plan info, billing, profile settings |
 
@@ -51,4 +51,6 @@ The full written design reference will live in
 - **Responsive** — mobile-first; cards stack and nav collapses to a Sheet
   drawer below the documented breakpoints. The pricing comparison table keeps a
   `min-width` and scrolls horizontally inside its container on small screens.
+  The dashboard sidebar collapses into a Sheet drawer at ≤860px (top-bar menu
+  button appears); the stat grid steps 3 → 2 → 1 columns.
 - **Indentation** — 2 spaces (HTML and CSS), per project code style.

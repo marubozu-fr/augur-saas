@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<!--
+  Augur SaaS — Member Dashboard mockup (GitHub issue #4)
+  Implemented later as a Server Component at src/app/(dashboard)/dashboard/page.tsx
+  (Milestone 4). The stat catalog is fetched server-side from the Augur API with
+  the service-level X-API-Key, then filtered by the user's tier before render.
+
+  Navigation pattern: persistent left SIDEBAR + slim top bar. This is the first
+  member-area mockup, so it ESTABLISHES the app-shell layout that stat-detail.html
+  and account.html will reuse (sidebar nav + top bar with tier/instrument/theme).
+
+  This single file stacks the FOUR required states for review:
+    1. POPULATED  — the canonical dashboard (top of page)
+    2. LOADING    — skeleton card grid
+    3. EMPTY      — no stats match the active filter
+  The LOCKED state is shown inline within the populated grid (tier-gated cards),
+  AND isolated in the "states" section so the frontend-dev has a clean contract.
+
+  Shared design tokens live in styles.css. Styles unique to the dashboard are in
+  the <style> block below (page-scoped layout only — no new color/spacing values,
+  everything references the tokens).
+-->
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Augur — Dashboard</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      /* ---- Page-scoped layout for the member dashboard only -------------- */
+
+      /* App shell: fixed sidebar + scrolling content column.
+         shadcn/ui: a custom layout; sidebar links are NavigationMenu items,
+         mobile sidebar collapses into a Sheet drawer. */
+      .app {
+        display: grid;
+        grid-template-columns: 248px 1fr;
+        min-height: 100vh;
+      }
+
+      /* -------------------------------------------------------------------
+         SIDEBAR
+         shadcn/ui: Sheet (mobile) / static aside (desktop), Button(ghost) rows,
+                    Separator, Avatar (user footer)
+         ------------------------------------------------------------------- */
+      .sidebar {
+        position: sticky;
+        top: 0;
+        align-self: start;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+        padding: var(--space-5) var(--space-4);
+        background-color: var(--color-bg-subtle);
+        border-right: 1px solid var(--color-border);
+      }
+      .sidebar__brand {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-3);
+        font-weight: 700;
+        font-size: var(--text-lg);
+        letter-spacing: var(--tracking-tight);
+        padding: var(--space-2) var(--space-2) var(--space-5);
+      }
+      .sidebar__brand-mark {
+        width: 2rem;
+        height: 2rem;
+        border-radius: var(--radius-md);
+        background: linear-gradient(135deg, var(--color-accent), #06b6d4);
+        display: grid;
+        place-items: center;
+        color: var(--color-on-accent);
+        box-shadow: var(--shadow-sm);
+      }
+      .sidebar__section-label {
+        font-size: var(--text-xs);
+        font-weight: 600;
+        letter-spacing: var(--tracking-wide);
+        text-transform: uppercase;
+        color: var(--color-text-subtle);
+        padding: var(--space-4) var(--space-2) var(--space-2);
+      }
+      .nav-item {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        padding: var(--space-2) var(--space-3);
+        border-radius: var(--radius-md);
+        font-size: var(--text-sm);
+        font-weight: 500;
+        color: var(--color-text-muted);
+        cursor: pointer;
+        transition: background-color var(--transition), color var(--transition);
+      }
+      .nav-item svg {
+        flex: none;
+        color: var(--color-text-subtle);
+        transition: color var(--transition);
+      }
+      .nav-item:hover {
+        background-color: var(--color-surface);
+        color: var(--color-text);
+      }
+      .nav-item:hover svg {
+        color: var(--color-text-muted);
+      }
+      /* active = current route. shadcn/ui: data-active styling */
+      .nav-item--active {
+        background-color: var(--color-accent-soft);
+        color: var(--color-accent);
+      }
+      .nav-item--active svg {
+        color: var(--color-accent);
+      }
+      .nav-item--danger:hover {
+        color: var(--color-down);
+      }
+      .nav-item--danger:hover svg {
+        color: var(--color-down);
+      }
+
+      .sidebar__spacer {
+        flex: 1;
+      }
+
+      /* User card pinned to sidebar bottom. shadcn/ui: DropdownMenu trigger. */
+      .sidebar__user {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        padding: var(--space-3);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--color-border);
+        background-color: var(--color-surface);
+      }
+      .sidebar__user .avatar {
+        width: 2.25rem;
+        height: 2.25rem;
+        border-radius: var(--radius-full);
+        display: grid;
+        place-items: center;
+        font-weight: 700;
+        font-size: var(--text-xs);
+        color: var(--color-on-accent);
+        background: linear-gradient(135deg, var(--color-accent), #06b6d4);
+        flex: none;
+      }
+      .sidebar__user-meta {
+        min-width: 0;
+        line-height: var(--leading-snug);
+      }
+      .sidebar__user-name {
+        font-size: var(--text-sm);
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .sidebar__user-email {
+        font-size: var(--text-xs);
+        color: var(--color-text-subtle);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      /* -------------------------------------------------------------------
+         CONTENT COLUMN
+         ------------------------------------------------------------------- */
+      .content {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+      }
+
+      /* Top bar: mobile menu trigger + tier indicator + instrument + theme.
+         shadcn/ui: Sheet trigger, Badge, Tabs/ToggleGroup, Toggle */
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 40;
+        display: flex;
+        align-items: center;
+        gap: var(--space-4);
+        height: var(--header-height);
+        padding-inline: var(--space-6);
+        background-color: color-mix(in srgb, var(--color-bg) 82%, transparent);
+        backdrop-filter: saturate(160%) blur(12px);
+        border-bottom: 1px solid var(--color-border);
+      }
+      .topbar__menu {
+        display: none; /* visible on mobile only */
+      }
+      .topbar__title {
+        font-size: var(--text-base);
+        font-weight: 600;
+      }
+      .topbar__spacer {
+        flex: 1;
+      }
+      .topbar__group {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+      }
+
+      /* Tier indicator pill — subscription plan. shadcn/ui: Badge + Tooltip. */
+      .tier-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
+        padding: var(--space-2) var(--space-3);
+        border-radius: var(--radius-full);
+        border: 1px solid var(--color-border);
+        background-color: var(--color-surface);
+        font-size: var(--text-xs);
+        font-weight: 600;
+      }
+      .tier-pill__dot {
+        width: 0.5rem;
+        height: 0.5rem;
+        border-radius: var(--radius-full);
+        background-color: var(--color-accent);
+        box-shadow: 0 0 0 3px var(--color-accent-soft);
+      }
+      .tier-pill__label {
+        color: var(--color-text-muted);
+      }
+      .tier-pill__plan {
+        color: var(--color-text);
+      }
+
+      /* Instrument selector — segmented control (NQ / ES).
+         shadcn/ui: Tabs or ToggleGroup (single). */
+      .segmented {
+        display: inline-flex;
+        padding: 3px;
+        gap: 2px;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--color-border);
+        background-color: var(--color-surface);
+      }
+      .segmented__opt {
+        appearance: none;
+        border: none;
+        background: none;
+        cursor: pointer;
+        padding: 0 var(--space-3);
+        height: 1.75rem;
+        border-radius: var(--radius-sm);
+        font-family: var(--font-mono);
+        font-size: var(--text-xs);
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        color: var(--color-text-muted);
+        transition: background-color var(--transition), color var(--transition);
+      }
+      .segmented__opt:hover {
+        color: var(--color-text);
+      }
+      .segmented__opt--active {
+        background-color: var(--color-accent);
+        color: var(--color-on-accent);
+      }
+      .segmented__opt--active:hover {
+        color: var(--color-on-accent);
+      }
+
+      .icon-btn {
+        display: inline-grid;
+        place-items: center;
+        width: 2.25rem;
+        height: 2.25rem;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--color-border);
+        background-color: var(--color-surface);
+        color: var(--color-text-muted);
+        cursor: pointer;
+        transition: color var(--transition), border-color var(--transition);
+      }
+      .icon-btn:hover {
+        color: var(--color-text);
+        border-color: var(--color-border-strong);
+      }
+
+      /* Main scroll region. */
+      .main {
+        padding: var(--space-6);
+        max-width: 1320px;
+        width: 100%;
+      }
+
+      /* Page heading row. */
+      .page-head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: var(--space-4);
+        margin-bottom: var(--space-5);
+      }
+      .page-head h1 {
+        font-size: var(--text-2xl);
+      }
+      .page-head p {
+        margin-top: var(--space-2);
+        font-size: var(--text-sm);
+        color: var(--color-text-muted);
+      }
+      .page-head__refresh {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
+        font-size: var(--text-xs);
+        color: var(--color-text-subtle);
+      }
+
+      /* Upgrade banner (shown to non-top-tier users). shadcn/ui: Alert/Card. */
+      .upgrade-banner {
+        display: flex;
+        align-items: center;
+        gap: var(--space-4);
+        flex-wrap: wrap;
+        padding: var(--space-4) var(--space-5);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--color-border);
+        background:
+          radial-gradient(120% 140% at 0% 0%, var(--color-accent-soft), transparent 60%),
+          var(--color-surface);
+        margin-bottom: var(--space-5);
+      }
+      .upgrade-banner__icon {
+        display: inline-grid;
+        place-items: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: var(--radius-md);
+        background-color: var(--color-accent-soft);
+        color: var(--color-accent);
+        flex: none;
+      }
+      .upgrade-banner__text {
+        flex: 1;
+        min-width: 14rem;
+      }
+      .upgrade-banner__text strong {
+        font-size: var(--text-sm);
+      }
+      .upgrade-banner__text p {
+        font-size: var(--text-xs);
+        color: var(--color-text-muted);
+        margin-top: 2px;
+      }
+
+      /* Toolbar: search + filter chips. shadcn/ui: Input + ToggleGroup/Tabs. */
+      .toolbar {
+        display: flex;
+        align-items: center;
+        gap: var(--space-4);
+        flex-wrap: wrap;
+        margin-bottom: var(--space-5);
+      }
+      .search {
+        position: relative;
+        flex: 1;
+        min-width: 16rem;
+        max-width: 26rem;
+      }
+      .search svg {
+        position: absolute;
+        left: var(--space-3);
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--color-text-subtle);
+        pointer-events: none;
+      }
+      .search input {
+        width: 100%;
+        height: 2.5rem;
+        padding: 0 var(--space-4) 0 2.5rem;
+        font-size: var(--text-sm);
+        color: var(--color-text);
+        background-color: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-md);
+        transition: border-color var(--transition), box-shadow var(--transition);
+      }
+      .search input::placeholder {
+        color: var(--color-text-subtle);
+      }
+      .search input:hover {
+        border-color: var(--color-border-strong);
+      }
+      .search input:focus {
+        outline: none;
+        border-color: var(--color-accent);
+        box-shadow: 0 0 0 3px var(--color-accent-ring);
+      }
+
+      /* Category filter chips. shadcn/ui: ToggleGroup (multiple/single). */
+      .chips {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        flex-wrap: wrap;
+      }
+      .chip {
+        appearance: none;
+        cursor: pointer;
+        padding: var(--space-2) var(--space-3);
+        border-radius: var(--radius-full);
+        border: 1px solid var(--color-border);
+        background-color: var(--color-surface);
+        font-size: var(--text-xs);
+        font-weight: 600;
+        color: var(--color-text-muted);
+        transition: background-color var(--transition), color var(--transition),
+          border-color var(--transition);
+      }
+      .chip:hover {
+        color: var(--color-text);
+        border-color: var(--color-border-strong);
+      }
+      .chip--active {
+        background-color: var(--color-accent-soft);
+        border-color: transparent;
+        color: var(--color-accent);
+      }
+
+      .toolbar__count {
+        font-size: var(--text-xs);
+        color: var(--color-text-subtle);
+        margin-left: auto;
+      }
+
+      /* -------------------------------------------------------------------
+         STAT FAMILY CARD GRID
+         shadcn/ui: Card + CardHeader + CardContent + CardFooter + Badge
+         ------------------------------------------------------------------- */
+      .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--space-5);
+      }
+
+      .stat-card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-4);
+        overflow: hidden;
+      }
+      .stat-card__top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: var(--space-3);
+      }
+      .stat-card__icon {
+        display: inline-grid;
+        place-items: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: var(--radius-md);
+        background-color: var(--color-surface-2);
+        color: var(--color-text-muted);
+        flex: none;
+      }
+      .stat-card__title {
+        font-size: var(--text-base);
+        font-weight: 600;
+        line-height: var(--leading-snug);
+      }
+      .stat-card__instrument {
+        font-family: var(--font-mono);
+        font-size: var(--text-xs);
+        color: var(--color-text-subtle);
+        margin-top: 2px;
+      }
+      .stat-card__desc {
+        font-size: var(--text-sm);
+        color: var(--color-text-muted);
+        line-height: var(--leading-normal);
+      }
+
+      /* Headline edge readout inside each card. */
+      .stat-card__edge {
+        display: flex;
+        align-items: baseline;
+        gap: var(--space-3);
+        padding-top: var(--space-3);
+        border-top: 1px solid var(--color-border);
+        margin-top: auto;
+      }
+      .stat-card__edge-val {
+        font-size: var(--text-2xl);
+        font-weight: 700;
+      }
+      .stat-card__baseline {
+        font-size: var(--text-xs);
+        color: var(--color-text-subtle);
+      }
+
+      .stat-card__foot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-3);
+        font-size: var(--text-xs);
+        color: var(--color-text-subtle);
+      }
+      .stat-card__n {
+        font-family: var(--font-mono);
+      }
+      .stat-card__cta {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-1);
+        font-size: var(--text-xs);
+        font-weight: 600;
+        color: var(--color-accent);
+        transition: gap var(--transition);
+      }
+      .stat-card:hover .stat-card__cta {
+        gap: var(--space-2);
+      }
+
+      /* ---- LOCKED variant: tier-gated card with overlay + upgrade CTA ---- */
+      .stat-card--locked .stat-card__body {
+        filter: blur(3px);
+        opacity: 0.5;
+        pointer-events: none;
+        user-select: none;
+      }
+      .stat-card--locked {
+        border-style: dashed;
+      }
+      .lock-overlay {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-3);
+        text-align: center;
+        padding: var(--space-5);
+        background: color-mix(in srgb, var(--color-surface) 55%, transparent);
+        backdrop-filter: blur(1px);
+      }
+      .lock-overlay__icon {
+        display: inline-grid;
+        place-items: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: var(--radius-full);
+        background-color: var(--color-surface-2);
+        border: 1px solid var(--color-border-strong);
+        color: var(--color-text-muted);
+      }
+      .lock-overlay__text {
+        font-size: var(--text-sm);
+        font-weight: 600;
+      }
+      .lock-overlay__sub {
+        font-size: var(--text-xs);
+        color: var(--color-text-muted);
+        max-width: 16rem;
+      }
+
+      /* ---- LOADING skeleton ---- */
+      .skeleton {
+        position: relative;
+        overflow: hidden;
+        background-color: var(--color-surface-2);
+        border-radius: var(--radius-sm);
+      }
+      .skeleton::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        transform: translateX(-100%);
+        background: linear-gradient(
+          90deg,
+          transparent,
+          color-mix(in srgb, var(--color-text) 6%, transparent),
+          transparent
+        );
+        animation: shimmer 1.4s infinite;
+      }
+      @keyframes shimmer {
+        100% { transform: translateX(100%); }
+      }
+      .sk-line { height: 0.75rem; }
+      .sk-icon { width: 2.5rem; height: 2.5rem; border-radius: var(--radius-md); }
+      .sk-badge { width: 3.5rem; height: 1.25rem; border-radius: var(--radius-full); }
+      .sk-group { display: grid; gap: var(--space-2); }
+
+      /* ---- EMPTY state ---- */
+      .empty {
+        grid-column: 1 / -1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: var(--space-4);
+        padding: var(--space-9) var(--space-5);
+        border: 1px dashed var(--color-border-strong);
+        border-radius: var(--radius-xl);
+        background-color: var(--color-bg-subtle);
+      }
+      .empty__icon {
+        display: inline-grid;
+        place-items: center;
+        width: 3.5rem;
+        height: 3.5rem;
+        border-radius: var(--radius-full);
+        background-color: var(--color-surface-2);
+        color: var(--color-text-subtle);
+      }
+      .empty__title {
+        font-size: var(--text-lg);
+      }
+      .empty__text {
+        font-size: var(--text-sm);
+        color: var(--color-text-muted);
+        max-width: 26rem;
+      }
+      .empty__actions {
+        display: flex;
+        gap: var(--space-3);
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      /* Mockup-only divider between stacked state demos (not a real element). */
+      .mockup-divider {
+        display: flex;
+        align-items: center;
+        gap: var(--space-4);
+        margin: var(--space-8) 0 var(--space-5);
+        font-size: var(--text-xs);
+        font-weight: 600;
+        letter-spacing: var(--tracking-wide);
+        text-transform: uppercase;
+        color: var(--color-text-subtle);
+      }
+      .mockup-divider::before,
+      .mockup-divider::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        border-top: 1px dashed var(--color-border-strong);
+      }
+
+      /* -------------------------------------------------------------------
+         Responsive
+         ------------------------------------------------------------------- */
+      @media (max-width: 1080px) {
+        .stat-grid { grid-template-columns: repeat(2, 1fr); }
+      }
+      @media (max-width: 860px) {
+        /* Sidebar collapses into a Sheet drawer; top bar gets a menu button. */
+        .app { grid-template-columns: 1fr; }
+        .sidebar { display: none; }
+        .topbar__menu { display: inline-grid; }
+        .tier-pill__label { display: none; }
+      }
+      @media (max-width: 620px) {
+        .main { padding: var(--space-5) var(--space-4); }
+        .stat-grid { grid-template-columns: 1fr; }
+        .toolbar__count { display: none; }
+        .search { max-width: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <!-- ===================================================================
+           SIDEBAR NAVIGATION
+           shadcn/ui: aside (desktop) / Sheet (mobile), Button(ghost) rows,
+                      Separator, Avatar + DropdownMenu (user footer)
+           Links: Dashboard (active), Account, Logout — per issue #4.
+           ================================================================ -->
+      <aside class="sidebar">
+        <a class="sidebar__brand" href="landing.html" aria-label="Augur home">
+          <span class="sidebar__brand-mark" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M6 5h12L11 12l7 7H6" />
+            </svg>
+          </span>
+          Augur
+        </a>
+
+        <nav aria-label="Primary">
+          <!-- shadcn/ui: nav links; active item uses data-active styling -->
+          <a class="nav-item nav-item--active" href="dashboard.html" aria-current="page">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true">
+              <rect x="3" y="3" width="7" height="9" rx="1" />
+              <rect x="14" y="3" width="7" height="5" rx="1" />
+              <rect x="14" y="12" width="7" height="9" rx="1" />
+              <rect x="3" y="16" width="7" height="5" rx="1" />
+            </svg>
+            Dashboard
+          </a>
+          <a class="nav-item" href="account.html">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 21a8 8 0 0 1 16 0" />
+            </svg>
+            Account
+          </a>
+        </nav>
+
+        <p class="sidebar__section-label">Catalog</p>
+        <nav aria-label="Stat categories">
+          <a class="nav-item" href="#">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 3v18h18" /><path d="M7 14l4-4 3 3 5-6" />
+            </svg>
+            Gaps &amp; opens
+          </a>
+          <a class="nav-item" href="#">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 18V8M10 18V4M16 18v-6M22 18h-2M2 18h20" />
+            </svg>
+            Range &amp; extension
+          </a>
+          <a class="nav-item" href="#">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true">
+              <rect x="3" y="4" width="18" height="16" rx="2" />
+              <path d="M3 9h18M8 4v16" />
+            </svg>
+            Seasonality
+          </a>
+        </nav>
+
+        <div class="sidebar__spacer"></div>
+
+        <!-- Logout lives at the bottom of the nav per issue requirement. -->
+        <nav aria-label="Session">
+          <a class="nav-item nav-item--danger" href="landing.html">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true">
+              <path d="M16 17l5-5-5-5M21 12H9M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            </svg>
+            Logout
+          </a>
+        </nav>
+
+        <!-- User card. shadcn/ui: Avatar + DropdownMenu trigger -->
+        <div class="sidebar__user">
+          <span class="avatar" aria-hidden="true">MK</span>
+          <span class="sidebar__user-meta">
+            <span class="sidebar__user-name">Marcus Kellner</span>
+            <span class="sidebar__user-email">marcus@example.com</span>
+          </span>
+        </div>
+      </aside>
+
+      <!-- ===================================================================
+           CONTENT COLUMN
+           ================================================================ -->
+      <div class="content">
+        <!-- TOP BAR ------------------------------------------------------- -->
+        <header class="topbar">
+          <!-- shadcn/ui: Sheet trigger (mobile only) -->
+          <button class="icon-btn topbar__menu" aria-label="Open navigation">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              aria-hidden="true">
+              <path d="M4 7h16M4 12h16M4 17h16" />
+            </svg>
+          </button>
+
+          <span class="topbar__title">Stat catalog</span>
+
+          <div class="topbar__spacer"></div>
+
+          <div class="topbar__group">
+            <!-- SUBSCRIPTION TIER INDICATOR.
+                 shadcn/ui: Badge + Tooltip. Plan name comes from Supabase
+                 subscription record (never hardcoded). -->
+            <span class="tier-pill" title="Your current plan">
+              <span class="tier-pill__dot" aria-hidden="true"></span>
+              <span class="tier-pill__label">Plan</span>
+              <span class="tier-pill__plan">Pro</span>
+            </span>
+
+            <!-- INSTRUMENT SELECTOR (NQ / ES).
+                 shadcn/ui: Tabs or ToggleGroup type=single -->
+            <div class="segmented" role="tablist" aria-label="Instrument">
+              <button class="segmented__opt segmented__opt--active" role="tab"
+                aria-selected="true">NQ</button>
+              <button class="segmented__opt" role="tab" aria-selected="false">ES</button>
+            </div>
+
+            <!-- shadcn/ui: Toggle (theme switch). Static in mockup. -->
+            <button class="icon-btn" aria-label="Toggle dark / light theme">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
+              </svg>
+            </button>
+          </div>
+        </header>
+
+        <!-- =================================================================
+             STATE 1 — POPULATED (canonical dashboard)
+             ============================================================== -->
+        <main class="main">
+          <div class="page-head">
+            <div>
+              <h1>Good morning, Marcus</h1>
+              <p>
+                <span class="mono">42</span> stat families for
+                <span class="mono">NQ</span> · Nasdaq-100 futures
+              </p>
+            </div>
+            <span class="page-head__refresh">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                stroke="var(--color-up)" stroke-width="2.2" stroke-linecap="round"
+                stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="9" /><path d="M12 8v4l2.5 2" />
+              </svg>
+              Refreshed today, 22:15 ET — after the cash close
+            </span>
+          </div>
+
+          <!-- UPGRADE BANNER — shown to non-Enterprise users. shadcn/ui: Card -->
+          <div class="upgrade-banner">
+            <span class="upgrade-banner__icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M13 2 3 14h7l-1 8 10-12h-7z" />
+              </svg>
+            </span>
+            <div class="upgrade-banner__text">
+              <strong>You're on the Pro plan — Tier 1 &amp; 2 unlocked.</strong>
+              <p>
+                <span class="mono">11</span> Tier 3 &amp; Enterprise stat families
+                are still locked. Upgrade to Premium for volatility-regime and
+                intraday-microstructure edges.
+              </p>
+            </div>
+            <!-- shadcn/ui: Button variant=default -->
+            <a class="btn btn--primary" href="pricing.html">Upgrade plan</a>
+          </div>
+
+          <!-- TOOLBAR: search + filter chips. -->
+          <div class="toolbar">
+            <!-- STATS SEARCH. shadcn/ui: Input -->
+            <div class="search">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" />
+              </svg>
+              <input type="search" placeholder="Search stat families…"
+                aria-label="Search stat families" />
+            </div>
+
+            <!-- FILTER CHIPS. shadcn/ui: ToggleGroup -->
+            <div class="chips" role="group" aria-label="Filter by category">
+              <button class="chip chip--active">All</button>
+              <button class="chip">Gaps &amp; opens</button>
+              <button class="chip">Range</button>
+              <button class="chip">Seasonality</button>
+              <button class="chip">Volatility</button>
+            </div>
+
+            <span class="toolbar__count">
+              Showing <span class="mono">6</span> of <span class="mono">42</span>
+            </span>
+          </div>
+
+          <!-- STAT FAMILY CARD GRID.
+               Each card: name, instrument, short description, tier badge,
+               headline edge vs baseline, sample size, "View stats" CTA.
+               Cards 5 & 6 demonstrate the LOCKED (tier-gated) variant inline. -->
+          <div class="stat-grid">
+            <!-- Card 1 — Tier 1, strong positive edge -->
+            <article class="card card--interactive stat-card">
+              <div class="stat-card__top">
+                <span class="stat-card__icon" aria-hidden="true">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path d="M3 3v18h18" /><path d="M7 14l4-4 3 3 5-6" />
+                  </svg>
+                </span>
+                <span class="badge">Tier 1</span>
+              </div>
+              <div>
+                <h3 class="stat-card__title">Gap-up continuation</h3>
+                <p class="stat-card__instrument">NQ · RTH</p>
+              </div>
+              <p class="stat-card__desc">
+                Probability the session closes above the open after an
+                overnight gap up of more than 0.30%.
+              </p>
+              <div class="stat-card__edge">
+                <span class="stat-card__edge-val mono val-up">63.4%</span>
+                <span class="badge badge--up">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2.6" stroke-linecap="round"
+                    stroke-linejoin="round" aria-hidden="true">
+                    <path d="M5 15l7-7 7 7" />
+                  </svg>
+                  +9.8 pts
+                </span>
+                <span class="stat-card__baseline">vs <span class="mono">53.6%</span> base</span>
+              </div>
+              <div class="stat-card__foot">
+                <span class="stat-card__n">N = 1,284</span>
+                <a class="stat-card__cta" href="stat-detail.html">
+                  View stats
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                    stroke-linejoin="round" aria-hidden="true">
+                    <path d="M5 12h14M13 6l6 6-6 6" />
+                  </svg>
+                </a>
+              </div>
+            </article>
+
+            <!-- Card 2 — Tier 1, negative edge (below baseline) -->
+            <article class="card card--interactive stat-card">
+              <div class="stat-card__top">
+                <span class="stat-card__icon" aria-hidden="true">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path d="M3 3v18h18" /><path d="M7 8l4 4 3-3 5 6" />
+                  </svg>
+                </span>
+                <span class="badge">Tier 1</span>
+              </div>
+              <div>
+                <h3 class="stat-card__title">Friday afternoon fade</h3>
+                <p class="stat-card__instrument">NQ · RTH</p>
+              </div>
+              <p class="stat-card__desc">
+                Probability the close is green when the 14:00 ET price is up
+                more than 0.50% on a Friday session.
+              </p>
+              <div class="stat-card__edge">
+                <span class="stat-card__edge-val mono val-down">44.7%</span>
+                <span class="badge badge--down">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2.6" stroke-linecap="round"
+                    stroke-linejoin="round" aria-hidden="true">
+                    <path d="M5 9l7 7 7-7" />
+                  </svg>
+                  −8.9 pts
+                </span>
+                <span class="stat-card__baseline">vs <span class="mono">53.6%</span> base</span>
+              </div>
+              <div class="stat-card__foot">
+                <span class="stat-card__n">N = 612</span>
+                <a class="stat-card__cta" href="stat-detail.html">
+                  View stats
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                    stroke-linejoin="round" aria-hidden="true">
+                    <path d="M5 12h14M13 6l6 6-6 6" />
+                  </svg>
+                </a>
+              </div>
+            </article>
+
+            <!-- Card 3 — Tier 1, neutral edge (no significant edge) -->
+            <article class="card card--interactive stat-card">
+              <div class="stat-card__top">
+                <span class="stat-card__icon" aria-hidden="true">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path d="M4 18V8M10 18V4M16 18v-6M2 18h20" />
+                  </svg>
+                </span>
+                <span class="badge">Tier 1</span>
+              </div>
+              <div>
+                <h3 class="stat-card__title">Opening 30-min range break</h3>
+                <p class="stat-card__instrument">NQ · RTH</p>
+              </div>
+              <p class="stat-card__desc">
+                Probability price breaks the opening-range high before the low
+                across all regular-hours sessions.
+              </p>
+              <div class="stat-card__edge">
+                <span class="stat-card__edge-val mono val-neutral">51.2%</span>
+                <span class="badge">≈ baseline</span>
+                <span class="stat-card__baseline">vs <span class="mono">50.0%</span> base</span>
+              </div>
+              <div class="stat-card__foot">
+                <span class="stat-card__n">N = 3,910</span>
+                <a class="stat-card__cta" href="stat-detail.html">
+                  View stats
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                    stroke-linejoin="round" aria-hidden="true">
+                    <path d="M5 12h14M13 6l6 6-6 6" />
+                  </svg>
+                </a>
+              </div>
+            </article>
+
+            <!-- Card 4 — Tier 2 (within Pro), strong positive edge -->
+            <article class="card card--interactive stat-card">
+              <div class="stat-card__top">
+                <span class="stat-card__icon" aria-hidden="true">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="16" rx="2" />
+                    <path d="M3 9h18M8 4v16" />
+                  </svg>
+                </span>
+                <span class="badge badge--accent">Tier 2</span>
+              </div>
+              <div>
+                <h3 class="stat-card__title">Monday gap-fill rate</h3>
+                <p class="stat-card__instrument">NQ · RTH</p>
+              </div>
+              <p class="stat-card__desc">
+                Probability a Monday overnight gap is fully filled before the
+                regular-hours close, sliced by gap size.
+              </p>
+              <div class="stat-card__edge">
+                <span class="stat-card__edge-val mono val-up">68.9%</span>
+                <span class="badge badge--up">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2.6" stroke-linecap="round"
+                    stroke-linejoin="round" aria-hidden="true">
+                    <path d="M5 15l7-7 7 7" />
+                  </svg>
+                  +12.4 pts
+                </span>
+                <span class="stat-card__baseline">vs <span class="mono">56.5%</span> base</span>
+              </div>
+              <div class="stat-card__foot">
+                <span class="stat-card__n">N = 742</span>
+                <a class="stat-card__cta" href="stat-detail.html">
+                  View stats
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                    stroke-linejoin="round" aria-hidden="true">
+                    <path d="M5 12h14M13 6l6 6-6 6" />
+                  </svg>
+                </a>
+              </div>
+            </article>
+
+            <!-- Card 5 — LOCKED (Tier 3, requires Premium) inline in grid -->
+            <article class="card stat-card stat-card--locked">
+              <div class="stat-card__body">
+                <div class="stat-card__top">
+                  <span class="stat-card__icon" aria-hidden="true">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <path d="M3 12h4l3 8 4-16 3 8h4" />
+                    </svg>
+                  </span>
+                  <span class="badge badge--accent">Tier 3</span>
+                </div>
+                <div>
+                  <h3 class="stat-card__title">High-vol regime drift</h3>
+                  <p class="stat-card__instrument">NQ · RTH</p>
+                </div>
+                <p class="stat-card__desc">
+                  Close direction probability conditioned on the VIX term-structure
+                  regime, by quintile.
+                </p>
+                <div class="stat-card__edge">
+                  <span class="stat-card__edge-val mono val-neutral">••.•%</span>
+                  <span class="badge">+•• pts</span>
+                </div>
+                <div class="stat-card__foot">
+                  <span class="stat-card__n">N = ••••</span>
+                </div>
+              </div>
+
+              <!-- shadcn/ui: overlay with Lock icon + Button(primary) -->
+              <div class="lock-overlay">
+                <span class="lock-overlay__icon" aria-hidden="true">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <rect x="4" y="11" width="16" height="9" rx="2" />
+                    <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+                  </svg>
+                </span>
+                <span class="lock-overlay__text">Premium unlocks this stat</span>
+                <span class="lock-overlay__sub">
+                  High-vol regime drift is a Tier 3 family. Upgrade from Pro to
+                  Premium to access it.
+                </span>
+                <a class="btn btn--primary btn--sm" href="pricing.html">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2.4" stroke-linecap="round"
+                    stroke-linejoin="round" aria-hidden="true">
+                    <path d="M13 2 3 14h7l-1 8 10-12h-7z" />
+                  </svg>
+                  Upgrade to Premium
+                </a>
+              </div>
+            </article>
+
+            <!-- Card 6 — LOCKED (Enterprise) inline in grid -->
+            <article class="card stat-card stat-card--locked">
+              <div class="stat-card__body">
+                <div class="stat-card__top">
+                  <span class="stat-card__icon" aria-hidden="true">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <path d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6" />
+                    </svg>
+                  </span>
+                  <span class="badge">Enterprise</span>
+                </div>
+                <div>
+                  <h3 class="stat-card__title">Order-flow imbalance edge</h3>
+                  <p class="stat-card__instrument">NQ · ETH</p>
+                </div>
+                <p class="stat-card__desc">
+                  Next-bar direction probability from cumulative delta imbalance
+                  at the opening auction.
+                </p>
+                <div class="stat-card__edge">
+                  <span class="stat-card__edge-val mono val-neutral">••.•%</span>
+                  <span class="badge">+•• pts</span>
+                </div>
+                <div class="stat-card__foot">
+                  <span class="stat-card__n">N = ••••</span>
+                </div>
+              </div>
+
+              <div class="lock-overlay">
+                <span class="lock-overlay__icon" aria-hidden="true">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <rect x="4" y="11" width="16" height="9" rx="2" />
+                    <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+                  </svg>
+                </span>
+                <span class="lock-overlay__text">Enterprise-only stat</span>
+                <span class="lock-overlay__sub">
+                  Intraday microstructure families require the Enterprise plan,
+                  including full API access.
+                </span>
+                <a class="btn btn--outline btn--sm" href="pricing.html">
+                  View Enterprise plan
+                </a>
+              </div>
+            </article>
+          </div>
+
+          <!-- ===============================================================
+               MOCKUP-ONLY: STATE VARIANTS BELOW
+               The blocks below are NOT additional dashboard content. They are
+               the LOADING and EMPTY states stacked here so this single file is
+               a complete visual contract for the frontend-dev. In production
+               only ONE of {loading | empty | populated} renders at a time.
+               ============================================================ -->
+
+          <!-- STATE 2 — LOADING (skeleton grid) -------------------------- -->
+          <div class="mockup-divider">State · Loading (skeleton)</div>
+          <div class="stat-grid" aria-hidden="true">
+            <!-- Repeat a skeleton card; 3 shown for the contract. -->
+            <article class="card stat-card">
+              <div class="stat-card__top">
+                <span class="skeleton sk-icon"></span>
+                <span class="skeleton sk-badge"></span>
+              </div>
+              <div class="sk-group">
+                <span class="skeleton sk-line" style="width:70%; height:1rem;"></span>
+                <span class="skeleton sk-line" style="width:30%;"></span>
+              </div>
+              <div class="sk-group">
+                <span class="skeleton sk-line" style="width:100%;"></span>
+                <span class="skeleton sk-line" style="width:85%;"></span>
+              </div>
+              <div class="stat-card__edge">
+                <span class="skeleton" style="width:5rem; height:1.75rem;"></span>
+              </div>
+              <div class="stat-card__foot">
+                <span class="skeleton sk-line" style="width:5rem;"></span>
+                <span class="skeleton sk-line" style="width:4rem;"></span>
+              </div>
+            </article>
+            <article class="card stat-card">
+              <div class="stat-card__top">
+                <span class="skeleton sk-icon"></span>
+                <span class="skeleton sk-badge"></span>
+              </div>
+              <div class="sk-group">
+                <span class="skeleton sk-line" style="width:60%; height:1rem;"></span>
+                <span class="skeleton sk-line" style="width:30%;"></span>
+              </div>
+              <div class="sk-group">
+                <span class="skeleton sk-line" style="width:100%;"></span>
+                <span class="skeleton sk-line" style="width:75%;"></span>
+              </div>
+              <div class="stat-card__edge">
+                <span class="skeleton" style="width:5rem; height:1.75rem;"></span>
+              </div>
+              <div class="stat-card__foot">
+                <span class="skeleton sk-line" style="width:5rem;"></span>
+                <span class="skeleton sk-line" style="width:4rem;"></span>
+              </div>
+            </article>
+            <article class="card stat-card">
+              <div class="stat-card__top">
+                <span class="skeleton sk-icon"></span>
+                <span class="skeleton sk-badge"></span>
+              </div>
+              <div class="sk-group">
+                <span class="skeleton sk-line" style="width:75%; height:1rem;"></span>
+                <span class="skeleton sk-line" style="width:30%;"></span>
+              </div>
+              <div class="sk-group">
+                <span class="skeleton sk-line" style="width:100%;"></span>
+                <span class="skeleton sk-line" style="width:80%;"></span>
+              </div>
+              <div class="stat-card__edge">
+                <span class="skeleton" style="width:5rem; height:1.75rem;"></span>
+              </div>
+              <div class="stat-card__foot">
+                <span class="skeleton sk-line" style="width:5rem;"></span>
+                <span class="skeleton sk-line" style="width:4rem;"></span>
+              </div>
+            </article>
+          </div>
+
+          <!-- STATE 3 — EMPTY (no stats match the filter / search) ------- -->
+          <div class="mockup-divider">State · Empty (no results)</div>
+          <div class="stat-grid">
+            <!-- shadcn/ui: Card-less empty state with Button to clear filters -->
+            <div class="empty">
+              <span class="empty__icon" aria-hidden="true">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" />
+                  <path d="M8 11h6" />
+                </svg>
+              </span>
+              <h2 class="empty__title">No stat families match “volatility”</h2>
+              <p class="empty__text">
+                Try a different search term or clear your filters. Some volatility
+                families are Tier 3 — switch to NQ or upgrade your plan to see more.
+              </p>
+              <div class="empty__actions">
+                <button class="btn btn--secondary btn--sm">Clear filters</button>
+                <a class="btn btn--ghost btn--sm" href="pricing.html">See plans</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- STATE 4 — LOCKED (isolated contract) ----------------------- -->
+          <div class="mockup-divider">State · Locked (tier-gated, isolated)</div>
+          <div class="stat-grid">
+            <article class="card stat-card stat-card--locked">
+              <div class="stat-card__body">
+                <div class="stat-card__top">
+                  <span class="stat-card__icon" aria-hidden="true">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <path d="M3 12h4l3 8 4-16 3 8h4" />
+                    </svg>
+                  </span>
+                  <span class="badge badge--accent">Tier 3</span>
+                </div>
+                <div>
+                  <h3 class="stat-card__title">VIX-spike reversal odds</h3>
+                  <p class="stat-card__instrument">NQ · RTH</p>
+                </div>
+                <p class="stat-card__desc">
+                  Probability of a same-session reversal after an intraday VIX
+                  spike above the 90th percentile.
+                </p>
+                <div class="stat-card__edge">
+                  <span class="stat-card__edge-val mono val-neutral">••.•%</span>
+                  <span class="badge">+•• pts</span>
+                </div>
+                <div class="stat-card__foot">
+                  <span class="stat-card__n">N = ••••</span>
+                </div>
+              </div>
+              <div class="lock-overlay">
+                <span class="lock-overlay__icon" aria-hidden="true">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <rect x="4" y="11" width="16" height="9" rx="2" />
+                    <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+                  </svg>
+                </span>
+                <span class="lock-overlay__text">Premium unlocks this stat</span>
+                <span class="lock-overlay__sub">
+                  This Tier 3 family is above your current Pro plan. Upgrade to
+                  see the full edge and all slices.
+                </span>
+                <a class="btn btn--primary btn--sm" href="pricing.html">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2.4" stroke-linecap="round"
+                    stroke-linejoin="round" aria-hidden="true">
+                    <path d="M13 2 3 14h7l-1 8 10-12h-7z" />
+                  </svg>
+                  Upgrade to Premium
+                </a>
+              </div>
+            </article>
+          </div>
+        </main>
+      </div>
+    </div>
+  </body>
+</html>
