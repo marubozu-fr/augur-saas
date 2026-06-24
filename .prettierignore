@@ -1,0 +1,9 @@
+.next/
+node_modules/
+out/
+pnpm-lock.yaml
+# Pre-existing files not managed by Prettier
+.claude/
+docs/
+CLAUDE.md
+README.md
