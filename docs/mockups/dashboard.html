@@ -232,42 +232,6 @@
         color: var(--color-text);
       }
 
-      /* Instrument selector — segmented control (NQ / ES).
-         shadcn/ui: Tabs or ToggleGroup (single). */
-      .segmented {
-        display: inline-flex;
-        padding: 3px;
-        gap: 2px;
-        border-radius: var(--radius-md);
-        border: 1px solid var(--color-border);
-        background-color: var(--color-surface);
-      }
-      .segmented__opt {
-        appearance: none;
-        border: none;
-        background: none;
-        cursor: pointer;
-        padding: 0 var(--space-3);
-        height: 1.75rem;
-        border-radius: var(--radius-sm);
-        font-family: var(--font-mono);
-        font-size: var(--text-xs);
-        font-weight: 600;
-        letter-spacing: 0.02em;
-        color: var(--color-text-muted);
-        transition: background-color var(--transition), color var(--transition);
-      }
-      .segmented__opt:hover {
-        color: var(--color-text);
-      }
-      .segmented__opt--active {
-        background-color: var(--color-accent);
-        color: var(--color-on-accent);
-      }
-      .segmented__opt--active:hover {
-        color: var(--color-on-accent);
-      }
-
       .icon-btn {
         display: inline-grid;
         place-items: center;
@@ -288,7 +252,6 @@
       /* Main scroll region. */
       .main {
         padding: var(--space-6);
-        max-width: 1320px;
         width: 100%;
       }
 
@@ -439,10 +402,15 @@
          STAT FAMILY CARD GRID
          shadcn/ui: Card + CardHeader + CardContent + CardFooter + Badge
          ------------------------------------------------------------------- */
+      /* Mobile-first: 2 per row by default, 3 on wide screens, 1 on mobile.
+         Cards always fill the full row — no orphans, no empty space. */
       .stat-grid {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(2, 1fr);
         gap: var(--space-5);
+      }
+      @media (min-width: 861px) {
+        .stat-grid { grid-template-columns: repeat(3, 1fr); }
       }
 
       .stat-card {
@@ -658,9 +626,6 @@
       /* -------------------------------------------------------------------
          Responsive
          ------------------------------------------------------------------- */
-      @media (max-width: 1080px) {
-        .stat-grid { grid-template-columns: repeat(2, 1fr); }
-      }
       @media (max-width: 860px) {
         /* Sidebar collapses into a Sheet drawer; top bar gets a menu button. */
         .app { grid-template-columns: 1fr; }
@@ -802,12 +767,20 @@
               <span class="tier-pill__plan">Pro</span>
             </span>
 
-            <!-- INSTRUMENT SELECTOR (NQ / ES).
-                 shadcn/ui: Tabs or ToggleGroup type=single -->
-            <div class="segmented" role="tablist" aria-label="Instrument">
-              <button class="segmented__opt segmented__opt--active" role="tab"
-                aria-selected="true">NQ</button>
-              <button class="segmented__opt" role="tab" aria-selected="false">ES</button>
+            <!-- INSTRUMENT SELECTOR.
+                 shadcn/ui: Combobox (Command + Popover). The full asset
+                 catalog (NQ / ES / YM / RTY) is searchable in the popover;
+                 trigger shown closed here (open state demoed on stat-detail). -->
+            <div class="combobox combobox--compact">
+              <button class="combobox__trigger" aria-haspopup="listbox"
+                aria-expanded="false" aria-label="Instrument: NQ. Search instruments">
+                <span class="combobox__value">NQ</span>
+                <svg class="chev" width="16" height="16" viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" stroke-width="2.2"
+                  stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </button>
             </div>
 
             <!-- shadcn/ui: Toggle (theme switch). Static in mockup. -->
