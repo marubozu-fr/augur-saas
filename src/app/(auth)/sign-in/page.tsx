@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { signIn } from "@/app/(auth)/actions";
+import { OAuthButtons } from "@/components/OAuthButtons";
 
 interface SignInPageProps {
   searchParams: Promise<{ error?: string }>;
@@ -9,16 +10,34 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
   const { error } = await searchParams;
 
   return (
-    <div className="w-full max-w-md">
-      <h1 className="text-2xl font-bold text-center mb-6">Sign in</h1>
+    // .auth-card: surface background, border, rounded-xl, padding, shadow
+    <div className="w-full bg-card border border-border rounded-xl p-8 shadow-[0_16px_48px_rgba(0,0,0,0.55)]">
+      {/* .auth-card__head */}
+      <div className="text-center mb-8">
+        <h1 className="text-[1.75rem] font-bold tracking-tight text-foreground">
+          Welcome back
+        </h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Sign in to access your stat catalog.
+        </p>
+      </div>
+
+      {/* OAuth providers */}
+      <OAuthButtons />
+
+      {/* "or continue with email" separator */}
+      <div className="flex items-center gap-4 my-6 text-xs tracking-widest uppercase text-subtle before:flex-1 before:h-px before:bg-border after:flex-1 after:h-px after:bg-border">
+        or continue with email
+      </div>
 
       {error && (
-        <p className="mb-4 text-sm text-destructive text-center">{error}</p>
+        <p className="mb-4 text-sm text-down text-center">{error}</p>
       )}
 
-      <form action={signIn} className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1">
-          <label htmlFor="email" className="text-sm font-medium">
+      {/* Email/password form */}
+      <form action={signIn} className="grid gap-5">
+        <div className="grid gap-2">
+          <label htmlFor="email" className="text-sm font-semibold text-foreground">
             Email
           </label>
           <input
@@ -28,18 +47,18 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
             required
             autoComplete="email"
             placeholder="you@example.com"
-            className="h-10 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            className="w-full h-11 px-4 text-sm text-foreground bg-background border border-border-strong rounded-md placeholder:text-subtle transition-colors hover:border-neutral focus:outline-none focus:border-brand focus:ring-3 focus:ring-brand-ring"
           />
         </div>
 
-        <div className="flex flex-col gap-1">
-          <div className="flex items-baseline justify-between">
-            <label htmlFor="password" className="text-sm font-medium">
+        <div className="grid gap-2">
+          <div className="flex items-baseline justify-between gap-3">
+            <label htmlFor="password" className="text-sm font-semibold text-foreground">
               Password
             </label>
             <Link
               href="/forgot-password"
-              className="text-xs text-muted-foreground hover:text-foreground"
+              className="text-xs font-semibold text-brand hover:text-brand-hover transition-colors"
             >
               Forgot password?
             </Link>
@@ -50,22 +69,26 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
             type="password"
             required
             autoComplete="current-password"
-            placeholder="••••••••"
-            className="h-10 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            placeholder="••••••••••••"
+            className="w-full h-11 px-4 text-sm text-foreground bg-background border border-border-strong rounded-md placeholder:text-subtle transition-colors hover:border-neutral focus:outline-none focus:border-brand focus:ring-3 focus:ring-brand-ring"
           />
         </div>
 
         <button
           type="submit"
-          className="h-10 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
+          className="w-full h-11 rounded-md bg-brand text-on-brand text-sm font-semibold hover:bg-brand-hover active:bg-brand-hover transition-colors"
         >
           Sign in
         </button>
       </form>
 
+      {/* .auth-foot */}
       <p className="mt-6 text-center text-sm text-muted-foreground">
         Don&apos;t have an account?{" "}
-        <Link href="/sign-up" className="font-medium text-foreground hover:underline">
+        <Link
+          href="/sign-up"
+          className="font-semibold text-brand hover:text-brand-hover transition-colors"
+        >
           Create one
         </Link>
       </p>
