@@ -1,4 +1,137 @@
 {
-  "_comment": "Stripe product and price definitions — loaded via: stripe fixtures stripe-fixtures.json",
-  "fixtures": []
+  "_comment": "Stripe product and price definitions \u2014 loaded via: stripe fixtures stripe-fixtures.json",
+  "fixtures": [
+    {
+      "name": "product_starter",
+      "path": "/v1/products",
+      "method": "post",
+      "params": {
+        "name": "Starter",
+        "metadata": {
+          "tier": "1",
+          "plan": "starter"
+        }
+      }
+    },
+    {
+      "name": "price_starter_monthly",
+      "path": "/v1/prices",
+      "method": "post",
+      "params": {
+        "product": "${product_starter:id}",
+        "currency": "eur",
+        "unit_amount": 2900,
+        "recurring": {
+          "interval": "month"
+        },
+        "lookup_key": "starter_monthly"
+      }
+    },
+    {
+      "name": "price_starter_annual",
+      "path": "/v1/prices",
+      "method": "post",
+      "params": {
+        "product": "${product_starter:id}",
+        "currency": "eur",
+        "unit_amount": 27600,
+        "recurring": {
+          "interval": "year"
+        },
+        "lookup_key": "starter_annual"
+      }
+    },
+    {
+      "name": "product_pro",
+      "path": "/v1/products",
+      "method": "post",
+      "params": {
+        "name": "Pro",
+        "metadata": {
+          "tier": "2",
+          "plan": "pro"
+        }
+      }
+    },
+    {
+      "name": "price_pro_monthly",
+      "path": "/v1/prices",
+      "method": "post",
+      "params": {
+        "product": "${product_pro:id}",
+        "currency": "eur",
+        "unit_amount": 7900,
+        "recurring": {
+          "interval": "month"
+        },
+        "lookup_key": "pro_monthly"
+      }
+    },
+    {
+      "name": "price_pro_annual",
+      "path": "/v1/prices",
+      "method": "post",
+      "params": {
+        "product": "${product_pro:id}",
+        "currency": "eur",
+        "unit_amount": 75600,
+        "recurring": {
+          "interval": "year"
+        },
+        "lookup_key": "pro_annual"
+      }
+    },
+    {
+      "name": "product_premium",
+      "path": "/v1/products",
+      "method": "post",
+      "params": {
+        "name": "Premium",
+        "metadata": {
+          "tier": "3",
+          "plan": "premium"
+        }
+      }
+    },
+    {
+      "name": "price_premium_monthly",
+      "path": "/v1/prices",
+      "method": "post",
+      "params": {
+        "product": "${product_premium:id}",
+        "currency": "eur",
+        "unit_amount": 14900,
+        "recurring": {
+          "interval": "month"
+        },
+        "lookup_key": "premium_monthly"
+      }
+    },
+    {
+      "name": "price_premium_annual",
+      "path": "/v1/prices",
+      "method": "post",
+      "params": {
+        "product": "${product_premium:id}",
+        "currency": "eur",
+        "unit_amount": 142800,
+        "recurring": {
+          "interval": "year"
+        },
+        "lookup_key": "premium_annual"
+      }
+    },
+    {
+      "name": "product_enterprise",
+      "path": "/v1/products",
+      "method": "post",
+      "params": {
+        "name": "Enterprise",
+        "metadata": {
+          "tier": "4",
+          "plan": "enterprise"
+        }
+      }
+    }
+  ]
 }
