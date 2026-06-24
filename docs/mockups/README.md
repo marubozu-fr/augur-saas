@@ -27,7 +27,7 @@ The full written design reference will live in
 | # | Mockup | File | Status | Notes |
 |---|--------|------|--------|-------|
 | 1 | Landing page | [`landing.html`](./landing.html) | Done | Hero, features, how-it-works, metrics + testimonials, newsletter CTA, footer. Establishes shared tokens. |
-| 2 | Pricing page | `pricing.html` | Pending | 4 tiers, comparison table, monthly/annual toggle, FAQ |
+| 2 | Pricing page | [`pricing.html`](./pricing.html) | Done | Shared header/footer from landing. Monthly/annual segmented toggle (Save 20%), 4 plan cards (Starter €29 / Pro €79 featured "Most popular" / Premium €149 / Enterprise Custom), grouped feature-comparison table with sticky header + horizontal scroll on mobile, 7-item FAQ accordion (`<details>`), closing CTA band. |
 | 3 | Auth pages | `auth.html` | Pending | Sign in / sign up / forgot password |
 | 4 | Member dashboard | `dashboard.html` | Pending | Stat family cards, tier-gating overlay, nav |
 | 5 | Stat detail | `stat-detail.html` | Pending | Probability table, sliced accordion, color-coded edge |
@@ -43,9 +43,12 @@ The full written design reference will live in
 - **Color semantics** — green = above baseline / positive edge, red = below
   baseline / negative edge, neutral grey = no significant edge. Accent (sky/teal)
   is for CTAs and interactive elements only. Never reuse green/red for anything
-  other than edge direction.
+  other than edge direction. On the pricing page the accent is used for
+  included-feature checks and the featured plan — green/red are intentionally
+  absent (no edge direction to convey).
 - **Numbers** — all numeric values use the monospace font with
   `font-variant-numeric: tabular-nums` (`.mono` / `.num` helper classes).
 - **Responsive** — mobile-first; cards stack and nav collapses to a Sheet
-  drawer below the documented breakpoints.
+  drawer below the documented breakpoints. The pricing comparison table keeps a
+  `min-width` and scrolls horizontally inside its container on small screens.
 - **Indentation** — 2 spaces (HTML and CSS), per project code style.
