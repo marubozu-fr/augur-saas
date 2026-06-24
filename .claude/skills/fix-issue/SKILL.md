@@ -7,7 +7,7 @@ Fix the GitHub issue: $ARGUMENTS
 
 ## 1. Read the issue
 
-Run `gh issue view $ARGUMENTS --json title,body,labels` to get full details and labels.
+Run `gh issue view $ARGUMENTS --json title,body,labels,comments` to get full details and labels.
 
 ## 2. Read project state
 
