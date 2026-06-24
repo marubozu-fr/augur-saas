@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<!--
+  Augur SaaS — Public Landing Page mockup (GitHub issue #1)
+  Implemented later as a Server Component at src/app/(marketing)/page.tsx (issue #12).
+  No client-side JS required except the theme toggle and mobile nav.
+
+  Shared design tokens live in styles.css. Styles unique to the landing page are
+  in the <style> block below (page-scoped layout only — no new color/spacing
+  values, everything references the tokens).
+-->
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Augur — Statistical Market Probabilities for Futures Traders</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      /* ---- Page-scoped layout for the landing page only ------------------ */
+
+      /* Header / nav --------------------------------------------------------
+         shadcn/ui: NavigationMenu (desktop links) + Sheet (mobile drawer)
+                    + Button (CTAs) */
+      .site-header {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        height: var(--header-height);
+        display: flex;
+        align-items: center;
+        background-color: color-mix(in srgb, var(--color-bg) 80%, transparent);
+        backdrop-filter: saturate(160%) blur(12px);
+        border-bottom: 1px solid var(--color-border);
+      }
+      .site-header__inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-5);
+        width: 100%;
+      }
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-3);
+        font-weight: 700;
+        font-size: var(--text-lg);
+        letter-spacing: var(--tracking-tight);
+      }
+      .brand__mark {
+        width: 2rem;
+        height: 2rem;
+        border-radius: var(--radius-md);
+        background: linear-gradient(135deg, var(--color-accent), #06b6d4);
+        display: grid;
+        place-items: center;
+        color: var(--color-on-accent);
+        box-shadow: var(--shadow-sm);
+      }
+      .nav {
+        display: flex;
+        align-items: center;
+        gap: var(--space-6);
+      }
+      .nav__links {
+        display: flex;
+        align-items: center;
+        gap: var(--space-6);
+        list-style: none;
+      }
+      .nav__links a {
+        font-size: var(--text-sm);
+        font-weight: 500;
+        color: var(--color-text-muted);
+        transition: color var(--transition);
+      }
+      .nav__links a:hover {
+        color: var(--color-text);
+      }
+      .nav__actions {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+      }
+      .icon-btn {
+        display: inline-grid;
+        place-items: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--color-border);
+        background-color: var(--color-surface);
+        color: var(--color-text-muted);
+        cursor: pointer;
+        transition: color var(--transition), border-color var(--transition);
+      }
+      .icon-btn:hover {
+        color: var(--color-text);
+        border-color: var(--color-border-strong);
+      }
+      .nav__toggle {
+        display: none;
+      }
+
+      /* Hero ---------------------------------------------------------------- */
+      .hero {
+        position: relative;
+        overflow: hidden;
+        padding-block: var(--space-10) var(--space-9);
+      }
+      .hero::before {
+        /* ambient glow behind the hero */
+        content: "";
+        position: absolute;
+        inset: -20% 0 auto 0;
+        height: 480px;
+        background: radial-gradient(
+          60% 60% at 50% 0%,
+          rgba(14, 165, 233, 0.22),
+          transparent 70%
+        );
+        pointer-events: none;
+      }
+      .hero__inner {
+        position: relative;
+        display: grid;
+        grid-template-columns: 1.05fr 0.95fr;
+        gap: var(--space-8);
+        align-items: center;
+      }
+      .hero__pill {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
+        margin-bottom: var(--space-5);
+      }
+      .hero h1 {
+        font-size: var(--text-5xl);
+        line-height: 1.05;
+      }
+      .hero h1 .accent-grad {
+        background: linear-gradient(120deg, #38bdf8, #22c55e);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+      .hero__lede {
+        margin-top: var(--space-5);
+        font-size: var(--text-lg);
+        color: var(--color-text-muted);
+        max-width: 34rem;
+      }
+      .hero__cta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-3);
+        margin-top: var(--space-6);
+      }
+      .hero__meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-5);
+        margin-top: var(--space-6);
+        font-size: var(--text-sm);
+        color: var(--color-text-subtle);
+      }
+      .hero__meta span {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
+      }
+
+      /* Hero preview card (sample stat) ------------------------------------- */
+      .stat-preview {
+        box-shadow: var(--shadow-lg);
+      }
+      .stat-preview__top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: var(--space-4);
+        margin-bottom: var(--space-5);
+      }
+      .stat-preview__title {
+        font-size: var(--text-base);
+        font-weight: 600;
+      }
+      .stat-preview__sub {
+        font-size: var(--text-xs);
+        color: var(--color-text-subtle);
+        margin-top: 2px;
+      }
+      .stat-preview__hero-val {
+        display: flex;
+        align-items: baseline;
+        gap: var(--space-3);
+        margin-bottom: var(--space-2);
+      }
+      .stat-preview__hero-val .big {
+        font-size: var(--text-4xl);
+        font-weight: 700;
+      }
+      .stat-preview__baseline {
+        font-size: var(--text-sm);
+        color: var(--color-text-muted);
+      }
+      .stat-preview__rows {
+        margin-top: var(--space-5);
+        border-top: 1px solid var(--color-border);
+      }
+      .preview-row {
+        display: grid;
+        grid-template-columns: 1fr auto auto;
+        gap: var(--space-4);
+        align-items: center;
+        padding: var(--space-3) 0;
+        border-bottom: 1px solid var(--color-border);
+        font-size: var(--text-sm);
+      }
+      .preview-row__label {
+        color: var(--color-text-muted);
+      }
+      .preview-row__val {
+        font-weight: 600;
+      }
+      .preview-row__n {
+        font-size: var(--text-xs);
+        color: var(--color-text-subtle);
+      }
+
+      /* Logo strip ---------------------------------------------------------- */
+      .logo-strip {
+        padding-block: var(--space-6);
+        border-block: 1px solid var(--color-border);
+      }
+      .logo-strip__label {
+        text-align: center;
+        font-size: var(--text-xs);
+        letter-spacing: var(--tracking-wide);
+        text-transform: uppercase;
+        color: var(--color-text-subtle);
+        margin-bottom: var(--space-4);
+      }
+      .logo-strip__row {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: var(--space-7);
+        color: var(--color-text-subtle);
+        font-weight: 600;
+        font-size: var(--text-lg);
+      }
+      .logo-strip__row span {
+        opacity: 0.7;
+      }
+
+      /* Feature grid -------------------------------------------------------- */
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--space-5);
+      }
+      .feature__icon {
+        display: inline-grid;
+        place-items: center;
+        width: 2.75rem;
+        height: 2.75rem;
+        border-radius: var(--radius-lg);
+        background-color: var(--color-accent-soft);
+        color: var(--color-accent);
+        margin-bottom: var(--space-4);
+      }
+      .feature h3 {
+        font-size: var(--text-lg);
+        margin-bottom: var(--space-2);
+      }
+      .feature p {
+        font-size: var(--text-sm);
+        color: var(--color-text-muted);
+        line-height: var(--leading-normal);
+      }
+
+      /* How it works -------------------------------------------------------- */
+      .steps {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--space-6);
+        counter-reset: step;
+      }
+      .step {
+        position: relative;
+        padding-top: var(--space-6);
+      }
+      .step__num {
+        position: absolute;
+        top: 0;
+        left: 0;
+        display: inline-grid;
+        place-items: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: var(--radius-full);
+        border: 1px solid var(--color-border-strong);
+        background-color: var(--color-surface);
+        color: var(--color-accent);
+        font-family: var(--font-mono);
+        font-weight: 700;
+        margin-bottom: var(--space-4);
+      }
+      .step h3 {
+        font-size: var(--text-lg);
+        margin: var(--space-6) 0 var(--space-2);
+      }
+      .step p {
+        font-size: var(--text-sm);
+        color: var(--color-text-muted);
+      }
+
+      /* Metrics / social proof --------------------------------------------- */
+      .metrics {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--space-5);
+        text-align: center;
+      }
+      .metric__value {
+        font-size: var(--text-4xl);
+        font-weight: 700;
+        letter-spacing: var(--tracking-tight);
+      }
+      .metric__label {
+        margin-top: var(--space-2);
+        font-size: var(--text-sm);
+        color: var(--color-text-muted);
+      }
+
+      /* Testimonials -------------------------------------------------------- */
+      .testimonials {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--space-5);
+        margin-top: var(--space-7);
+      }
+      .testimonial__quote {
+        font-size: var(--text-base);
+        color: var(--color-text);
+        line-height: var(--leading-normal);
+      }
+      .testimonial__author {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        margin-top: var(--space-5);
+      }
+      .avatar {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: var(--radius-full);
+        display: grid;
+        place-items: center;
+        font-weight: 700;
+        font-size: var(--text-sm);
+        color: var(--color-on-accent);
+        background: linear-gradient(135deg, var(--color-accent), #06b6d4);
+      }
+      .testimonial__name {
+        font-size: var(--text-sm);
+        font-weight: 600;
+      }
+      .testimonial__role {
+        font-size: var(--text-xs);
+        color: var(--color-text-subtle);
+      }
+
+      /* Secondary CTA + newsletter ----------------------------------------- */
+      .cta-band {
+        position: relative;
+        overflow: hidden;
+        border-radius: var(--radius-2xl);
+        border: 1px solid var(--color-border);
+        background:
+          radial-gradient(80% 120% at 50% 0%, rgba(14, 165, 233, 0.18), transparent 60%),
+          var(--color-surface);
+        padding: var(--space-8) var(--space-7);
+        text-align: center;
+      }
+      .cta-band h2 {
+        font-size: var(--text-3xl);
+      }
+      .cta-band p {
+        margin: var(--space-4) auto 0;
+        max-width: 32rem;
+        color: var(--color-text-muted);
+      }
+      .newsletter {
+        display: flex;
+        gap: var(--space-3);
+        max-width: 28rem;
+        margin: var(--space-6) auto 0;
+      }
+      .input {
+        flex: 1;
+        height: 3rem;
+        padding: 0 var(--space-4);
+        font-size: var(--text-sm);
+        color: var(--color-text);
+        background-color: var(--color-bg);
+        border: 1px solid var(--color-border-strong);
+        border-radius: var(--radius-md);
+        transition: border-color var(--transition);
+      }
+      .input::placeholder {
+        color: var(--color-text-subtle);
+      }
+      .input:focus {
+        outline: none;
+        border-color: var(--color-accent);
+        box-shadow: 0 0 0 3px var(--color-accent-ring);
+      }
+      .cta-band__fineprint {
+        margin-top: var(--space-4);
+        font-size: var(--text-xs);
+        color: var(--color-text-subtle);
+      }
+
+      /* Footer -------------------------------------------------------------- */
+      .footer {
+        border-top: 1px solid var(--color-border);
+        padding-block: var(--space-8) var(--space-6);
+      }
+      .footer__grid {
+        display: grid;
+        grid-template-columns: 1.5fr repeat(3, 1fr);
+        gap: var(--space-6);
+      }
+      .footer__brand p {
+        margin-top: var(--space-4);
+        font-size: var(--text-sm);
+        color: var(--color-text-muted);
+        max-width: 22rem;
+      }
+      .footer__col h4 {
+        font-size: var(--text-xs);
+        letter-spacing: var(--tracking-wide);
+        text-transform: uppercase;
+        color: var(--color-text-subtle);
+        margin-bottom: var(--space-4);
+      }
+      .footer__col ul {
+        list-style: none;
+        display: grid;
+        gap: var(--space-3);
+      }
+      .footer__col a {
+        font-size: var(--text-sm);
+        color: var(--color-text-muted);
+        transition: color var(--transition);
+      }
+      .footer__col a:hover {
+        color: var(--color-text);
+      }
+      .footer__bottom {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-4);
+        margin-top: var(--space-7);
+        padding-top: var(--space-5);
+        border-top: 1px solid var(--color-border);
+        font-size: var(--text-xs);
+        color: var(--color-text-subtle);
+      }
+      .footer__legal {
+        max-width: 52rem;
+        line-height: var(--leading-normal);
+      }
+
+      /* -------------------------------------------------------------------
+         Responsive — cards stack, nav collapses (mobile-first behavior)
+         ------------------------------------------------------------------- */
+      @media (max-width: 960px) {
+        .hero__inner { grid-template-columns: 1fr; }
+        .feature-grid { grid-template-columns: repeat(2, 1fr); }
+        .metrics { grid-template-columns: repeat(2, 1fr); }
+        .testimonials { grid-template-columns: 1fr; }
+        .footer__grid { grid-template-columns: 1fr 1fr; }
+      }
+
+      @media (max-width: 680px) {
+        .nav__links,
+        .nav__actions .btn { display: none; }
+        .nav__toggle { display: inline-grid; } /* shadcn/ui: Sheet trigger */
+        .hero { padding-block: var(--space-8) var(--space-7); }
+        .hero h1 { font-size: var(--text-4xl); }
+        .section { padding-block: var(--space-8); }
+        .section__title,
+        .cta-band h2 { font-size: var(--text-2xl); }
+        .feature-grid,
+        .steps,
+        .metrics { grid-template-columns: 1fr; }
+        .newsletter { flex-direction: column; }
+        .footer__grid { grid-template-columns: 1fr; gap: var(--space-6); }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- =====================================================================
+         HEADER / NAVIGATION
+         shadcn/ui: NavigationMenu (desktop), Sheet (mobile drawer),
+                    Button (Sign in / Get started), Toggle (theme)
+         ================================================================== -->
+    <header class="site-header">
+      <div class="container site-header__inner">
+        <a class="brand" href="#" aria-label="Augur home">
+          <span class="brand__mark" aria-hidden="true">
+            <!-- inline SVG mark: stylized probability/sigma glyph -->
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M6 5h12L11 12l7 7H6" />
+            </svg>
+          </span>
+          Augur
+        </a>
+
+        <nav class="nav" aria-label="Primary">
+          <!-- shadcn/ui: NavigationMenu -->
+          <ul class="nav__links">
+            <li><a href="#features">Features</a></li>
+            <li><a href="#how">How it works</a></li>
+            <li><a href="pricing.html">Pricing</a></li>
+            <li><a href="#proof">Customers</a></li>
+          </ul>
+          <div class="nav__actions">
+            <!-- shadcn/ui: Toggle (theme switch). Mockup is static. -->
+            <button class="icon-btn" aria-label="Toggle dark / light theme">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
+              </svg>
+            </button>
+            <!-- shadcn/ui: Button variant=ghost -->
+            <a class="btn btn--ghost" href="auth.html">Sign in</a>
+            <!-- shadcn/ui: Button variant=default -->
+            <a class="btn btn--primary" href="auth.html?mode=signup">Get started</a>
+            <!-- shadcn/ui: Sheet trigger (mobile only) -->
+            <button class="icon-btn nav__toggle" aria-label="Open menu">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M4 7h16M4 12h16M4 17h16" />
+              </svg>
+            </button>
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <!-- ===================================================================
+           HERO
+           shadcn/ui: Badge (release pill), Button x2 (primary CTA + outline),
+                      Card (sample stat preview)
+           ================================================================ -->
+      <section class="hero">
+        <div class="container hero__inner">
+          <div class="hero__copy">
+            <!-- shadcn/ui: Badge variant=secondary -->
+            <span class="badge badge--accent hero__pill">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2.4" stroke-linecap="round"
+                stroke-linejoin="round" aria-hidden="true">
+                <path d="M13 2 3 14h7l-1 8 10-12h-7z" />
+              </svg>
+              New — overnight gap continuation stats now live
+            </span>
+
+            <h1>
+              Trade the
+              <span class="accent-grad">probabilities</span>,<br />
+              not the predictions.
+            </h1>
+
+            <p class="hero__lede">
+              Augur turns 18 years of NQ and ES futures data into clean,
+              conditional probabilities. Every edge is shown against its
+              baseline, with the sample size in plain sight — so you know exactly
+              how strong a setup really is.
+            </p>
+
+            <div class="hero__cta">
+              <!-- shadcn/ui: Button variant=default size=lg -->
+              <a class="btn btn--primary btn--lg" href="auth.html?mode=signup">
+                Start free 7-day trial
+              </a>
+              <!-- shadcn/ui: Button variant=outline size=lg -->
+              <a class="btn btn--outline btn--lg" href="#proof">
+                See the data
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round" aria-hidden="true">
+                  <path d="M5 12h14M13 6l6 6-6 6" />
+                </svg>
+              </a>
+            </div>
+
+            <div class="hero__meta">
+              <span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                  stroke="var(--color-up)" stroke-width="2.2"
+                  stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M20 6 9 17l-5-5" />
+                </svg>
+                No card required
+              </span>
+              <span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                  stroke="var(--color-up)" stroke-width="2.2"
+                  stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M20 6 9 17l-5-5" />
+                </svg>
+                Cancel anytime
+              </span>
+              <span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                  stroke="var(--color-up)" stroke-width="2.2"
+                  stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M20 6 9 17l-5-5" />
+                </svg>
+                Updated daily after the close
+              </span>
+            </div>
+          </div>
+
+          <!-- Sample stat preview — a realistic taste of the member area.
+               shadcn/ui: Card + CardHeader + CardContent + Badge -->
+          <div class="card stat-preview" aria-label="Sample statistic preview">
+            <div class="stat-preview__top">
+              <div>
+                <div class="stat-preview__title">Gap-up continuation — NQ</div>
+                <div class="stat-preview__sub">
+                  P(close above open | gap &gt; 0.30%) · RTH session
+                </div>
+              </div>
+              <!-- shadcn/ui: Badge variant=outline -->
+              <span class="badge">Tier 1</span>
+            </div>
+
+            <div class="stat-preview__hero-val">
+              <span class="big mono val-up">63.4%</span>
+              <span class="badge badge--up">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2.6" stroke-linecap="round"
+                  stroke-linejoin="round" aria-hidden="true">
+                  <path d="M5 15l7-7 7 7" />
+                </svg>
+                +9.8 pts edge
+              </span>
+            </div>
+            <div class="stat-preview__baseline">
+              Baseline (all sessions): <span class="mono">53.6%</span>
+              · <span class="mono">N = 1,284</span>
+            </div>
+
+            <div class="stat-preview__rows">
+              <div class="preview-row">
+                <span class="preview-row__label">Monday open</span>
+                <span class="preview-row__val mono val-up">67.1%</span>
+                <span class="preview-row__n mono">N = 251</span>
+              </div>
+              <div class="preview-row">
+                <span class="preview-row__label">Gap &gt; 0.75%</span>
+                <span class="preview-row__val mono val-up">71.5%</span>
+                <span class="preview-row__n mono">N = 388</span>
+              </div>
+              <div class="preview-row">
+                <span class="preview-row__label">Friday open</span>
+                <span class="preview-row__val mono val-down">48.9%</span>
+                <span class="preview-row__n mono">N = 243</span>
+              </div>
+              <div class="preview-row">
+                <span class="preview-row__label">FOMC day</span>
+                <span class="preview-row__val mono val-neutral">54.0%</span>
+                <span class="preview-row__n mono">N = 36</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           LOGO / TRUST STRIP
+           Instruments and data sources covered (text marks, no external assets)
+           ================================================================ -->
+      <section class="logo-strip">
+        <div class="container">
+          <p class="logo-strip__label">Coverage across the instruments you actually trade</p>
+          <div class="logo-strip__row" aria-label="Covered instruments">
+            <span>NQ · Nasdaq-100</span>
+            <span>ES · S&amp;P 500</span>
+            <span>RTH &amp; ETH sessions</span>
+            <span>2007 – present</span>
+            <span>1m · 5m · daily</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           FEATURES
+           shadcn/ui: Card + CardHeader + CardContent (x4)
+           ================================================================ -->
+      <section class="section" id="features">
+        <div class="container">
+          <div class="section__head">
+            <span class="eyebrow">Why Augur</span>
+            <h2 class="section__title">Edges you can actually trust</h2>
+            <p class="section__subtitle">
+              No black boxes, no curve-fit signals. Just transparent conditional
+              statistics with the context you need to size a trade with confidence.
+            </p>
+          </div>
+
+          <div class="feature-grid">
+            <!-- Feature card 1 -->
+            <article class="card feature card--interactive">
+              <span class="feature__icon" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <path d="M3 3v18h18" />
+                  <path d="M7 14l4-4 3 3 5-6" />
+                </svg>
+              </span>
+              <h3>Baseline-relative edges</h3>
+              <p>
+                Every probability is shown next to its unconditional baseline.
+                A 56% hit rate means nothing until you know the base rate — we
+                put both side by side, always.
+              </p>
+            </article>
+
+            <!-- Feature card 2 -->
+            <article class="card feature card--interactive">
+              <span class="feature__icon" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <rect x="3" y="4" width="18" height="16" rx="2" />
+                  <path d="M3 9h18M9 4v16" />
+                </svg>
+              </span>
+              <h3>Sliced every way</h3>
+              <p>
+                Drill into any stat by weekday, gap size, prior-day range,
+                session, or volatility regime. Each slice carries its own sample
+                size so thin buckets never mislead you.
+              </p>
+            </article>
+
+            <!-- Feature card 3 -->
+            <article class="card feature card--interactive">
+              <span class="feature__icon" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <path d="M12 2a10 10 0 1 0 10 10" />
+                  <path d="M12 7v5l3 2" />
+                </svg>
+              </span>
+              <h3>Refreshed daily</h3>
+              <p>
+                Stats recompute automatically after each cash close, rolling in
+                the latest session so your edges reflect this week's market — not
+                a backtest frozen in 2019.
+              </p>
+            </article>
+
+            <!-- Feature card 4 -->
+            <article class="card feature card--interactive">
+              <span class="feature__icon" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <path d="M12 3l8 4v5c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V7z" />
+                  <path d="M9 12l2 2 4-4" />
+                </svg>
+              </span>
+              <h3>Significance built in</h3>
+              <p>
+                Confidence intervals and minimum-N thresholds keep noise out of
+                the headline number. We grey out edges that aren't statistically
+                meaningful instead of overselling them.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           HOW IT WORKS
+           shadcn/ui: Card (optional per step) — here ordered list with markers
+           ================================================================ -->
+      <section class="section section--subtle" id="how">
+        <div class="container">
+          <div class="section__head">
+            <span class="eyebrow">How it works</span>
+            <h2 class="section__title">From signup to your first edge in minutes</h2>
+          </div>
+
+          <ol class="steps">
+            <li class="step">
+              <span class="step__num" aria-hidden="true">1</span>
+              <h3>Pick your plan</h3>
+              <p>
+                Choose a tier from Starter to Enterprise. Higher tiers unlock
+                deeper stat families and finer slices. Start free for 7 days, no
+                card required.
+              </p>
+            </li>
+            <li class="step">
+              <span class="step__num" aria-hidden="true">2</span>
+              <h3>Browse the stat catalog</h3>
+              <p>
+                Open the dashboard and explore stat families for NQ and ES —
+                gaps, opening drives, range extensions, weekday seasonality and
+                more. Filter to what fits your style.
+              </p>
+            </li>
+            <li class="step">
+              <span class="step__num" aria-hidden="true">3</span>
+              <h3>Trade with context</h3>
+              <p>
+                Read the edge against its baseline, check the sample size, and
+                size your position accordingly. Come back after the close for the
+                next day's refreshed numbers.
+              </p>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           SOCIAL PROOF — metrics + testimonials
+           shadcn/ui: Card (metrics + testimonial cards), Avatar (author)
+           ================================================================ -->
+      <section class="section" id="proof">
+        <div class="container">
+          <div class="metrics">
+            <div>
+              <div class="metric__value mono">54+</div>
+              <div class="metric__label">Distinct stat families</div>
+            </div>
+            <div>
+              <div class="metric__value mono">1.2M</div>
+              <div class="metric__label">Sessions analyzed</div>
+            </div>
+            <div>
+              <div class="metric__value mono">18 yrs</div>
+              <div class="metric__label">Of NQ &amp; ES history</div>
+            </div>
+            <div>
+              <div class="metric__value mono">2</div>
+              <div class="metric__label">Covered instruments (NQ &amp; ES)</div>
+            </div>
+          </div>
+
+          <div class="section__head mt-9">
+            <span class="eyebrow">Loved by serious traders</span>
+            <h2 class="section__title">The edge desk traders keep open all day</h2>
+          </div>
+
+          <div class="testimonials">
+            <!-- Testimonial card 1 -->
+            <figure class="card">
+              <blockquote class="testimonial__quote">
+                "I stopped guessing whether a gap would fill. Augur tells me the
+                continuation rate by gap size and weekday, with the N right
+                there. It's the first thing I check before the open."
+              </blockquote>
+              <figcaption class="testimonial__author">
+                <span class="avatar" aria-hidden="true">MK</span>
+                <span>
+                  <span class="testimonial__name">Marcus Kellner</span><br />
+                  <span class="testimonial__role">Independent NQ futures trader</span>
+                </span>
+              </figcaption>
+            </figure>
+
+            <!-- Testimonial card 2 -->
+            <figure class="card">
+              <blockquote class="testimonial__quote">
+                "What sold me was the honesty. When a slice has 22 samples it
+                says so and greys out the edge. No other stats product respects
+                significance like this."
+              </blockquote>
+              <figcaption class="testimonial__author">
+                <span class="avatar" aria-hidden="true">PD</span>
+                <span>
+                  <span class="testimonial__name">Priya Desai</span><br />
+                  <span class="testimonial__role">Quant analyst, prop desk</span>
+                </span>
+              </figcaption>
+            </figure>
+
+            <!-- Testimonial card 3 -->
+            <figure class="card">
+              <blockquote class="testimonial__quote">
+                "We use the Enterprise API to feed our pre-market checklist for a
+                small ES book. Daily refresh and clean baselines saved us
+                weeks of building this ourselves."
+              </blockquote>
+              <figcaption class="testimonial__author">
+                <span class="avatar" aria-hidden="true">JR</span>
+                <span>
+                  <span class="testimonial__name">Jonas Reuter</span><br />
+                  <span class="testimonial__role">Head of trading, proprietary fund</span>
+                </span>
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           SECONDARY CTA + NEWSLETTER
+           shadcn/ui: Card (band), Input + Button (newsletter form)
+           ================================================================ -->
+      <section class="section">
+        <div class="container">
+          <div class="cta-band">
+            <h2>Get an edge in your inbox every morning</h2>
+            <p>
+              The Augur Pre-Market Brief: three statistically notable setups for
+              NQ and ES, delivered before the open. Free, and a taste of the full
+              platform.
+            </p>
+
+            <!-- shadcn/ui: form with Input + Button. Static in mockup. -->
+            <form class="newsletter">
+              <label class="sr-only" for="nl-email">Email address</label>
+              <input
+                class="input"
+                id="nl-email"
+                type="email"
+                placeholder="you@example.com"
+                autocomplete="email"
+              />
+              <button class="btn btn--primary btn--lg" type="submit">
+                Subscribe
+              </button>
+            </form>
+            <p class="cta-band__fineprint">
+              No spam. Unsubscribe in one click. Or
+              <a class="text-accent" href="auth.html?mode=signup">start your
+              free trial</a> for the full catalog.
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ===================================================================
+         FOOTER
+         shadcn/ui: Separator (dividers). Mostly plain links.
+         ================================================================ -->
+    <footer class="footer">
+      <div class="container">
+        <div class="footer__grid">
+          <div class="footer__brand">
+            <a class="brand" href="#" aria-label="Augur home">
+              <span class="brand__mark" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <path d="M6 5h12L11 12l7 7H6" />
+                </svg>
+              </span>
+              Augur
+            </a>
+            <p>
+              Statistical market probabilities for NQ and ES futures traders.
+              Transparent edges, real baselines, refreshed daily.
+            </p>
+          </div>
+
+          <div class="footer__col">
+            <h4>Product</h4>
+            <ul>
+              <li><a href="#features">Features</a></li>
+              <li><a href="pricing.html">Pricing</a></li>
+              <li><a href="#how">How it works</a></li>
+              <li><a href="auth.html?mode=signup">Start free trial</a></li>
+            </ul>
+          </div>
+
+          <div class="footer__col">
+            <h4>Company</h4>
+            <ul>
+              <li><a href="#">About</a></li>
+              <li><a href="#">Methodology</a></li>
+              <li><a href="#">Changelog</a></li>
+              <li><a href="#">Contact</a></li>
+            </ul>
+          </div>
+
+          <div class="footer__col">
+            <h4>Legal</h4>
+            <ul>
+              <li><a href="#">Terms of service</a></li>
+              <li><a href="#">Privacy policy</a></li>
+              <li><a href="#">Risk disclosure</a></li>
+              <li><a href="#">Cookie settings</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="footer__bottom">
+          <span>© 2026 Augur · Marubozu FR. All rights reserved.</span>
+          <span class="footer__legal">
+            Augur provides historical statistical information only and is not
+            investment advice. Past performance does not guarantee future
+            results. Trading futures carries substantial risk of loss.
+          </span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
