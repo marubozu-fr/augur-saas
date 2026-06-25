@@ -95,6 +95,15 @@
   }
 }
 
+/* Accordion styles — used by SliceAccordion in the stat detail page. */
+details[open].accordion-item {
+  border-color: var(--border-strong);
+}
+details[open] > summary .accordion-chev {
+  transform: rotate(90deg);
+  color: var(--brand);
+}
+
 /* Shimmer animation used by StatGridSkeleton on the member dashboard. */
 @keyframes shimmer {
   100% { transform: translateX(100%); }

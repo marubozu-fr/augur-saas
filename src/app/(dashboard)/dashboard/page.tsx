@@ -1,12 +1,10 @@
 // Member dashboard — server component.
-// Renders the app shell (Sidebar + Topbar) immediately, then streams the
-// catalog content via <Suspense>/<StatCatalog> once the Augur API responds.
+// The app shell (grid + Sidebar) is provided by the (dashboard) layout.
+// This page streams the catalog content via <Suspense>/<StatCatalog>.
 
 import { Suspense } from "react";
-import { createClient } from "@/lib/supabase/server";
 import { getCurrentUserTier } from "@/lib/subscription.server";
-import { Sidebar } from "./Sidebar";
-import { Topbar } from "./Topbar";
+import { Topbar } from "@/app/(dashboard)/Topbar";
 import { StatCatalog } from "./StatCatalog";
 import { StatGridSkeleton } from "./StatGridSkeleton";
 
@@ -23,42 +21,27 @@ export default async function DashboardPage({
   const instrument =
     typeof rawInstrument === "string" ? rawInstrument : "NQ";
 
-  // Fetch user for the sidebar
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const userEmail = user?.email ?? "";
-
-  // Fetch tier for the topbar tier pill — guard separately so the shell always
-  // renders even if the subscription query fails.
+  // Fetch tier for the topbar tier pill — fail open so the shell always renders.
+  // Next dedupes the underlying getUser call with the one in DashboardLayout.
   let userTier: number | null = null;
   try {
     userTier = await getCurrentUserTier();
   } catch {
-    // Fail open — no tier displayed, no crash
     userTier = null;
   }
 
   return (
-    <div className="grid md:grid-cols-[248px_1fr] min-h-screen">
-      {/* Sidebar — desktop only (hidden below md) */}
-      <Sidebar userEmail={userEmail} />
+    <>
+      <Topbar userTier={userTier} />
 
-      {/* Content column */}
-      <div className="flex flex-col min-w-0">
-        <Topbar userTier={userTier} />
-
-        <main className="p-6">
-          {/* StatCatalog is async and fetches the Augur API.
-              Wrap in Suspense keyed on instrument so switching instruments
-              replays the skeleton while new data loads. */}
-          <Suspense key={instrument} fallback={<StatGridSkeleton />}>
-            <StatCatalog instrument={instrument} />
-          </Suspense>
-        </main>
-      </div>
-    </div>
+      <main className="p-6">
+        {/* StatCatalog is async and fetches the Augur API.
+            Wrap in Suspense keyed on instrument so switching instruments
+            replays the skeleton while new data loads. */}
+        <Suspense key={instrument} fallback={<StatGridSkeleton />}>
+          <StatCatalog instrument={instrument} />
+        </Suspense>
+      </main>
+    </>
   );
 }

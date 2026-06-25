@@ -1,14 +1,16 @@
 interface TopbarProps {
   userTier: number | null;
+  /** Page title shown in the top bar. Defaults to "Stat catalog". */
+  title?: string;
 }
 
-export function Topbar({ userTier }: TopbarProps) {
+export function Topbar({ userTier, title = "Stat catalog" }: TopbarProps) {
   const tierLabel = userTier !== null ? `Tier ${userTier}` : "No active plan";
 
   return (
     <header className="sticky top-0 z-40 flex items-center gap-4 h-16 px-6 bg-background/80 backdrop-saturate-[160%] backdrop-blur-[12px] border-b border-border">
       <span className="text-base font-semibold text-foreground">
-        Stat catalog
+        {title}
       </span>
 
       <div className="flex-1" />

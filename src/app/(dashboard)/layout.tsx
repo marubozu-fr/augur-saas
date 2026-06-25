@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { Sidebar } from "./Sidebar";
 
 export default async function DashboardLayout({
   children,
@@ -16,5 +17,12 @@ export default async function DashboardLayout({
     redirect("/sign-in");
   }
 
-  return <>{children}</>;
+  const userEmail = user.email ?? "";
+
+  return (
+    <div className="grid md:grid-cols-[248px_1fr] min-h-screen">
+      <Sidebar userEmail={userEmail} />
+      <div className="flex flex-col min-w-0">{children}</div>
+    </div>
+  );
 }

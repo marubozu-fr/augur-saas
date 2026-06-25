@@ -6,7 +6,7 @@ import { getStatCatalog, AugurApiError } from "@/services/augur";
 import { getCurrentUserTier } from "@/lib/subscription.server";
 import { canAccessStat } from "@/lib/subscription";
 import { getStatTier } from "@/lib/stat-tiers";
-import { InstrumentSelector } from "./InstrumentSelector";
+import { InstrumentSelector } from "@/app/(dashboard)/InstrumentSelector";
 import { StatCard } from "./StatCard";
 import type { TimeframeMeta } from "@/types/stats";
 
