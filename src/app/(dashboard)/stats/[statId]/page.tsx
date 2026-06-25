@@ -3,11 +3,11 @@
 // This page streams the data section via <Suspense> keyed on instrument + timeframe.
 
 import { Suspense } from "react";
-import Link from "next/link";
 import { getCurrentUserTier } from "@/lib/subscription.server";
 import { Topbar } from "@/app/(dashboard)/Topbar";
 import { StatDetail } from "./StatDetail";
 import { StatDetailSkeleton } from "./StatDetailSkeleton";
+import { StatBreadcrumb, StatBreadcrumbSkeleton } from "./StatBreadcrumb";
 
 interface StatDetailPageProps {
   params: Promise<{ statId: string }>;
@@ -44,22 +44,10 @@ export default async function StatDetailPage({
       <Topbar userTier={userTier} title="Stat detail" />
 
       <main className="p-6">
-        {/* Breadcrumb */}
-        <nav
-          className="flex items-center gap-2 text-sm text-subtle mb-5"
-          aria-label="Breadcrumb"
-        >
-          <Link
-            href="/dashboard"
-            className="text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Dashboard
-          </Link>
-          <span aria-hidden="true" className="text-subtle">/</span>
-          <span className="text-foreground font-semibold" aria-current="page">
-            {statId}
-          </span>
-        </nav>
+        {/* Breadcrumb — streams independently so the title resolves from the API. */}
+        <Suspense fallback={<StatBreadcrumbSkeleton />}>
+          <StatBreadcrumb statId={statId} />
+        </Suspense>
 
         {/* Data section — streams while the API responds.
             StatDetail renders the <h1> and all content. */}
