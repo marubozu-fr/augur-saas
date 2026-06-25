@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { LayoutDashboard, User, LogOut } from "lucide-react";
 import { signOut } from "@/app/(auth)/actions";
+import { NavLink } from "@/app/(dashboard)/NavLink";
 
 interface SidebarProps {
   userEmail: string;
@@ -49,21 +50,8 @@ export function Sidebar({ userEmail }: SidebarProps) {
 
       {/* Primary navigation */}
       <nav aria-label="Primary">
-        <Link
-          href="/dashboard"
-          className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium bg-brand-soft text-brand"
-          aria-current="page"
-        >
-          <LayoutDashboard size={18} aria-hidden="true" />
-          Dashboard
-        </Link>
-        <Link
-          href="/account"
-          className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:bg-card hover:text-foreground transition-colors"
-        >
-          <User size={18} aria-hidden="true" />
-          Account
-        </Link>
+        <NavLink href="/dashboard" icon={LayoutDashboard} label="Dashboard" />
+        <NavLink href="/account" icon={User} label="Account" />
       </nav>
 
       {/* Spacer pushes logout + user card to bottom */}
