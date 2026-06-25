@@ -16,6 +16,9 @@ export const metadata: Metadata = {
   title: "Augur — Trading Statistics Platform",
   description:
     "Data-driven trading probabilities for disciplined market participants.",
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 export default function RootLayout({
