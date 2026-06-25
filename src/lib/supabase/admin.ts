@@ -2,6 +2,8 @@
 // Use this ONLY in server-side contexts (webhook handlers, API routes).
 // NEVER import from client components — SUPABASE_SERVICE_ROLE_KEY must not reach the browser.
 
+import "server-only";
+
 import { createClient } from "@supabase/supabase-js";
 
 export function createAdminClient() {

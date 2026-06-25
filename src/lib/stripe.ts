@@ -7,6 +7,8 @@
 // level causes `next build` to throw when STRIPE_SECRET_KEY is absent from
 // the build environment (it is a runtime secret, not a build-time variable).
 
+import "server-only";
+
 import Stripe from "stripe";
 
 export function createStripeClient(): Stripe {
