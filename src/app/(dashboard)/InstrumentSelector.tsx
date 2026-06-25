@@ -1,7 +1,13 @@
 "use client";
 
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { ChevronDown } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface InstrumentSelectorProps {
   instruments: string[];
@@ -16,31 +22,27 @@ export function InstrumentSelector({
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  function handleChange(event: React.ChangeEvent<HTMLSelectElement>) {
+  function handleValueChange(value: string) {
     const params = new URLSearchParams(searchParams.toString());
-    params.set("instrument", event.target.value);
+    params.set("instrument", value);
     router.push(`${pathname}?${params.toString()}`);
   }
 
   return (
-    <div className="relative inline-flex items-center">
-      <select
-        value={activeInstrument}
-        onChange={handleChange}
+    <Select value={activeInstrument} onValueChange={handleValueChange}>
+      <SelectTrigger
         aria-label="Select instrument"
-        className="appearance-none h-9 pl-3 pr-8 rounded-md border border-border bg-card text-sm font-semibold text-foreground cursor-pointer hover:border-border-strong focus:outline-none focus:border-brand transition-colors"
+        className="h-9 border-border bg-card text-sm font-semibold text-foreground hover:border-border-strong focus:border-brand focus-visible:ring-0 focus-visible:border-brand"
       >
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent className="bg-card border-border text-foreground">
         {instruments.map((inst) => (
-          <option key={inst} value={inst}>
+          <SelectItem key={inst} value={inst}>
             {inst}
-          </option>
+          </SelectItem>
         ))}
-      </select>
-      <ChevronDown
-        size={14}
-        className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
-        aria-hidden="true"
-      />
-    </div>
+      </SelectContent>
+    </Select>
   );
 }
