@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { LayoutDashboard, User, LogOut } from "lucide-react";
 import { signOut } from "@/app/(auth)/actions";
