@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { signIn } from "@/app/(auth)/actions";
 import { OAuthButtons } from "@/components/OAuthButtons";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface SignInPageProps {
   searchParams: Promise<{ error?: string }>;
@@ -72,6 +73,18 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
             placeholder="••••••••••••"
             className="w-full h-11 px-4 text-sm text-foreground bg-background border border-border-strong rounded-md placeholder:text-subtle transition-colors hover:border-neutral focus:outline-none focus:border-brand focus:ring-3 focus:ring-brand-ring"
           />
+        </div>
+
+        {/* .checkbox-row: Keep me signed in — checked by default, submits as name="remember" */}
+        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+          <Checkbox
+            id="remember"
+            name="remember"
+            defaultChecked
+          />
+          <label htmlFor="remember" className="cursor-pointer select-none">
+            Keep me signed in
+          </label>
         </div>
 
         <button

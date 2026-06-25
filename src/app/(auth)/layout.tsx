@@ -19,7 +19,7 @@ export default function AuthLayout({
       />
 
       {/* Back to home — shared across all auth routes (sign-in, sign-up, forgot-password) */}
-      <div className="relative z-10 self-start mb-6">
+      <div className="relative z-10 self-center mb-6">
         <Link
           href="/"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"

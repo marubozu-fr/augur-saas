@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextRequest, NextResponse } from "next/server";
+import { NO_PERSIST_COOKIE } from "@/lib/constants";
 import { selectActiveSubscription } from "@/lib/subscription";
 
 // Paths that require a valid session. /account is intentionally included so
@@ -13,6 +14,11 @@ const SUBSCRIPTION_GATED_PREFIXES = ["/dashboard", "/stats"];
 
 export async function updateSession(request: NextRequest): Promise<NextResponse> {
   let response = NextResponse.next({ request });
+
+  // When the user signed in with "Keep me signed in" unchecked, the sign-in
+  // action sets this marker. Strip maxAge/expires on refresh so the auth cookies
+  // stay session-scoped instead of being silently re-persisted here.
+  const noPersist = request.cookies.get(NO_PERSIST_COOKIE)?.value === "1";
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -28,7 +34,14 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
           });
           response = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) => {
-            response.cookies.set(name, value, options);
+            const cookieOptions = noPersist
+              ? Object.fromEntries(
+                  Object.entries(options ?? {}).filter(
+                    ([k]) => k !== "maxAge" && k !== "expires",
+                  ),
+                )
+              : options;
+            response.cookies.set(name, value, cookieOptions);
           });
         },
       },

@@ -1,11 +1,14 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { NO_PERSIST_COOKIE } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/server";
 
 export async function signIn(formData: FormData): Promise<void> {
-  const supabase = await createClient();
+  const remember = formData.get("remember") === "on";
+  const supabase = await createClient(remember);
 
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
@@ -14,6 +17,14 @@ export async function signIn(formData: FormData): Promise<void> {
 
   if (error) {
     redirect(`/sign-in?error=${encodeURIComponent(error.message)}`);
+  }
+
+  // Persist the user's choice so the middleware can honor it on every refresh.
+  const cookieStore = await cookies();
+  if (remember) {
+    cookieStore.delete(NO_PERSIST_COOKIE);
+  } else {
+    cookieStore.set(NO_PERSIST_COOKIE, "1", { path: "/" });
   }
 
   revalidatePath("/", "layout");
