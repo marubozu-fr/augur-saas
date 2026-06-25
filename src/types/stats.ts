@@ -71,11 +71,6 @@ export interface StatRunResult {
   instruments: Record<string, Record<string, TimeframeResult>>;
 }
 
-export interface StatFamilyDetail {
-  computedAt: string | null;
-  result: StatRunResult;
-}
-
 export interface HealthStatus {
   status: string;
 }

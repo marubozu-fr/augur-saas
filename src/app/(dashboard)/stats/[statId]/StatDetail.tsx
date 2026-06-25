@@ -15,7 +15,7 @@ import { ControlsBar } from "./ControlsBar";
 import { MagnitudeCards } from "./MagnitudeCards";
 import { ProbabilityTable } from "./ProbabilityTable";
 import { SliceAccordion } from "./SliceAccordion";
-import type { StatFamilyDetail } from "@/types/stats";
+import type { StatRunResult } from "@/types/stats";
 
 interface StatDetailProps {
   statId: string;
@@ -31,11 +31,11 @@ export async function StatDetail({
   // -------------------------------------------------------------------------
   // Fetch stat detail + user tier concurrently
   // -------------------------------------------------------------------------
-  let detail: StatFamilyDetail;
+  let result: StatRunResult;
   let userTier: number | null;
 
   try {
-    [detail, userTier] = await Promise.all([
+    [result, userTier] = await Promise.all([
       getStatDetail(statId),
       getCurrentUserTier(),
     ]);
@@ -68,10 +68,8 @@ export async function StatDetail({
   // -------------------------------------------------------------------------
   const statTier = getStatTier(statId);
   if (!canAccessStat(userTier, statTier)) {
-    return <LockedState detail={detail} statTier={statTier} />;
+    return <LockedState result={result} statTier={statTier} />;
   }
-
-  const { result } = detail;
 
   // -------------------------------------------------------------------------
   // Resolve active instrument (prefer "NQ", fall back to first available)

@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { Lock } from "lucide-react";
-import type { StatFamilyDetail } from "@/types/stats";
+import type { StatRunResult } from "@/types/stats";
 
 interface LockedStateProps {
-  detail: StatFamilyDetail;
+  result: StatRunResult;
   statTier: number;
 }
 
-export function LockedState({ detail, statTier }: LockedStateProps) {
+export function LockedState({ result, statTier }: LockedStateProps) {
   return (
     <div className="relative rounded-xl border border-dashed border-border-strong overflow-hidden">
       {/* Blurred content preview */}
@@ -31,10 +31,10 @@ export function LockedState({ detail, statTier }: LockedStateProps) {
         </span>
         <div>
           <p className="text-base font-semibold text-foreground">
-            {detail.result.title.en}
+            {result.title.en}
           </p>
           <p className="mt-1 text-sm text-muted-foreground max-w-[26rem]">
-            {detail.result.definition.en}
+            {result.definition.en}
           </p>
         </div>
         <p className="text-xs text-subtle">

@@ -14,7 +14,6 @@ import type {
   Labels,
   SliceGroupResult,
   SliceResult,
-  StatFamilyDetail,
   StatFamilyMeta,
   StatResultRow,
   StatRunResult,
@@ -126,11 +125,6 @@ interface RawStatRunResult {
   instruments: Record<string, Record<string, RawTimeframeResult>>;
 }
 
-interface RawStatFamilyDetail {
-  computed_at: string | null;
-  result: RawStatRunResult;
-}
-
 // ---------------------------------------------------------------------------
 // Mapper functions (explicit, typed — no blanket deep-camelCaser)
 // Dynamic map keys (instrument codes, timeframe codes, condition/outcome/dimension
@@ -239,13 +233,6 @@ function mapStatRunResult(raw: RawStatRunResult): StatRunResult {
   };
 }
 
-function mapStatFamilyDetail(raw: RawStatFamilyDetail): StatFamilyDetail {
-  return {
-    computedAt: raw.computed_at,
-    result: mapStatRunResult(raw.result),
-  };
-}
-
 // ---------------------------------------------------------------------------
 // Fetch helper
 // ---------------------------------------------------------------------------
@@ -313,14 +300,14 @@ export async function getStatCatalog(): Promise<StatFamilyMeta[]> {
   return raw.map(mapStatFamilyMeta);
 }
 
-export async function getStatDetail(statId: string): Promise<StatFamilyDetail> {
+export async function getStatDetail(statId: string): Promise<StatRunResult> {
   const apiKey = getApiKey();
-  const raw = await fetchAugur<RawStatFamilyDetail>(
+  const raw = await fetchAugur<RawStatRunResult>(
     `/api/v1/stats/${encodeURIComponent(statId)}`,
     {
       headers: { "X-API-Key": apiKey },
       next: { revalidate: STATS_REVALIDATE },
     },
   );
-  return mapStatFamilyDetail(raw);
+  return mapStatRunResult(raw);
 }
