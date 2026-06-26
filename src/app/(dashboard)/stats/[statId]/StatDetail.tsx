@@ -40,6 +40,7 @@ export async function StatDetail({
       getCurrentUserTier(),
     ]);
   } catch (err) {
+    console.error("[StatDetail] fetch failed for", statId, { instrument, timeframe }, err);
     if (err instanceof AugurApiError && err.status === 404) {
       notFound();
     }

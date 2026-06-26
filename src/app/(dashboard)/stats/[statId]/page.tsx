@@ -35,7 +35,8 @@ export default async function StatDetailPage({
   let userTier: number | null = null;
   try {
     userTier = await getCurrentUserTier();
-  } catch {
+  } catch (err) {
+    console.error("[StatDetailPage] getCurrentUserTier failed for", statId, err);
     userTier = null;
   }
 

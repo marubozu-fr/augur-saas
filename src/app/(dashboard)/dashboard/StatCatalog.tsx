@@ -27,6 +27,7 @@ export async function StatCatalog({ instrument }: StatCatalogProps) {
       getCurrentUserTier(),
     ]);
   } catch (err) {
+    console.error("[StatCatalog] fetch failed", { instrument }, err);
     const message =
       err instanceof AugurApiError
         ? err.message

@@ -58,7 +58,8 @@ async function fetchPlanData(
     const intervalLabel = interval === "year" ? "/ year" : "/ month";
 
     return { planName, amountFormatted, intervalLabel };
-  } catch {
+  } catch (err) {
+    console.error("[PlanAndBillingCards] fetchPlanData failed for priceId", subscription.priceId, err);
     // Stripe fetch failed — fail soft. The caller renders a degraded state.
     return null;
   }

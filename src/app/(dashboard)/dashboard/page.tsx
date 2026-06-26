@@ -26,7 +26,8 @@ export default async function DashboardPage({
   let userTier: number | null = null;
   try {
     userTier = await getCurrentUserTier();
-  } catch {
+  } catch (err) {
+    console.error("[DashboardPage] getCurrentUserTier failed", { instrument }, err);
     userTier = null;
   }
 

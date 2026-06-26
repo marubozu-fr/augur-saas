@@ -49,7 +49,8 @@ export async function StatBreadcrumb({ statId }: StatBreadcrumbProps) {
   try {
     const result = await getStatDetail(statId);
     title = result.title.en;
-  } catch {
+  } catch (err) {
+    console.error("[StatBreadcrumb] getStatDetail failed for", statId, err);
     // On any fetch failure, fall back to the raw slug.
     // StatDetail handles the real error/404 UI independently.
   }

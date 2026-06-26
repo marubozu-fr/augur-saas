@@ -35,7 +35,8 @@ export default async function AccountPage() {
   let userTier: number | null = null;
   try {
     userTier = await getCurrentUserTier();
-  } catch {
+  } catch (err) {
+    console.error("[AccountPage] getCurrentUserTier failed", err);
     userTier = null;
   }
 
@@ -46,7 +47,8 @@ export default async function AccountPage() {
   let subscription: Subscription | null = null;
   try {
     subscription = await getActiveSubscription();
-  } catch {
+  } catch (err) {
+    console.error("[AccountPage] getActiveSubscription failed for user", user.id, err);
     // Fail open — keep the danger zone hidden if we can't confirm a subscription.
   }
 
