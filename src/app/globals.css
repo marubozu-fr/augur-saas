@@ -93,6 +93,11 @@
   body {
     @apply bg-background text-foreground antialiased;
   }
+  /* Tailwind v4 Preflight no longer sets cursor:pointer on buttons — restore it. */
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
 }
 
 /* Accordion styles — used by SliceAccordion in the stat detail page. */
