@@ -3,7 +3,6 @@
 import { useTransition } from "react";
 import { Loader2 } from "lucide-react";
 import { signUp } from "@/app/(auth)/actions";
-import { OAuthButtons } from "@/components/OAuthButtons";
 
 interface SignUpFormProps {
   error?: string;
@@ -20,14 +19,6 @@ export function SignUpForm({ error }: SignUpFormProps) {
 
   return (
     <>
-      {/* OAuth providers — label matches mockup "Sign up with …" */}
-      <OAuthButtons disabled={isPending} />
-
-      {/* "or sign up with email" separator */}
-      <div className="flex items-center gap-4 my-6 text-xs tracking-widest uppercase text-subtle before:flex-1 before:h-px before:bg-border after:flex-1 after:h-px after:bg-border">
-        or sign up with email
-      </div>
-
       {error && (
         <p className="mb-4 text-sm text-down text-center">{error}</p>
       )}

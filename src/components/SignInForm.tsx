@@ -4,7 +4,6 @@ import { useTransition } from "react";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { signIn } from "@/app/(auth)/actions";
-import { OAuthButtons } from "@/components/OAuthButtons";
 import { Checkbox } from "@/components/ui/checkbox";
 
 interface SignInFormProps {
@@ -22,13 +21,6 @@ export function SignInForm({ error }: SignInFormProps) {
 
   return (
     <>
-      <OAuthButtons disabled={isPending} />
-
-      {/* "or continue with email" separator */}
-      <div className="flex items-center gap-4 my-6 text-xs tracking-widest uppercase text-subtle before:flex-1 before:h-px before:bg-border after:flex-1 after:h-px after:bg-border">
-        or continue with email
-      </div>
-
       {error && (
         <p className="mb-4 text-sm text-down text-center">{error}</p>
       )}
