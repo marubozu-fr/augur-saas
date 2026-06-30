@@ -11,7 +11,11 @@ const SITE_URL =
 
 const REDIRECT_URL = `${SITE_URL}/auth/callback?next=/dashboard`;
 
-export function OAuthButtons() {
+interface OAuthButtonsProps {
+  disabled?: boolean;
+}
+
+export function OAuthButtons({ disabled = false }: OAuthButtonsProps) {
   const supabase = createClient();
 
   async function handleGoogle() {
@@ -33,7 +37,8 @@ export function OAuthButtons() {
       <button
         type="button"
         onClick={handleGoogle}
-        className="inline-flex items-center justify-center gap-3 w-full h-11 rounded-md border border-border-strong bg-transparent text-foreground text-sm font-semibold transition-colors hover:bg-card"
+        disabled={disabled}
+        className="inline-flex items-center justify-center gap-3 w-full h-11 rounded-md border border-border-strong bg-transparent text-foreground text-sm font-semibold transition-colors hover:bg-card disabled:opacity-60 disabled:cursor-not-allowed"
       >
         {/* Google "G" mark — multi-color inline SVG */}
         <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
@@ -60,7 +65,8 @@ export function OAuthButtons() {
       <button
         type="button"
         onClick={handleGitHub}
-        className="inline-flex items-center justify-center gap-3 w-full h-11 rounded-md border border-border-strong bg-transparent text-foreground text-sm font-semibold transition-colors hover:bg-card"
+        disabled={disabled}
+        className="inline-flex items-center justify-center gap-3 w-full h-11 rounded-md border border-border-strong bg-transparent text-foreground text-sm font-semibold transition-colors hover:bg-card disabled:opacity-60 disabled:cursor-not-allowed"
       >
         {/* GitHub mark — uses currentColor, adapts to theme */}
         <svg
