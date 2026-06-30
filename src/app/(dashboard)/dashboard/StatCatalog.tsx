@@ -6,7 +6,6 @@ import { getStatCatalog, AugurApiError } from "@/services/augur";
 import { getCurrentUserTier } from "@/lib/subscription.server";
 import { canAccessStat } from "@/lib/subscription";
 import { getStatTier } from "@/lib/stat-tiers";
-import { SUPPORTED_INSTRUMENTS } from "@/lib/instruments";
 import { InstrumentSelector } from "@/app/(dashboard)/InstrumentSelector";
 import { StatCard } from "./StatCard";
 import type { TimeframeMeta } from "@/types/stats";
@@ -51,8 +50,7 @@ export async function StatCatalog({ instrument }: StatCatalogProps) {
   }
 
   // -------------------------------------------------------------------------
-  // Derive instrument list: only SUPPORTED_INSTRUMENTS that exist in the API.
-  // This ensures the selector only navigates to valid routed paths.
+  // Derive instrument list: all instruments returned by the API, sorted.
   // -------------------------------------------------------------------------
   const instrumentSet = new Set<string>();
   for (const f of families) {
@@ -60,8 +58,7 @@ export async function StatCatalog({ instrument }: StatCatalogProps) {
       instrumentSet.add(tf.instrument);
     }
   }
-  const instruments = (SUPPORTED_INSTRUMENTS as readonly string[])
-    .filter((code) => instrumentSet.has(code));
+  const instruments = Array.from(instrumentSet).sort();
 
   // instrument is already validated upstream (normalizeInstrument in the page)
   const activeInstrument = instrument;

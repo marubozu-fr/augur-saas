@@ -9,7 +9,6 @@ import { getStatDetail, AugurApiError } from "@/services/augur";
 import { getCurrentUserTier } from "@/lib/subscription.server";
 import { canAccessStat } from "@/lib/subscription";
 import { getStatTier } from "@/lib/stat-tiers";
-import { normalizeInstrument } from "@/lib/instruments";
 import { makeLabelResolver } from "./helpers";
 import { LockedState } from "./LockedState";
 import { ControlsBar } from "./ControlsBar";
@@ -76,14 +75,12 @@ export async function StatDetail({
 
   // -------------------------------------------------------------------------
   // Resolve active instrument.
-  // The instrument is validated in the page params; use it directly.
-  // If the API has no data for this instrument, show the "no data" message.
-  // The selector list is restricted to supported instruments so it never
-  // offers a code (e.g. YM/RTY) whose path segment would 404.
+  // The instrument is normalised in the page params; use it directly.
+  // All instruments returned by the API are offered in the selector — the
+  // route accepts any non-empty code, falling through to "no data" if the
+  // API has no results for the chosen instrument.
   // -------------------------------------------------------------------------
-  const availableInstruments = Object.keys(result.instruments)
-    .filter((code) => normalizeInstrument(code) !== null)
-    .sort();
+  const availableInstruments = Object.keys(result.instruments).sort();
   const activeInstrument = instrument;
 
   const instrumentData = result.instruments[activeInstrument];

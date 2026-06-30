@@ -11,7 +11,6 @@ import {
   CommandEmpty,
   CommandItem,
 } from "@/components/ui/command";
-import { getInstrumentName } from "@/lib/instruments";
 
 interface InstrumentSelectorProps {
   instruments: string[];
@@ -66,15 +65,10 @@ export function InstrumentSelector({
             {instruments.map((code) => (
               <CommandItem
                 key={code}
-                value={`${code} ${getInstrumentName(code)}`}
+                value={code}
                 onSelect={() => handleValueChange(code)}
               >
-                <span className="flex items-baseline gap-2">
-                  <span className="font-mono text-sm font-semibold">{code}</span>
-                  <span className="text-xs text-subtle">
-                    {getInstrumentName(code)}
-                  </span>
-                </span>
+                <span className="font-mono text-sm font-semibold">{code}</span>
                 {code === activeInstrument && (
                   <CheckIcon
                     className="size-3.5 text-brand shrink-0"

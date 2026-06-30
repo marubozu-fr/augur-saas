@@ -1,6 +1,7 @@
-// Instrument-specific dashboard — /dashboard/nq, /dashboard/es.
-// The instrument path segment is validated against SUPPORTED_INSTRUMENTS;
-// unsupported values (e.g. /dashboard/ym) produce a 404.
+// Instrument-specific dashboard — /dashboard/{instrument}.
+// The instrument path segment is normalised (uppercased/trimmed); notFound()
+// fires only for empty/whitespace-only segments. Unknown instruments fall
+// through to the API's "no data" handling in StatCatalog.
 
 import { notFound } from "next/navigation";
 import { Suspense } from "react";

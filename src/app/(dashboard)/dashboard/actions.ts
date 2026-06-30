@@ -24,8 +24,7 @@ export async function setDefaultInstrument(formData: FormData): Promise<void> {
   if (typeof raw !== "string") return;
 
   const canonical = normalizeInstrument(raw);
-  // Silently ignore unknown instruments — the form only submits NQ / ES so
-  // this guard is a safety net, not an expected error path.
+  // Safety net against empty/whitespace input — not an expected error path.
   if (!canonical) return;
 
   await supabase

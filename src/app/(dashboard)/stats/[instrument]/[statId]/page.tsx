@@ -1,6 +1,7 @@
 // Stat detail page — /stats/{instrument}/{statId}.
-// The instrument path segment is validated against SUPPORTED_INSTRUMENTS;
-// unsupported values produce a 404.
+// The instrument path segment is normalised (uppercased/trimmed); notFound()
+// fires only for empty/whitespace-only segments. Unknown instruments fall
+// through to StatDetail's "no data" handling.
 // Timeframe stays a query param (?timeframe=daily) — out of scope for this refactor.
 
 import { notFound } from "next/navigation";
