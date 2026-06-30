@@ -11,6 +11,8 @@ interface ControlsBarProps {
   timeframes: string[];
   activeTimeframe: string;
   tfResult: TimeframeResult;
+  // Used to build the instrument-switch template: /stats/{instrument}/{statId}
+  statId: string;
 }
 
 export function ControlsBar({
@@ -19,9 +21,14 @@ export function ControlsBar({
   timeframes,
   activeTimeframe,
   tfResult,
+  statId,
 }: ControlsBarProps) {
   const [rangeStart, rangeEnd] = tfResult.dataRange;
   const totalN = tfResult.totalSamples.toLocaleString("en-US");
+
+  // Switching instrument navigates to /stats/{instrument}/{statId},
+  // preserving the current ?timeframe= query string.
+  const instrumentHrefTemplate = `/stats/{instrument}/${statId}`;
 
   return (
     <div className="flex items-center gap-5 flex-wrap p-4 px-5 mb-5 border border-border rounded-xl bg-card">
@@ -33,6 +40,7 @@ export function ControlsBar({
         <InstrumentSelector
           instruments={instruments}
           activeInstrument={activeInstrument}
+          hrefTemplate={instrumentHrefTemplate}
         />
       </div>
 

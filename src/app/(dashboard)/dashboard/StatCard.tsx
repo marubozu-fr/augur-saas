@@ -25,7 +25,7 @@ export function StatCard({ family, timeframes, tier, locked }: StatCardProps) {
     // unlocked families, the pricing page for locked ones). Inner affordances
     // ("View stats", "Upgrade") are decorative spans, not nested links.
     <Link
-      href={locked ? "/pricing" : `/stats/${family.family}`}
+      href={locked ? "/pricing" : `/stats/${instrument.toLowerCase()}/${family.family}`}
       className={[
         "group relative flex flex-col gap-4 rounded-xl border bg-card p-5 overflow-hidden cursor-pointer transition-all duration-[180ms] hover:-translate-y-0.5",
         locked

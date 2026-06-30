@@ -6,6 +6,7 @@ import { getStatCatalog, AugurApiError } from "@/services/augur";
 import { getCurrentUserTier } from "@/lib/subscription.server";
 import { canAccessStat } from "@/lib/subscription";
 import { getStatTier } from "@/lib/stat-tiers";
+import { SUPPORTED_INSTRUMENTS } from "@/lib/instruments";
 import { InstrumentSelector } from "@/app/(dashboard)/InstrumentSelector";
 import { StatCard } from "./StatCard";
 import type { TimeframeMeta } from "@/types/stats";
@@ -50,7 +51,8 @@ export async function StatCatalog({ instrument }: StatCatalogProps) {
   }
 
   // -------------------------------------------------------------------------
-  // Derive instrument list from union of all timeframes
+  // Derive instrument list: only SUPPORTED_INSTRUMENTS that exist in the API.
+  // This ensures the selector only navigates to valid routed paths.
   // -------------------------------------------------------------------------
   const instrumentSet = new Set<string>();
   for (const f of families) {
@@ -58,13 +60,11 @@ export async function StatCatalog({ instrument }: StatCatalogProps) {
       instrumentSet.add(tf.instrument);
     }
   }
-  const instruments = Array.from(instrumentSet).sort();
+  const instruments = (SUPPORTED_INSTRUMENTS as readonly string[])
+    .filter((code) => instrumentSet.has(code));
 
-  // Default to "NQ" if present, otherwise first alphabetically
-  const defaultInstrument = instrumentSet.has("NQ") ? "NQ" : (instruments[0] ?? "NQ");
-  const activeInstrument = instrumentSet.has(instrument)
-    ? instrument
-    : defaultInstrument;
+  // instrument is already validated upstream (normalizeInstrument in the page)
+  const activeInstrument = instrument;
 
   // -------------------------------------------------------------------------
   // Filter families to those that have a timeframe for the active instrument
@@ -107,11 +107,12 @@ export async function StatCatalog({ instrument }: StatCatalogProps) {
           </p>
         </div>
 
-        {/* Instrument selector — client component driving ?instrument= search param */}
+        {/* Instrument selector — navigates to /dashboard/{instrument} path */}
         {instruments.length > 1 && (
           <InstrumentSelector
             instruments={instruments}
             activeInstrument={activeInstrument}
+            hrefTemplate="/dashboard/{instrument}"
           />
         )}
       </div>

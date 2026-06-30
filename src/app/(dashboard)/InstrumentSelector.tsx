@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ChevronDownIcon, CheckIcon } from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import {
@@ -16,21 +16,29 @@ import { getInstrumentName } from "@/lib/instruments";
 interface InstrumentSelectorProps {
   instruments: string[];
   activeInstrument: string;
+  /**
+   * URL template containing the literal `{instrument}` placeholder.
+   * Dashboard passes "/dashboard/{instrument}".
+   * Stat detail passes "/stats/{instrument}/{statId}".
+   * On select, `{instrument}` is replaced with the lowercased code and the
+   * current query string (e.g. ?timeframe=daily) is appended.
+   */
+  hrefTemplate: string;
 }
 
 export function InstrumentSelector({
   instruments,
   activeInstrument,
+  hrefTemplate,
 }: InstrumentSelectorProps) {
   const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
   const [open, setOpen] = useState(false);
 
   function handleValueChange(value: string) {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("instrument", value);
-    router.push(`${pathname}?${params.toString()}`);
+    const url = hrefTemplate.replace("{instrument}", value.toLowerCase());
+    const qs = searchParams.toString();
+    router.push(qs ? `${url}?${qs}` : url);
     setOpen(false);
   }
 

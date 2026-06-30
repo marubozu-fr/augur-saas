@@ -1,14 +1,17 @@
-// Stat detail page — Server Component.
-// The app shell (grid + Sidebar) is provided by the (dashboard) layout.
-// This page streams the data section via <Suspense> keyed on instrument + timeframe.
+// Stat detail page — /stats/{instrument}/{statId}.
+// The instrument path segment is validated against SUPPORTED_INSTRUMENTS;
+// unsupported values produce a 404.
+// Timeframe stays a query param (?timeframe=daily) — out of scope for this refactor.
 
+import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { normalizeInstrument } from "@/lib/instruments";
 import { StatDetail } from "./StatDetail";
 import { StatDetailSkeleton } from "./StatDetailSkeleton";
 import { StatBreadcrumb, StatBreadcrumbSkeleton } from "./StatBreadcrumb";
 
 interface StatDetailPageProps {
-  params: Promise<{ statId: string }>;
+  params: Promise<{ instrument: string; statId: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
@@ -17,22 +20,24 @@ export default async function StatDetailPage({
   searchParams,
 }: StatDetailPageProps) {
   // Resolve async params (Next 16 requirement)
-  const { statId } = await params;
+  const { instrument: rawInstrument, statId } = await params;
+  const instrument = normalizeInstrument(rawInstrument);
+
+  if (!instrument) {
+    notFound();
+  }
+
   const sp = await searchParams;
-
-  const rawInstrument = sp["instrument"];
-  const instrument =
-    typeof rawInstrument === "string" ? rawInstrument : "NQ";
-
   const rawTimeframe = sp["timeframe"];
   const timeframe =
     typeof rawTimeframe === "string" ? rawTimeframe : "daily";
 
   return (
     <main className="p-6">
-      {/* Breadcrumb — streams independently so the title resolves from the API. */}
+      {/* Breadcrumb — streams independently so the title resolves from the API.
+          instrument is passed so the back-links point at /dashboard/{instrument}. */}
       <Suspense fallback={<StatBreadcrumbSkeleton />}>
-        <StatBreadcrumb statId={statId} />
+        <StatBreadcrumb statId={statId} instrument={instrument} />
       </Suspense>
 
       {/* Data section — streams while the API responds.

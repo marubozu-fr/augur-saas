@@ -9,6 +9,7 @@ import { getStatDetail, AugurApiError } from "@/services/augur";
 import { getCurrentUserTier } from "@/lib/subscription.server";
 import { canAccessStat } from "@/lib/subscription";
 import { getStatTier } from "@/lib/stat-tiers";
+import { normalizeInstrument } from "@/lib/instruments";
 import { makeLabelResolver } from "./helpers";
 import { LockedState } from "./LockedState";
 import { ControlsBar } from "./ControlsBar";
@@ -19,6 +20,7 @@ import type { StatRunResult } from "@/types/stats";
 
 interface StatDetailProps {
   statId: string;
+  // Canonical uppercase instrument code, already validated in the page params.
   instrument: string;
   timeframe: string;
 }
@@ -73,15 +75,16 @@ export async function StatDetail({
   }
 
   // -------------------------------------------------------------------------
-  // Resolve active instrument (prefer "NQ", fall back to first available)
+  // Resolve active instrument.
+  // The instrument is validated in the page params; use it directly.
+  // If the API has no data for this instrument, show the "no data" message.
+  // The selector list is restricted to supported instruments so it never
+  // offers a code (e.g. YM/RTY) whose path segment would 404.
   // -------------------------------------------------------------------------
-  const availableInstruments = Object.keys(result.instruments).sort();
-  const defaultInstrument = availableInstruments.includes("NQ")
-    ? "NQ"
-    : (availableInstruments[0] ?? "NQ");
-  const activeInstrument = availableInstruments.includes(instrument)
-    ? instrument
-    : defaultInstrument;
+  const availableInstruments = Object.keys(result.instruments)
+    .filter((code) => normalizeInstrument(code) !== null)
+    .sort();
+  const activeInstrument = instrument;
 
   const instrumentData = result.instruments[activeInstrument];
   if (!instrumentData) {
@@ -149,13 +152,15 @@ export async function StatDetail({
         </div>
       </div>
 
-      {/* Controls bar */}
+      {/* Controls bar — passes statId so the instrument selector can build
+          the correct /stats/{instrument}/{statId} href template */}
       <ControlsBar
         instruments={availableInstruments}
         activeInstrument={activeInstrument}
         timeframes={availableTimeframes}
         activeTimeframe={activeTimeframe}
         tfResult={tfResult}
+        statId={statId}
       />
 
       {/* Magnitudes section — only rendered when magnitude rows exist */}

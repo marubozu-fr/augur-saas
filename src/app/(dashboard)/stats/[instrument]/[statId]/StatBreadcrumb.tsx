@@ -7,16 +7,21 @@ import { getStatDetail } from "@/services/augur";
 
 interface StatBreadcrumbProps {
   statId: string;
+  // Canonical uppercase instrument code (e.g. "NQ"). Used to point the
+  // "Dashboard" / "Catalog" links back to the instrument-specific catalog.
+  instrument: string;
 }
 
-// Static leading segments (Dashboard / Catalog / …) shared by the live
-// breadcrumb and its skeleton. The final segment is supplied via children.
+// Static leading segments shared by the live breadcrumb and its skeleton.
+// `dashboardHref` defaults to /dashboard so the skeleton stays generic.
 function BreadcrumbBase({
   children,
   ariaHidden,
+  dashboardHref = "/dashboard",
 }: {
   children: React.ReactNode;
   ariaHidden?: boolean;
+  dashboardHref?: string;
 }) {
   return (
     <nav
@@ -25,14 +30,14 @@ function BreadcrumbBase({
       aria-hidden={ariaHidden}
     >
       <Link
-        href="/dashboard"
+        href={dashboardHref}
         className="text-muted-foreground hover:text-foreground transition-colors"
       >
         Dashboard
       </Link>
       <span aria-hidden="true" className="text-subtle">/</span>
       <Link
-        href="/dashboard"
+        href={dashboardHref}
         className="text-muted-foreground hover:text-foreground transition-colors"
       >
         Catalog
@@ -43,7 +48,7 @@ function BreadcrumbBase({
   );
 }
 
-export async function StatBreadcrumb({ statId }: StatBreadcrumbProps) {
+export async function StatBreadcrumb({ statId, instrument }: StatBreadcrumbProps) {
   let title: string = statId;
 
   try {
@@ -55,8 +60,12 @@ export async function StatBreadcrumb({ statId }: StatBreadcrumbProps) {
     // StatDetail handles the real error/404 UI independently.
   }
 
+  // Point back-links at the instrument-specific catalog, not the root /dashboard
+  // (which would require an extra redirect hop through the selector screen).
+  const dashboardHref = "/dashboard/" + instrument.toLowerCase();
+
   return (
-    <BreadcrumbBase>
+    <BreadcrumbBase dashboardHref={dashboardHref}>
       <span className="text-foreground font-semibold" aria-current="page">
         {title}
       </span>
