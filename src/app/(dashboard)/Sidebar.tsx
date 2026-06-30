@@ -6,21 +6,11 @@ import { signOut } from "@/app/(auth)/actions";
 import { NavLink } from "@/app/(dashboard)/NavLink";
 
 interface SidebarProps {
-  userEmail: string;
+  userTier: number | null;
 }
 
-/** Derives two-letter initials from the email local part (e.g. "jd" → "JD"). */
-function emailInitials(email: string): string {
-  const local = email.split("@")[0] ?? "";
-  const parts = local.split(/[._-]/).filter(Boolean);
-  if (parts.length >= 2) {
-    return (parts[0][0]! + parts[1][0]!).toUpperCase();
-  }
-  return local.slice(0, 2).toUpperCase();
-}
-
-export function Sidebar({ userEmail }: SidebarProps) {
-  const initials = emailInitials(userEmail);
+export function Sidebar({ userTier }: SidebarProps) {
+  const tierLabel = userTier !== null ? `Tier ${userTier}` : "No active plan";
 
   return (
     <aside className="hidden md:flex sticky top-0 self-start h-screen flex-col gap-2 px-4 py-5 bg-muted border-r border-border">
@@ -56,8 +46,22 @@ export function Sidebar({ userEmail }: SidebarProps) {
         <NavLink href="/account" icon={User} label="Account" />
       </nav>
 
-      {/* Spacer pushes logout + user card to bottom */}
+      {/* Spacer pushes tier badge + logout to bottom */}
       <div className="flex-1" />
+
+      {/* Plan/Tier badge — full-width block row, just above Logout.
+          Matches mockup .tier-pill--sidebar: flex w-full, tier value pushed right. */}
+      <span
+        className="flex w-full items-center gap-2 px-3 py-3 rounded-lg border border-border bg-card text-xs font-semibold"
+        title="Your current subscription tier"
+      >
+        <span
+          className="w-2 h-2 rounded-full bg-brand shadow-[0_0_0_3px_rgba(14,165,233,0.14)] flex-shrink-0"
+          aria-hidden="true"
+        />
+        <span className="text-muted-foreground">Plan</span>
+        <span className="ml-auto text-foreground">{tierLabel}</span>
+      </span>
 
       {/* Logout */}
       <nav aria-label="Session">
@@ -71,22 +75,6 @@ export function Sidebar({ userEmail }: SidebarProps) {
           </button>
         </form>
       </nav>
-
-      {/* User card */}
-      <div className="flex items-center gap-3 p-3 rounded-lg border border-border bg-card">
-        <span
-          className="w-9 h-9 rounded-full bg-gradient-to-br from-brand to-[#06b6d4] grid place-items-center text-xs font-bold text-on-brand flex-shrink-0"
-          aria-hidden="true"
-        >
-          {initials}
-        </span>
-        <span className="min-w-0 leading-snug">
-          <span className="block text-sm font-semibold text-foreground truncate">
-            {userEmail.split("@")[0]}
-          </span>
-          <span className="block text-xs text-subtle truncate">{userEmail}</span>
-        </span>
-      </div>
     </aside>
   );
 }
