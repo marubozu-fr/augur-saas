@@ -21,12 +21,16 @@ export function StatCard({ family, timeframes, tier, locked }: StatCardProps) {
   const n = totalSamples.toLocaleString("en-US");
 
   return (
-    <article
+    // The whole card is the click target — a single destination (stat detail for
+    // unlocked families, the pricing page for locked ones). Inner affordances
+    // ("View stats", "Upgrade") are decorative spans, not nested links.
+    <Link
+      href={locked ? "/pricing" : `/stats/${family.family}`}
       className={[
-        "relative flex flex-col gap-4 rounded-xl border bg-card p-5 overflow-hidden",
+        "group relative flex flex-col gap-4 rounded-xl border bg-card p-5 overflow-hidden cursor-pointer transition-all duration-[180ms] hover:-translate-y-0.5",
         locked
           ? "border-dashed border-border-strong"
-          : "border-border hover:border-border-strong hover:-translate-y-0.5 transition-all duration-[180ms]",
+          : "border-border hover:border-border-strong",
       ].join(" ")}
     >
       {/* Card body — blurred/dimmed when locked */}
@@ -69,13 +73,10 @@ export function StatCard({ family, timeframes, tier, locked }: StatCardProps) {
             N = {n}
           </span>
           {!locked && (
-            <Link
-              href={`/stats/${family.family}`}
-              className="inline-flex items-center gap-1 text-xs font-semibold text-brand hover:gap-2 transition-all duration-[180ms]"
-            >
+            <span className="inline-flex items-center gap-1 text-xs font-semibold text-brand transition-all duration-[180ms] group-hover:gap-2">
               View stats
               <ArrowRight size={14} aria-hidden="true" />
-            </Link>
+            </span>
           )}
         </div>
       </div>
@@ -92,14 +93,11 @@ export function StatCard({ family, timeframes, tier, locked }: StatCardProps) {
           <span className="text-xs text-muted-foreground max-w-[16rem]">
             This stat family requires a higher plan. Upgrade to access it.
           </span>
-          <Link
-            href="/pricing"
-            className="inline-flex items-center justify-center h-8 px-4 rounded-md bg-brand text-xs font-semibold text-on-brand hover:bg-brand-hover transition-colors"
-          >
+          <span className="inline-flex items-center justify-center h-8 px-4 rounded-md bg-brand text-xs font-semibold text-on-brand transition-colors group-hover:bg-brand-hover">
             Upgrade
-          </Link>
+          </span>
         </div>
       )}
-    </article>
+    </Link>
   );
 }
