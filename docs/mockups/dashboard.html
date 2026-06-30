@@ -5,9 +5,12 @@
   (Milestone 4). The stat catalog is fetched server-side from the Augur API with
   the service-level X-API-Key, then filtered by the user's tier before render.
 
-  Navigation pattern: persistent left SIDEBAR + slim top bar. This is the first
-  member-area mockup, so it ESTABLISHES the app-shell layout that stat-detail.html
-  and account.html will reuse (sidebar nav + top bar with tier/instrument/theme).
+  Navigation pattern: persistent left SIDEBAR only — no top bar. This is the
+  first member-area mockup, so it ESTABLISHES the app-shell layout that
+  stat-detail.html and account.html reuse (the sidebar holds the nav, the
+  plan/tier badge, and the theme toggle; the instrument selector lives in the
+  page toolbar). A floating hamburger opens the sidebar as a Sheet drawer on
+  mobile.
 
   This single file stacks the FOUR required states for review:
     1. POPULATED  — the canonical dashboard (top of page)
@@ -41,7 +44,7 @@
       /* -------------------------------------------------------------------
          SIDEBAR
          shadcn/ui: Sheet (mobile) / static aside (desktop), Button(ghost) rows,
-                    Separator, Avatar (user footer)
+                    Separator, Badge (plan/tier), Toggle (theme, footer)
          ------------------------------------------------------------------- */
       .sidebar {
         position: sticky;
@@ -125,45 +128,36 @@
         flex: 1;
       }
 
-      /* User card pinned to sidebar bottom. shadcn/ui: DropdownMenu trigger. */
-      .sidebar__user {
+      /* Plan/tier badge — full-width sidebar element pinned near the bottom,
+         just above Logout. Reuses the .tier-pill tokens; the --sidebar modifier
+         makes it read as a block row rather than an inline pill.
+         shadcn/ui: Badge + Tooltip. */
+      .tier-pill--sidebar {
+        display: flex;
+        width: 100%;
+        justify-content: flex-start;
+        border-radius: var(--radius-lg);
+        padding: var(--space-3);
+      }
+      .tier-pill--sidebar .tier-pill__plan {
+        margin-left: auto;
+      }
+
+      /* Sidebar footer — theme toggle sits where the user card used to be.
+         shadcn/ui: Toggle (theme switch). */
+      .sidebar__footer {
         display: flex;
         align-items: center;
+        justify-content: space-between;
         gap: var(--space-3);
-        padding: var(--space-3);
-        border-radius: var(--radius-lg);
-        border: 1px solid var(--color-border);
-        background-color: var(--color-surface);
+        padding: var(--space-2) var(--space-2) 0;
       }
-      .sidebar__user .avatar {
-        width: 2.25rem;
-        height: 2.25rem;
-        border-radius: var(--radius-full);
-        display: grid;
-        place-items: center;
-        font-weight: 700;
+      .sidebar__footer-label {
         font-size: var(--text-xs);
-        color: var(--color-on-accent);
-        background: linear-gradient(135deg, var(--color-accent), #06b6d4);
-        flex: none;
-      }
-      .sidebar__user-meta {
-        min-width: 0;
-        line-height: var(--leading-snug);
-      }
-      .sidebar__user-name {
-        font-size: var(--text-sm);
         font-weight: 600;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      .sidebar__user-email {
-        font-size: var(--text-xs);
+        letter-spacing: var(--tracking-wide);
+        text-transform: uppercase;
         color: var(--color-text-subtle);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
       }
 
       /* -------------------------------------------------------------------
@@ -175,35 +169,11 @@
         min-width: 0;
       }
 
-      /* Top bar: mobile menu trigger + tier indicator + instrument + theme.
-         shadcn/ui: Sheet trigger, Badge, Tabs/ToggleGroup, Toggle */
-      .topbar {
-        position: sticky;
-        top: 0;
-        z-index: 40;
-        display: flex;
-        align-items: center;
-        gap: var(--space-4);
-        height: var(--header-height);
-        padding-inline: var(--space-6);
-        background-color: color-mix(in srgb, var(--color-bg) 82%, transparent);
-        backdrop-filter: saturate(160%) blur(12px);
-        border-bottom: 1px solid var(--color-border);
-      }
-      .topbar__menu {
-        display: none; /* visible on mobile only */
-      }
-      .topbar__title {
-        font-size: var(--text-base);
-        font-weight: 600;
-      }
-      .topbar__spacer {
-        flex: 1;
-      }
-      .topbar__group {
-        display: flex;
-        align-items: center;
-        gap: var(--space-3);
+      /* Floating mobile nav trigger — opens the sidebar as a Sheet drawer on
+         small screens (≤860px). Replaces the removed top bar's menu button;
+         hidden on desktop. shadcn/ui: Sheet trigger. */
+      .mobile-nav {
+        display: none;
       }
 
       /* Tier indicator pill — subscription plan. shadcn/ui: Badge + Tooltip. */
@@ -627,11 +597,19 @@
          Responsive
          ------------------------------------------------------------------- */
       @media (max-width: 860px) {
-        /* Sidebar collapses into a Sheet drawer; top bar gets a menu button. */
+        /* Sidebar collapses into a Sheet drawer, opened by the floating
+           hamburger. */
         .app { grid-template-columns: 1fr; }
         .sidebar { display: none; }
-        .topbar__menu { display: inline-grid; }
-        .tier-pill__label { display: none; }
+        .mobile-nav {
+          display: inline-grid;
+          position: sticky;
+          top: var(--space-4);
+          align-self: flex-start;
+          margin: var(--space-4) 0 0 var(--space-4);
+          z-index: 40;
+          box-shadow: var(--shadow-sm);
+        }
       }
       @media (max-width: 620px) {
         .main { padding: var(--space-5) var(--space-4); }
@@ -646,7 +624,7 @@
       <!-- ===================================================================
            SIDEBAR NAVIGATION
            shadcn/ui: aside (desktop) / Sheet (mobile), Button(ghost) rows,
-                      Separator, Avatar + DropdownMenu (user footer)
+                      Separator, Badge (plan/tier), Toggle (theme, footer)
            Links: Dashboard (active), Account, Logout — per issue #4.
            ================================================================ -->
       <aside class="sidebar">
@@ -716,6 +694,15 @@
 
         <div class="sidebar__spacer"></div>
 
+        <!-- SUBSCRIPTION TIER INDICATOR — current plan, always visible. Sits just
+             above Logout. shadcn/ui: Badge + Tooltip. Plan name comes from the
+             Supabase subscription record (never hardcoded). -->
+        <span class="tier-pill tier-pill--sidebar" title="Your current plan">
+          <span class="tier-pill__dot" aria-hidden="true"></span>
+          <span class="tier-pill__label">Plan</span>
+          <span class="tier-pill__plan">Pro</span>
+        </span>
+
         <!-- Logout lives at the bottom of the nav per issue requirement. -->
         <nav aria-label="Session">
           <a class="nav-item nav-item--danger" href="landing.html">
@@ -728,13 +715,17 @@
           </a>
         </nav>
 
-        <!-- User card. shadcn/ui: Avatar + DropdownMenu trigger -->
-        <div class="sidebar__user">
-          <span class="avatar" aria-hidden="true">MK</span>
-          <span class="sidebar__user-meta">
-            <span class="sidebar__user-name">Marcus Kellner</span>
-            <span class="sidebar__user-email">marcus@example.com</span>
-          </span>
+        <!-- Sidebar footer — theme toggle (where the user card used to be).
+             shadcn/ui: Toggle (theme switch). Static in mockup. -->
+        <div class="sidebar__footer">
+          <span class="sidebar__footer-label">Theme</span>
+          <button class="icon-btn" aria-label="Toggle dark / light theme">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
+            </svg>
+          </button>
         </div>
       </aside>
 
@@ -742,57 +733,15 @@
            CONTENT COLUMN
            ================================================================ -->
       <div class="content">
-        <!-- TOP BAR ------------------------------------------------------- -->
-        <header class="topbar">
-          <!-- shadcn/ui: Sheet trigger (mobile only) -->
-          <button class="icon-btn topbar__menu" aria-label="Open navigation">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round"
-              aria-hidden="true">
-              <path d="M4 7h16M4 12h16M4 17h16" />
-            </svg>
-          </button>
-
-          <span class="topbar__title">Stat catalog</span>
-
-          <div class="topbar__spacer"></div>
-
-          <div class="topbar__group">
-            <!-- SUBSCRIPTION TIER INDICATOR.
-                 shadcn/ui: Badge + Tooltip. Plan name comes from Supabase
-                 subscription record (never hardcoded). -->
-            <span class="tier-pill" title="Your current plan">
-              <span class="tier-pill__dot" aria-hidden="true"></span>
-              <span class="tier-pill__label">Plan</span>
-              <span class="tier-pill__plan">Pro</span>
-            </span>
-
-            <!-- INSTRUMENT SELECTOR.
-                 shadcn/ui: Combobox (Command + Popover). The full asset
-                 catalog (NQ / ES / YM / RTY) is searchable in the popover;
-                 trigger shown closed here (open state demoed on stat-detail). -->
-            <div class="combobox combobox--compact">
-              <button class="combobox__trigger" aria-haspopup="listbox"
-                aria-expanded="false" aria-label="Instrument: NQ. Search instruments">
-                <span class="combobox__value">NQ</span>
-                <svg class="chev" width="16" height="16" viewBox="0 0 24 24"
-                  fill="none" stroke="currentColor" stroke-width="2.2"
-                  stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <path d="M6 9l6 6 6-6" />
-                </svg>
-              </button>
-            </div>
-
-            <!-- shadcn/ui: Toggle (theme switch). Static in mockup. -->
-            <button class="icon-btn" aria-label="Toggle dark / light theme">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round" aria-hidden="true">
-                <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
-              </svg>
-            </button>
-          </div>
-        </header>
+        <!-- MOBILE NAV TRIGGER — floating hamburger, ≤860px only. Opens the
+             sidebar as a Sheet drawer. shadcn/ui: Sheet trigger. -->
+        <button class="mobile-nav icon-btn" aria-label="Open navigation">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            aria-hidden="true">
+            <path d="M4 7h16M4 12h16M4 17h16" />
+          </svg>
+        </button>
 
         <!-- =================================================================
              STATE 1 — POPULATED (canonical dashboard)
@@ -837,8 +786,25 @@
             <a class="btn btn--primary" href="pricing.html">Upgrade plan</a>
           </div>
 
-          <!-- TOOLBAR: search + filter chips. -->
+          <!-- TOOLBAR: instrument + search + filter chips. -->
           <div class="toolbar">
+            <!-- INSTRUMENT SELECTOR — relocated from the removed top bar. It is
+                 a contextual data control, so it now sits with the search and
+                 category filters. shadcn/ui: Combobox (Command + Popover). The
+                 full asset catalog (NQ / ES / YM / RTY) is searchable in the
+                 popover; trigger shown closed (open state demoed on stat-detail). -->
+            <div class="combobox combobox--compact">
+              <button class="combobox__trigger" aria-haspopup="listbox"
+                aria-expanded="false" aria-label="Instrument: NQ. Search instruments">
+                <span class="combobox__value">NQ</span>
+                <svg class="chev" width="16" height="16" viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" stroke-width="2.2"
+                  stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </button>
+            </div>
+
             <!-- STATS SEARCH. shadcn/ui: Input -->
             <div class="search">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
