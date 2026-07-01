@@ -50,6 +50,10 @@ export async function signUp(formData: FormData): Promise<void> {
 export async function signOut(): Promise<void> {
   const supabase = await createClient();
   await supabase.auth.signOut();
+  // Clear the "no persist" marker so a later sign-in starts from a clean
+  // slate rather than inheriting a stale session-scoping preference.
+  const cookieStore = await cookies();
+  cookieStore.delete(NO_PERSIST_COOKIE);
   revalidatePath("/", "layout");
   redirect("/sign-in");
 }

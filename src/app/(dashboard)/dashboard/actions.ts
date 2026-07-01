@@ -27,10 +27,20 @@ export async function setDefaultInstrument(formData: FormData): Promise<void> {
   // Safety net against empty/whitespace input — not an expected error path.
   if (!canonical) return;
 
-  await supabase
+  const { error } = await supabase
     .from("profiles")
-    .update({ default_instrument: canonical })
-    .eq("id", user.id);
+    .upsert(
+      { id: user.id, default_instrument: canonical },
+      { onConflict: "id" },
+    );
+
+  if (error) {
+    // Persisting the preference failed (e.g. RLS/permission). Do not redirect
+    // into the instrument dashboard on a failed write — surface via logs and
+    // let the selector screen render again on the next load.
+    console.error("Failed to persist default_instrument:", error);
+    return;
+  }
 
   redirect("/dashboard/" + canonical.toLowerCase());
 }
