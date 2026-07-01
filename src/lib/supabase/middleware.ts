@@ -12,6 +12,19 @@ const PROTECTED_PREFIXES = ["/dashboard", "/account", "/stats"];
 // so users can manage or create their subscription from the billing page.
 const SUBSCRIPTION_GATED_PREFIXES = ["/dashboard", "/stats"];
 
+// Redirects build a brand-new NextResponse, which does not carry the auth
+// cookies accumulated on `response` (e.g. a token refreshed by getUser()).
+// Copy them over so a redirect never drops a freshly rotated refresh token.
+function withPropagatedCookies(
+  redirectResponse: NextResponse,
+  response: NextResponse,
+): NextResponse {
+  response.cookies.getAll().forEach((cookie) => {
+    redirectResponse.cookies.set(cookie);
+  });
+  return redirectResponse;
+}
+
 export async function updateSession(request: NextRequest): Promise<NextResponse> {
   let response = NextResponse.next({ request });
 
@@ -61,7 +74,7 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
   if (isProtected && !user) {
     const signInUrl = request.nextUrl.clone();
     signInUrl.pathname = "/sign-in";
-    return NextResponse.redirect(signInUrl);
+    return withPropagatedCookies(NextResponse.redirect(signInUrl), response);
   }
 
   // Subscription gate: only runs for authenticated users on gated prefixes.
@@ -76,7 +89,7 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
       if (!subscription) {
         const pricingUrl = request.nextUrl.clone();
         pricingUrl.pathname = "/pricing";
-        return NextResponse.redirect(pricingUrl);
+        return withPropagatedCookies(NextResponse.redirect(pricingUrl), response);
       }
     } catch {
       // Transient DB/RLS error. The user is already authenticated, so fail open
