@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import {
   Zap,
   ArrowRight,
@@ -10,6 +11,7 @@ import {
   ShieldCheck,
   ChevronUp,
 } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   title: "Augur — Statistical Market Probabilities for Futures Traders",
@@ -20,7 +22,15 @@ export const metadata: Metadata = {
 // Shared container class — matches .container in styles.css (max-w 1180px)
 const container = "mx-auto w-full max-w-[1180px] px-6";
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (user) {
+    redirect("/dashboard");
+  }
+
   return (
     <>
       <main>
