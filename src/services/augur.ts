@@ -274,9 +274,7 @@ async function fetchAugur<T>(
   }
 
   if (envelope.data === null) {
-    throw new AugurApiError(
-      `Augur API returned null data for ${endpoint}`,
-    );
+    throw new AugurApiError(`Augur API returned null data for ${endpoint}`);
   }
 
   return envelope.data;
@@ -310,4 +308,34 @@ export async function getStatDetail(statId: string): Promise<StatRunResult> {
     },
   );
   return mapStatRunResult(raw);
+}
+
+// Fetches a single instrument/timeframe result, optionally date-filtered.
+// The granular `/api/v1/stats/{statId}/{instrument}/{timeframe}` endpoint is
+// the only one that honours `?start=&end=` — the family endpoint above ignores
+// them. Date-filtered responses are NOT cached (the `end` date is typically
+// today, so the data changes daily); the unfiltered variant shares the ISR TTL.
+export async function getStatTimeframe(
+  statId: string,
+  instrument: string,
+  timeframe: string,
+  options?: { start?: string; end?: string },
+): Promise<TimeframeResult> {
+  const apiKey = getApiKey();
+  const { start, end } = options ?? {};
+
+  let endpoint = `/api/v1/stats/${encodeURIComponent(statId)}/${encodeURIComponent(instrument)}/${encodeURIComponent(timeframe)}`;
+  const dateFiltered = Boolean(start && end);
+  if (start && end) {
+    const qs = new URLSearchParams({ start, end });
+    endpoint += `?${qs.toString()}`;
+  }
+
+  const raw = await fetchAugur<RawTimeframeResult>(endpoint, {
+    headers: { "X-API-Key": apiKey },
+    ...(dateFiltered
+      ? { cache: "no-store" }
+      : { next: { revalidate: STATS_REVALIDATE } }),
+  });
+  return mapTimeframeResult(raw);
 }

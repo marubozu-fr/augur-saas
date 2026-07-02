@@ -1,5 +1,10 @@
-// Shimmer skeleton for the stat detail content area.
-// Rendered by <Suspense> fallback while StatDetail fetches the Augur API.
+// Shimmer skeleton for the stat detail DATA section (metadata strip,
+// magnitudes, table). Rendered by <Suspense> fallback while StatDetail
+// fetches the Augur API. The header (title/badge/definition) and the context
+// zone / data filter zone controls are no longer part of this boundary — see
+// page.tsx — so they are intentionally not represented here.
+
+import { MetadataStripSkeleton } from "@/components/stat-detail/MetadataStrip";
 
 function SkeletonLine({ className }: { className?: string }) {
   return (
@@ -41,38 +46,8 @@ function SkeletonSummaryCard() {
 export function StatDetailSkeleton() {
   return (
     <div aria-hidden="true">
-      {/* Header skeleton */}
-      <div className="mb-5">
-        <div className="flex items-center gap-3 mb-3">
-          <SkeletonLine className="h-7 w-64" />
-          <SkeletonLine className="h-5 w-14 rounded-full" />
-        </div>
-        <SkeletonLine className="h-3 w-full max-w-xl" />
-        <SkeletonLine className="h-3 w-[80%] max-w-md mt-2" />
-      </div>
-
-      {/* Controls bar skeleton */}
-      <div className="flex items-center gap-5 flex-wrap p-4 px-5 mb-5 border border-border rounded-xl bg-card">
-        <div className="flex flex-col gap-2">
-          <SkeletonLine className="h-2.5 w-16" />
-          <SkeletonLine className="h-9 w-32 rounded-md" />
-        </div>
-        <div className="w-px self-stretch bg-border" />
-        <div className="flex flex-col gap-2">
-          <SkeletonLine className="h-2.5 w-16" />
-          <SkeletonLine className="h-7 w-24 rounded-md" />
-        </div>
-        <div className="flex gap-6 ml-auto">
-          <div className="flex flex-col gap-1">
-            <SkeletonLine className="h-2.5 w-16" />
-            <SkeletonLine className="h-3.5 w-32" />
-          </div>
-          <div className="flex flex-col gap-1">
-            <SkeletonLine className="h-2.5 w-16" />
-            <SkeletonLine className="h-3.5 w-16" />
-          </div>
-        </div>
-      </div>
+      {/* Metadata strip skeleton */}
+      <MetadataStripSkeleton />
 
       {/* Section heading skeleton */}
       <SkeletonLine className="h-5 w-48 mb-4 mt-6" />

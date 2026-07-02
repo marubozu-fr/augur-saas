@@ -1,47 +1,88 @@
-// Async Server Component: fetches stat detail from the Augur API,
-// performs the per-stat tier check, resolves instrument/timeframe, then
-// delegates rendering to the extracted presentational components.
+// Async Server Component: fetches the period-scoped stat detail from the
+// Augur API, performs the per-stat tier check, resolves instrument/timeframe
+// data, then delegates rendering to the extracted presentational components.
 // Never import from client components — this file touches server-only modules.
+//
+// The page title / tier badge / definition are now rendered by StatHeader
+// (page.tsx), outside this component's Suspense boundary, since they don't
+// depend on the selected period. This component owns everything that DOES —
+// the metadata strip, magnitudes, pattern-frequency table and slices — plus
+// the tier gate (LockedState, unchanged, replaces all of it when locked).
 
 import { notFound } from "next/navigation";
 import { AlertTriangle } from "lucide-react";
-import { getStatDetail, AugurApiError } from "@/services/augur";
+import {
+  getStatDetail,
+  getStatTimeframe,
+  AugurApiError,
+} from "@/services/augur";
 import { getCurrentUserTier } from "@/lib/subscription.server";
 import { canAccessStat } from "@/lib/subscription";
 import { getStatTier } from "@/lib/stat-tiers";
 import { makeLabelResolver } from "./helpers";
 import { LockedState } from "./LockedState";
-import { ControlsBar } from "./ControlsBar";
 import { MagnitudeCards } from "./MagnitudeCards";
 import { ProbabilityTable } from "./ProbabilityTable";
 import { SliceAccordion } from "./SliceAccordion";
-import type { StatRunResult } from "@/types/stats";
+import { MetadataStrip } from "@/components/stat-detail/MetadataStrip";
+import type { StatRunResult, TimeframeResult } from "@/types/stats";
+import type { PeriodPreset } from "@/lib/period";
 
 interface StatDetailProps {
   statId: string;
-  // Canonical uppercase instrument code, already validated in the page params.
+  // Canonical uppercase instrument code, already resolved in the page.
   instrument: string;
   timeframe: string;
+  period: PeriodPreset;
+  isCustomRange: boolean;
+  // YYYY-MM-DD, present together or not at all.
+  start?: string | null;
+  end?: string | null;
 }
 
 export async function StatDetail({
   statId,
   instrument,
   timeframe,
+  period,
+  isCustomRange,
+  start,
+  end,
 }: StatDetailProps) {
   // -------------------------------------------------------------------------
-  // Fetch stat detail + user tier concurrently
+  // Fetch strategy:
+  //   • getStatDetail(statId) — the full family response (labels, title,
+  //     definition, tier check, instrument/timeframe structure). Cached.
+  //   • getStatTimeframe(...) — only when a date range is active. The granular
+  //     endpoint is the only one that honours ?start=&end=, so the actual
+  //     period-scoped numbers come from here (not cached).
+  // When no date range is active, the numbers come straight from the family
+  // response's nested TimeframeResult (unchanged from the original behavior).
   // -------------------------------------------------------------------------
+  const dateFiltered = Boolean(start && end);
+
   let result: StatRunResult;
   let userTier: number | null;
+  let filteredTf: TimeframeResult | null;
 
   try {
-    [result, userTier] = await Promise.all([
+    [result, userTier, filteredTf] = await Promise.all([
       getStatDetail(statId),
       getCurrentUserTier(),
+      dateFiltered
+        ? getStatTimeframe(statId, instrument, timeframe, {
+            start: start ?? undefined,
+            end: end ?? undefined,
+          })
+        : Promise.resolve(null),
     ]);
   } catch (err) {
-    console.error("[StatDetail] fetch failed for", statId, { instrument, timeframe }, err);
+    console.error(
+      "[StatDetail] fetch failed for",
+      statId,
+      { instrument, timeframe, start, end },
+      err,
+    );
     if (err instanceof AugurApiError && err.status === 404) {
       notFound();
     }
@@ -74,45 +115,36 @@ export async function StatDetail({
   }
 
   // -------------------------------------------------------------------------
-  // Resolve active instrument.
-  // The instrument is normalised in the page params; use it directly.
-  // All instruments returned by the API are offered in the selector — the
-  // route accepts any non-empty code, falling through to "no data" if the
-  // API has no results for the chosen instrument.
+  // Resolve active instrument / timeframe against the actual response. The
+  // page already resolved these from the catalog, but the catalog and the
+  // period-scoped response are separate fetches — re-validate defensively
+  // rather than assume they always agree.
   // -------------------------------------------------------------------------
-  const availableInstruments = Object.keys(result.instruments).sort();
-  const activeInstrument = instrument;
-
-  const instrumentData = result.instruments[activeInstrument];
+  const instrumentData = result.instruments[instrument];
   if (!instrumentData) {
     return (
       <p className="text-sm text-muted-foreground">
         No data available for instrument{" "}
-        <span className="font-mono">{activeInstrument}</span>.
+        <span className="font-mono">{instrument}</span>.
       </p>
     );
   }
 
-  // -------------------------------------------------------------------------
-  // Resolve active timeframe (prefer "daily", fall back to first)
-  // -------------------------------------------------------------------------
-  const availableTimeframes = Object.keys(instrumentData);
-  const defaultTimeframe = availableTimeframes.includes("daily")
-    ? "daily"
-    : (availableTimeframes[0] ?? "daily");
-  const activeTimeframe = availableTimeframes.includes(timeframe)
-    ? timeframe
-    : defaultTimeframe;
-
-  const tfResult = instrumentData[activeTimeframe];
-  if (!tfResult) {
+  const baseTf = instrumentData[timeframe];
+  if (!baseTf) {
     return (
       <p className="text-sm text-muted-foreground">
         No data available for timeframe{" "}
-        <span className="font-mono">{activeTimeframe}</span>.
+        <span className="font-mono">{timeframe}</span>.
       </p>
     );
   }
+
+  // Render the period-scoped numbers when a date range is active; otherwise the
+  // full-history numbers from the family response. Structural validation above
+  // always uses the family response, which is the canonical source of truth for
+  // which instruments/timeframes exist.
+  const tfResult = filteredTf ?? baseTf;
 
   // -------------------------------------------------------------------------
   // Partition results: probability rows vs magnitude rows.
@@ -132,32 +164,13 @@ export async function StatDetail({
 
   return (
     <>
-      {/* Stat header — title, tier badge, definition */}
-      <div className="flex items-start gap-5 flex-wrap mb-5">
-        <div className="max-w-2xl">
-          <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              {result.title.en}
-            </h1>
-            <span className="inline-flex items-center px-3 py-[5px] rounded-full text-xs font-semibold bg-brand-soft text-brand">
-              Tier {statTier}
-            </span>
-          </div>
-          <p className="mt-3 text-sm text-muted-foreground leading-normal">
-            {result.definition.en}
-          </p>
-        </div>
-      </div>
-
-      {/* Controls bar — passes statId so the instrument selector can build
-          the correct /stats/{instrument}/{statId} href template */}
-      <ControlsBar
-        instruments={availableInstruments}
-        activeInstrument={activeInstrument}
-        timeframes={availableTimeframes}
-        activeTimeframe={activeTimeframe}
-        tfResult={tfResult}
-        statId={statId}
+      {/* Metadata strip — period-aware: dataRange/totalSamples come from the
+          selected TimeframeResult, which already reflects the active period. */}
+      <MetadataStrip
+        dataRange={tfResult.dataRange}
+        totalSamples={tfResult.totalSamples}
+        isCustomRange={isCustomRange}
+        period={period}
       />
 
       {/* Magnitudes section — only rendered when magnitude rows exist */}
@@ -166,7 +179,7 @@ export async function StatDetail({
           <h2 className="flex items-center gap-3 text-lg font-bold tracking-tight text-foreground mt-6 mb-4">
             Summarised magnitudes
             <span className="text-xs font-medium text-subtle ml-auto">
-              continuation · {activeInstrument} {activeTimeframe}
+              continuation · {instrument} {timeframe}
             </span>
           </h2>
           <MagnitudeCards rows={magnitudeRows} resolver={resolver} />
@@ -179,7 +192,7 @@ export async function StatDetail({
           <h2 className="flex items-center gap-3 text-lg font-bold tracking-tight text-foreground mt-6 mb-4">
             Pattern frequency
             <span className="text-xs font-medium text-subtle ml-auto">
-              probability of each outcome · {activeInstrument} {activeTimeframe}
+              probability of each outcome · {instrument} {timeframe}
             </span>
           </h2>
 
@@ -191,7 +204,7 @@ export async function StatDetail({
           </div>
 
           <p className="mt-5 text-xs text-subtle leading-normal">
-            Probabilities are observed frequencies over the full sample. The
+            Probabilities are observed frequencies over the selected period. The
             baseline is the same outcome&apos;s unconditional rate; edge is{" "}
             <span className="font-mono">probability − baseline</span>, in
             percentage points.
