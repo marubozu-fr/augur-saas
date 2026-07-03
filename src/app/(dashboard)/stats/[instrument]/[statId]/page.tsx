@@ -1,25 +1,25 @@
-// Stat detail page v2 (issue #87) — /stats/{statId}.
-// instrument, period, start/end and timeframe are now URL search params
-// instead of the instrument path segment, so the page is shareable/bookmarkable.
+// Stat detail page v3 (issue #89) — /stats/{instrument}/{statId}.
+// instrument is now a path segment (canonical lowercase slug) instead of a
+// query param, and the URL never carries query params: timeframe, period and
+// the custom start/end range are client React state owned by
+// StatDetailClient, refetched via a Server Action (fetchStatSlice) when they
+// change. This keeps AUGUR_API_KEY server-side while still allowing
+// client-driven refetch.
 //
 // The stat catalog is fetched once, directly (not Suspense-wrapped, matching
 // the existing dashboard/StatCatalog.tsx pattern — it's cheap and cached).
 // It resolves the context-zone/data-filter-zone defaults (available
 // instruments/timeframes, active values) AND supplies the title/definition
-// for the header and breadcrumb — all of it independent of the selected
-// period, so none of it needs to wait on the period-scoped data fetch below.
+// for the header and breadcrumb.
 //
 // Only the actual numbers (metadata strip + magnitudes + table + slices)
-// depend on the period-scoped fetch, so only that part is wrapped in the
+// depend on the initial data fetch, so only that part is wrapped in the
 // keyed <Suspense> boundary — keeping the context zone and data filter zone
-// interactive while it reloads, per the issue's loading-state requirement.
+// interactive while it loads, per the issue's loading-state requirement.
 
 import { Suspense } from "react";
 import { getStatCatalog } from "@/services/augur";
-import { periodToDateRange } from "@/lib/period";
 import {
-  isIsoDate,
-  isPeriodPreset,
   resolveActiveInstrument,
   resolveActiveTimeframe,
 } from "@/lib/stat-context";
@@ -29,25 +29,14 @@ import { StatBreadcrumb } from "./StatBreadcrumb";
 import { StatHeader } from "./StatHeader";
 import { StatDetail } from "./StatDetail";
 import { StatDetailSkeleton } from "./StatDetailSkeleton";
-import type { PeriodPreset } from "@/lib/period";
 import type { StatFamilyMeta } from "@/types/stats";
 
 interface StatDetailPageProps {
-  params: Promise<{ statId: string }>;
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
+  params: Promise<{ instrument: string; statId: string }>;
 }
 
-function firstParam(value: string | string[] | undefined): string | null {
-  if (Array.isArray(value)) return value[0] ?? null;
-  return value ?? null;
-}
-
-export default async function StatDetailPage({
-  params,
-  searchParams,
-}: StatDetailPageProps) {
-  const { statId } = await params;
-  const sp = await searchParams;
+export default async function StatDetailPage({ params }: StatDetailPageProps) {
+  const { instrument: instrumentSlug, statId } = await params;
 
   // -------------------------------------------------------------------------
   // Catalog — powers the context zone / data filter zone controls and the
@@ -73,28 +62,14 @@ export default async function StatDetailPage({
   const activeInstrument = resolveActiveInstrument(
     catalog,
     statId,
-    firstParam(sp["instrument"]),
+    instrumentSlug,
   );
   const activeTimeframe = resolveActiveTimeframe(
     catalog,
     statId,
     activeInstrument,
-    firstParam(sp["timeframe"]),
+    null,
   );
-
-  // -------------------------------------------------------------------------
-  // Resolve period / custom date range
-  // -------------------------------------------------------------------------
-  const rawPeriod = firstParam(sp["period"]);
-  const period: PeriodPreset = isPeriodPreset(rawPeriod) ? rawPeriod : "all";
-
-  const rawStart = firstParam(sp["start"]);
-  const rawEnd = firstParam(sp["end"]);
-  const isCustomRange = isIsoDate(rawStart) && isIsoDate(rawEnd);
-
-  const dateRange = isCustomRange
-    ? { start: rawStart, end: rawEnd }
-    : periodToDateRange(period);
 
   return (
     <main className="p-6">
@@ -106,6 +81,8 @@ export default async function StatDetailPage({
       <StatDetailClient
         statId={statId}
         catalog={catalog}
+        activeInstrument={activeInstrument}
+        defaultTimeframe={activeTimeframe}
         header={
           <StatHeader
             title={family?.title.en ?? statId}
@@ -115,17 +92,15 @@ export default async function StatDetailPage({
         }
       >
         <Suspense
-          key={`${statId}-${activeInstrument}-${activeTimeframe}-${dateRange?.start ?? "all"}-${dateRange?.end ?? "all"}`}
+          key={`${statId}-${activeInstrument}-${activeTimeframe}`}
           fallback={<StatDetailSkeleton />}
         >
           <StatDetail
             statId={statId}
             instrument={activeInstrument}
             timeframe={activeTimeframe}
-            period={period}
-            isCustomRange={isCustomRange}
-            start={dateRange?.start}
-            end={dateRange?.end}
+            period="all"
+            isCustomRange={false}
           />
         </Suspense>
       </StatDetailClient>

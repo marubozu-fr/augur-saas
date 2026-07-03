@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { Lock } from "lucide-react";
-import type { StatRunResult } from "@/types/stats";
 
 interface LockedStateProps {
-  result: StatRunResult;
+  title: string;
+  definition: string;
   statTier: number;
 }
 
-export function LockedState({ result, statTier }: LockedStateProps) {
+export function LockedState({ title, definition, statTier }: LockedStateProps) {
   return (
     <div className="relative rounded-xl border border-dashed border-border-strong overflow-hidden">
       {/* Blurred content preview */}
@@ -30,11 +30,9 @@ export function LockedState({ result, statTier }: LockedStateProps) {
           <Lock size={22} aria-hidden="true" />
         </span>
         <div>
-          <p className="text-base font-semibold text-foreground">
-            {result.title.en}
-          </p>
+          <p className="text-base font-semibold text-foreground">{title}</p>
           <p className="mt-1 text-sm text-muted-foreground max-w-[26rem]">
-            {result.definition.en}
+            {definition}
           </p>
         </div>
         <p className="text-xs text-subtle">

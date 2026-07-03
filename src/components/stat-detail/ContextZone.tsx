@@ -1,6 +1,8 @@
 // Context zone — the prominent "what am I looking at" surface. Defines the
-// instrument, stat family and period. Changing any control here re-scopes
-// the whole page (via StatDetailClient's URL updates).
+// instrument, stat family and period. Changing the instrument or stat family
+// navigates to a new /stats/{instrument}/{statId} path; changing the period
+// or custom range updates StatDetailClient's client state and triggers a
+// Server Action refetch — no query params are ever involved.
 //
 // DEVIATION from the mockup: the catalog (StatFamilyMeta) has no "category"
 // field, so the Stat combobox shows only the family title (no category

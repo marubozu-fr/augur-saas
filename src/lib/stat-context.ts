@@ -1,9 +1,13 @@
 // Pure helpers that resolve the stat detail page's "context" — active
-// instrument / timeframe / period — from the stat catalog + current search
-// params. No React, no server-only imports: called identically from the
-// Server Component (page.tsx, to build the actual data fetch) and from the
-// client controls (ContextZone / DataFilterZone, to render instantly from
-// the URL without waiting on a round trip) so the two never disagree.
+// instrument / timeframe — from the stat catalog + the requested path
+// segment. No React, no server-only imports.
+//
+// resolveActiveInstrument / resolveActiveTimeframe are called from the
+// Server Component (page.tsx) to resolve the instrument path segment and
+// pick a default timeframe. The client wrapper (StatDetailClient) receives
+// the resolved instrument/timeframe as props instead of re-deriving them —
+// it uses the remaining helpers here (getFamilyTimeframes,
+// getGlobalInstruments, isIsoDate) to render its controls.
 
 import type { StatFamilyMeta } from "@/types/stats";
 import type { PeriodPreset } from "@/lib/period";
