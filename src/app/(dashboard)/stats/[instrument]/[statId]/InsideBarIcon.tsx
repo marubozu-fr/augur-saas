@@ -24,8 +24,8 @@ export function InsideBarIcon({ color, timeframe }: InsideBarIconProps) {
   return (
     <svg
       className="flex-none"
-      width={64}
-      height={72}
+      width={96}
+      height={108}
       viewBox="0 0 64 72"
       role="img"
       aria-label={`Large candle followed by a smaller inside candle contained within its range, ${timeframe} timeframe`}

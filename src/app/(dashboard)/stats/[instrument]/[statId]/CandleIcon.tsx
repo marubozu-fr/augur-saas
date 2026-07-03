@@ -20,8 +20,8 @@ export function CandleIcon({ color, timeframe }: CandleIconProps) {
   return (
     <svg
       className="flex-none"
-      width={64}
-      height={72}
+      width={96}
+      height={108}
       viewBox="0 0 64 72"
       role="img"
       aria-label={label}

@@ -1,17 +1,16 @@
 // One visual card per condition — the new default "Pattern frequency" display
 // for stats whose every condition is a genuine two-outcome split (see the
-// isVisualShape check in StatDetailContent). Composes: title + edge badge,
-// the bespoke glyph (or DefaultStatCard fallback) + diverging bars, and the
-// collapsible Advanced panel. Named ConditionCard (not "StatCard") to avoid
-// colliding with the unrelated dashboard StatCard.tsx.
+// isVisualShape check in StatDetailContent). Composes: title + edge badge and
+// the bespoke glyph (or DefaultStatCard fallback) + diverging bars. The full
+// old-style table now lives in a single shared Advanced panel below the card
+// grid, not per card. Named ConditionCard (not "StatCard") to avoid colliding
+// with the unrelated dashboard StatCard.tsx.
 
 import type { StatResultRow } from "@/types/stats";
-import type { PeriodPreset } from "@/lib/period";
 import type { EdgeDirection, LabelResolver } from "./helpers";
 import { computeEdge, edgeDirection, fmtEdgePts } from "./helpers";
 import { DivergingBars } from "./DivergingBars";
 import { DefaultStatCard } from "./DefaultStatCard";
-import { AdvancedPanel } from "./AdvancedPanel";
 import { renderStatIcon } from "./stat-icon-map";
 import type { IconColor } from "./stat-icon-map";
 
@@ -22,10 +21,6 @@ interface ConditionCardProps {
   resolver: LabelResolver;
   statName: string;
   timeframe: string;
-  dataRange: string[];
-  totalSamples: number;
-  isCustomRange: boolean;
-  period: PeriodPreset;
 }
 
 export function ConditionCard({
@@ -34,10 +29,6 @@ export function ConditionCard({
   resolver,
   statName,
   timeframe,
-  dataRange,
-  totalSamples,
-  isCustomRange,
-  period,
 }: ConditionCardProps) {
   const [rowA, rowB] = rows;
 
@@ -92,8 +83,6 @@ export function ConditionCard({
   const title = resolver.condition(conditionCode);
   const subtitle = `${resolver.outcome(rowA.outcome)} vs ${resolver.outcome(rowB.outcome)}`;
 
-  const tableRows = rows.map((row) => ({ row }));
-
   return (
     <article className="flex flex-col bg-card border border-border rounded-xl p-5 transition-colors hover:border-border-strong">
       <div className="flex items-start gap-3 mb-4">
@@ -116,9 +105,9 @@ export function ConditionCard({
       {icon ? (
         <div className="flex items-start gap-5">
           {/* Offset the glyph so it centres on the diverging-bars zero axis:
-              the plot is two 84px halves (168px); the 72px glyph needs
-              (168 − 72) / 2 = 48px (pt-12) of top padding. */}
-          <div className="pt-12">{icon}</div>
+              the plot is two 120px halves (240px); the 108px glyph needs
+              (240 − 108) / 2 = 66px (pt-[66px]) of top padding. */}
+          <div className="pt-[66px]">{icon}</div>
           <DivergingBars
             upLabel={resolver.outcome(upRow.outcome)}
             upProbability={upRow.probability}
@@ -134,16 +123,6 @@ export function ConditionCard({
           downProbability={downRow.probability}
         />
       )}
-
-      <AdvancedPanel
-        upRow={upRow}
-        rows={tableRows}
-        resolver={resolver}
-        dataRange={dataRange}
-        totalSamples={totalSamples}
-        isCustomRange={isCustomRange}
-        period={period}
-      />
     </article>
   );
 }

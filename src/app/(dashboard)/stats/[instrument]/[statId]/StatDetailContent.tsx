@@ -101,13 +101,18 @@ export function StatDetailContent({ result }: StatDetailContentProps) {
       return (
         <>
           {/* Metadata strip — period-aware: dataRange/totalSamples come from the
-              selected TimeframeResult, which already reflects the active period. */}
-          <MetadataStrip
-            dataRange={dataRange}
-            totalSamples={totalSamples}
-            isCustomRange={isCustomRange}
-            period={period}
-          />
+              selected TimeframeResult, which already reflects the active period.
+              Hidden when the visual display is active: it then lives inside the
+              shared Advanced panel below the card grid, so showing it here too
+              would be redundant. */}
+          {!isVisualShape && (
+            <MetadataStrip
+              dataRange={dataRange}
+              totalSamples={totalSamples}
+              isCustomRange={isCustomRange}
+              period={period}
+            />
+          )}
 
           {/* Magnitudes section — only rendered when magnitude rows exist */}
           {magnitudeRows.length > 0 && (
@@ -142,10 +147,6 @@ export function StatDetailContent({ result }: StatDetailContentProps) {
                       resolver={resolver}
                       statName={statName}
                       timeframe={timeframe}
-                      dataRange={dataRange}
-                      totalSamples={totalSamples}
-                      isCustomRange={isCustomRange}
-                      period={period}
                     />
                   ))}
                 </div>
@@ -164,6 +165,51 @@ export function StatDetailContent({ result }: StatDetailContentProps) {
                 is <span className="font-mono">probability − baseline</span>, in
                 percentage points.
               </p>
+
+              {/* Shared Advanced panel — the visual cards are the at-a-glance
+                  layer; this single collapsible below the grid reveals the full
+                  old-style view (metadata strip + the complete probability
+                  table across every condition). Native <details>/<summary>
+                  reuses the .accordion-chev rotation rule from globals.css, as
+                  the slice accordions do. Only shown for the visual display;
+                  the ProbabilityTable fallback already IS the full table. */}
+              {isVisualShape && (
+                <details className="mt-5">
+                  <summary className="inline-flex items-center gap-2 cursor-pointer list-none text-xs font-semibold tracking-wide uppercase text-muted-foreground hover:text-foreground transition-colors [&::-webkit-details-marker]:hidden">
+                    <svg
+                      className="accordion-chev flex-shrink-0 text-subtle transition-transform"
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.4"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M9 6l6 6-6 6" />
+                    </svg>
+                    Advanced
+                  </summary>
+
+                  <div className="pt-4">
+                    <MetadataStrip
+                      dataRange={dataRange}
+                      totalSamples={totalSamples}
+                      isCustomRange={isCustomRange}
+                      period={period}
+                    />
+
+                    <div className="border border-border rounded-xl bg-card overflow-x-auto">
+                      <ProbabilityTable
+                        rows={probRows.map((row) => ({ row }))}
+                        resolver={resolver}
+                      />
+                    </div>
+                  </div>
+                </details>
+              )}
             </>
           )}
 

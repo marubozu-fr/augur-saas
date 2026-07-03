@@ -14,9 +14,9 @@ interface DivergingBarsProps {
 }
 
 // Scales a probability fraction (0..1) to the bar's pixel height. Matches the
-// mockup's proportions: 100% probability fills an 80px bar inside the 84px
+// mockup's proportions: 100% probability fills a 116px bar inside the 120px
 // half-column (the few spare px are breathing room above the zero axis).
-const MAX_BAR_PX = 80;
+const MAX_BAR_PX = 116;
 
 export function DivergingBars({
   upLabel,
@@ -34,8 +34,8 @@ export function DivergingBars({
         aria-label={`${upLabel} ${fmtPct1(upProbability)} (green, up); ${downLabel} ${fmtPct1(downProbability)} (red, down)`}
         className="flex flex-col"
       >
-        <div className="flex flex-col items-center justify-end h-[84px]">
-          <span className="text-lg font-bold leading-none mb-2 text-up">
+        <div className="flex flex-col items-center justify-end h-[120px]">
+          <span className="text-2xl font-bold leading-none mb-2 text-up">
             {fmtPct1(upProbability)}
           </span>
           <div
@@ -47,12 +47,12 @@ export function DivergingBars({
           className="h-0 border-t border-dashed border-border-strong"
           aria-hidden="true"
         />
-        <div className="flex flex-col items-center justify-start h-[84px]">
+        <div className="flex flex-col items-center justify-start h-[120px]">
           <div
             style={{ "--bar-h": `${downHeight}px` } as CSSProperties}
             className="w-16 max-w-[72%] h-[var(--bar-h)] bg-down rounded-b-sm"
           />
-          <span className="text-lg font-bold leading-none mt-2 text-down">
+          <span className="text-2xl font-bold leading-none mt-2 text-down">
             {fmtPct1(downProbability)}
           </span>
         </div>
