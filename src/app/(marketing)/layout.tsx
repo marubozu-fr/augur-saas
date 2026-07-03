@@ -15,11 +15,7 @@ const NAV_LINKS = [
   { href: "/#proof", label: "Customers" },
 ];
 
-export default function MarketingLayout({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export default function MarketingLayout({ children }: { children: ReactNode }) {
   return (
     <>
       {/* =====================================================================
@@ -30,7 +26,10 @@ export default function MarketingLayout({
           <AugurLogo />
 
           {/* Desktop nav */}
-          <nav aria-label="Primary" className="hidden md:flex items-center gap-6">
+          <nav
+            aria-label="Primary"
+            className="hidden md:flex items-center gap-6"
+          >
             <ul className="flex items-center gap-6 list-none">
               {NAV_LINKS.map((link) => (
                 <li key={link.href}>

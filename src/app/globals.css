@@ -115,7 +115,9 @@ details[open] > summary .accordion-chev {
 
 /* Shimmer animation used by StatGridSkeleton on the member dashboard. */
 @keyframes shimmer {
-  100% { transform: translateX(100%); }
+  100% {
+    transform: translateX(100%);
+  }
 }
 .shimmer::after {
   content: "";

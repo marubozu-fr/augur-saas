@@ -35,9 +35,7 @@ export default function AuthLayout({
       </div>
 
       {/* Page content (the card) */}
-      <div className="relative z-10 w-full max-w-md">
-        {children}
-      </div>
+      <div className="relative z-10 w-full max-w-md">{children}</div>
     </div>
   );
 }

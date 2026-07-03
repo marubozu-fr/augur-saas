@@ -59,7 +59,11 @@ async function fetchPlanData(
 
     return { planName, amountFormatted, intervalLabel };
   } catch (err) {
-    console.error("[PlanAndBillingCards] fetchPlanData failed for priceId", subscription.priceId, err);
+    console.error(
+      "[PlanAndBillingCards] fetchPlanData failed for priceId",
+      subscription.priceId,
+      err,
+    );
     // Stripe fetch failed — fail soft. The caller renders a degraded state.
     return null;
   }

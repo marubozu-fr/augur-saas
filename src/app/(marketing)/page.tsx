@@ -44,7 +44,9 @@ export default async function LandingPage() {
             aria-hidden="true"
           />
 
-          <div className={`${container} relative grid md:grid-cols-[1.05fr_0.95fr] gap-12 items-center`}>
+          <div
+            className={`${container} relative grid md:grid-cols-[1.05fr_0.95fr] gap-12 items-center`}
+          >
             {/* Left: copy */}
             <div>
               {/* Accent pill badge */}
@@ -225,9 +227,9 @@ export default async function LandingPage() {
                 Edges you can actually trust
               </h2>
               <p className="mt-4 text-lg text-muted-foreground leading-[1.55]">
-                No black boxes, no curve-fit signals. Just transparent conditional
-                statistics with the context you need to size a trade with
-                confidence.
+                No black boxes, no curve-fit signals. Just transparent
+                conditional statistics with the context you need to size a trade
+                with confidence.
               </p>
             </div>
 
@@ -281,9 +283,9 @@ export default async function LandingPage() {
                   Refreshed daily
                 </h3>
                 <p className="text-sm text-muted-foreground leading-[1.55]">
-                  Stats recompute automatically after each cash close, rolling in
-                  the latest session so your edges reflect this week&apos;s market —
-                  not a backtest frozen in 2019.
+                  Stats recompute automatically after each cash close, rolling
+                  in the latest session so your edges reflect this week&apos;s
+                  market — not a backtest frozen in 2019.
                 </p>
               </article>
 
@@ -299,9 +301,9 @@ export default async function LandingPage() {
                   Significance built in
                 </h3>
                 <p className="text-sm text-muted-foreground leading-[1.55]">
-                  Confidence intervals and minimum-N thresholds keep noise out of
-                  the headline number. We grey out edges that aren&apos;t statistically
-                  meaningful instead of overselling them.
+                  Confidence intervals and minimum-N thresholds keep noise out
+                  of the headline number. We grey out edges that aren&apos;t
+                  statistically meaningful instead of overselling them.
                 </p>
               </article>
             </div>
@@ -356,8 +358,8 @@ export default async function LandingPage() {
                 </h3>
                 <p className="text-sm text-muted-foreground leading-[1.55]">
                   Open the dashboard and explore stat families for NQ and ES —
-                  gaps, opening drives, range extensions, weekday seasonality and
-                  more. Filter to what fits your style.
+                  gaps, opening drives, range extensions, weekday seasonality
+                  and more. Filter to what fits your style.
                 </p>
               </li>
 
@@ -438,9 +440,10 @@ export default async function LandingPage() {
               {/* Testimonial 1 */}
               <figure className="rounded-xl border border-border bg-card p-6">
                 <blockquote className="text-base text-foreground leading-[1.55]">
-                  &ldquo;I stopped guessing whether a gap would fill. Augur tells me
-                  the continuation rate by gap size and weekday, with the N right
-                  there. It&apos;s the first thing I check before the open.&rdquo;
+                  &ldquo;I stopped guessing whether a gap would fill. Augur
+                  tells me the continuation rate by gap size and weekday, with
+                  the N right there. It&apos;s the first thing I check before
+                  the open.&rdquo;
                 </blockquote>
                 <figcaption className="flex items-center gap-3 mt-5">
                   <span
@@ -463,9 +466,9 @@ export default async function LandingPage() {
               {/* Testimonial 2 */}
               <figure className="rounded-xl border border-border bg-card p-6">
                 <blockquote className="text-base text-foreground leading-[1.55]">
-                  &ldquo;What sold me was the honesty. When a slice has 22 samples it
-                  says so and greys out the edge. No other stats product respects
-                  significance like this.&rdquo;
+                  &ldquo;What sold me was the honesty. When a slice has 22
+                  samples it says so and greys out the edge. No other stats
+                  product respects significance like this.&rdquo;
                 </blockquote>
                 <figcaption className="flex items-center gap-3 mt-5">
                   <span
@@ -488,9 +491,9 @@ export default async function LandingPage() {
               {/* Testimonial 3 */}
               <figure className="rounded-xl border border-border bg-card p-6">
                 <blockquote className="text-base text-foreground leading-[1.55]">
-                  &ldquo;We use the Enterprise API to feed our pre-market checklist for
-                  a small ES book. Daily refresh and clean baselines saved us
-                  weeks of building this ourselves.&rdquo;
+                  &ldquo;We use the Enterprise API to feed our pre-market
+                  checklist for a small ES book. Daily refresh and clean
+                  baselines saved us weeks of building this ourselves.&rdquo;
                 </blockquote>
                 <figcaption className="flex items-center gap-3 mt-5">
                   <span

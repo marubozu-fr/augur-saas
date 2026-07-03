@@ -35,7 +35,7 @@ function buildSubscriptionRow(
   const tier = product?.metadata?.tier ?? null;
   const priceId = price?.id ?? null;
   const productId =
-    typeof price?.product === "string" ? price.product : product?.id ?? null;
+    typeof price?.product === "string" ? price.product : (product?.id ?? null);
 
   const currentPeriodEnd = item?.current_period_end
     ? new Date(item.current_period_end * 1000).toISOString()

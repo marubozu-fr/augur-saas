@@ -25,7 +25,9 @@ function withPropagatedCookies(
   return redirectResponse;
 }
 
-export async function updateSession(request: NextRequest): Promise<NextResponse> {
+export async function updateSession(
+  request: NextRequest,
+): Promise<NextResponse> {
   let response = NextResponse.next({ request });
 
   // When the user signed in with "Keep me signed in" unchecked, the sign-in
@@ -89,7 +91,10 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
       if (!subscription) {
         const pricingUrl = request.nextUrl.clone();
         pricingUrl.pathname = "/pricing";
-        return withPropagatedCookies(NextResponse.redirect(pricingUrl), response);
+        return withPropagatedCookies(
+          NextResponse.redirect(pricingUrl),
+          response,
+        );
       }
     } catch {
       // Transient DB/RLS error. The user is already authenticated, so fail open

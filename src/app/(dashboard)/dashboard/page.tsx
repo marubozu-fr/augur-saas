@@ -75,7 +75,9 @@ export default async function DashboardPage() {
             <p className="text-sm text-muted-foreground max-w-[26rem]">
               {catalogError}
             </p>
-            <p className="text-xs text-subtle">Refresh the page to try again.</p>
+            <p className="text-xs text-subtle">
+              Refresh the page to try again.
+            </p>
           </div>
         ) : instruments.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center">
@@ -88,8 +90,8 @@ export default async function DashboardPage() {
                 Choose your instrument
               </h1>
               <p className="mt-2 text-sm text-muted-foreground">
-                Select the futures instrument you want to track. You can switch at
-                any time from the dashboard.
+                Select the futures instrument you want to track. You can switch
+                at any time from the dashboard.
               </p>
             </div>
 

@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 import {
   Command as CommandPrimitive,
   CommandEmpty as CommandEmptyPrimitive,
@@ -8,10 +8,10 @@ import {
   CommandInput as CommandInputPrimitive,
   CommandItem as CommandItemPrimitive,
   CommandList as CommandListPrimitive,
-} from "cmdk"
-import { SearchIcon } from "lucide-react"
+} from "cmdk";
+import { SearchIcon } from "lucide-react";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 function Command({
   className,
@@ -23,7 +23,7 @@ function Command({
       className={cn("flex h-full w-full flex-col overflow-hidden", className)}
       {...props}
     />
-  )
+  );
 }
 
 function CommandInput({
@@ -40,12 +40,12 @@ function CommandInput({
         data-slot="command-input"
         className={cn(
           "flex-1 bg-transparent text-sm text-foreground placeholder:text-subtle outline-none disabled:cursor-not-allowed disabled:opacity-50",
-          className
+          className,
         )}
         {...props}
       />
     </div>
-  )
+  );
 }
 
 function CommandList({
@@ -58,7 +58,7 @@ function CommandList({
       className={cn("flex flex-col gap-px", className)}
       {...props}
     />
-  )
+  );
 }
 
 function CommandEmpty({
@@ -68,10 +68,13 @@ function CommandEmpty({
   return (
     <CommandEmptyPrimitive
       data-slot="command-empty"
-      className={cn("py-4 text-center text-sm text-muted-foreground", className)}
+      className={cn(
+        "py-4 text-center text-sm text-muted-foreground",
+        className,
+      )}
       {...props}
     />
-  )
+  );
 }
 
 function CommandGroup({
@@ -84,7 +87,7 @@ function CommandGroup({
       className={cn("flex flex-col gap-px", className)}
       {...props}
     />
-  )
+  );
 }
 
 function CommandItem({
@@ -99,11 +102,11 @@ function CommandItem({
         "cursor-pointer select-none outline-none",
         "data-[selected=true]:bg-card data-[selected=true]:text-foreground",
         "data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50",
-        className
+        className,
       )}
       {...props}
     />
-  )
+  );
 }
 
 export {
@@ -113,4 +116,4 @@ export {
   CommandEmpty,
   CommandGroup,
   CommandItem,
-}
+};

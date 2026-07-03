@@ -19,14 +19,15 @@ export function SignUpForm({ error }: SignUpFormProps) {
 
   return (
     <>
-      {error && (
-        <p className="mb-4 text-sm text-down text-center">{error}</p>
-      )}
+      {error && <p className="mb-4 text-sm text-down text-center">{error}</p>}
 
       {/* Email/password form */}
       <form action={handleSubmit} className="grid gap-5">
         <div className="grid gap-2">
-          <label htmlFor="email" className="text-sm font-semibold text-foreground">
+          <label
+            htmlFor="email"
+            className="text-sm font-semibold text-foreground"
+          >
             Email
           </label>
           <input
@@ -42,7 +43,10 @@ export function SignUpForm({ error }: SignUpFormProps) {
         </div>
 
         <div className="grid gap-2">
-          <label htmlFor="password" className="text-sm font-semibold text-foreground">
+          <label
+            htmlFor="password"
+            className="text-sm font-semibold text-foreground"
+          >
             Password
           </label>
           <input

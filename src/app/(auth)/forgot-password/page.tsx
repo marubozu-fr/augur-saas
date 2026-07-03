@@ -39,8 +39,8 @@ export default async function ForgotPasswordPage({
         </h2>
         <p className="mt-3 text-sm text-muted-foreground leading-normal">
           If an account exists for{" "}
-          <strong className="text-foreground font-mono">{email}</strong>, we&apos;ve
-          sent a password reset link. It expires in 60 minutes.
+          <strong className="text-foreground font-mono">{email}</strong>,
+          we&apos;ve sent a password reset link. It expires in 60 minutes.
         </p>
 
         {/* Resend + back buttons */}
@@ -75,13 +75,14 @@ export default async function ForgotPasswordPage({
         </p>
       </div>
 
-      {error && (
-        <p className="mb-4 text-sm text-down text-center">{error}</p>
-      )}
+      {error && <p className="mb-4 text-sm text-down text-center">{error}</p>}
 
       <form action={resetPassword} className="grid gap-5">
         <div className="grid gap-2">
-          <label htmlFor="email" className="text-sm font-semibold text-foreground">
+          <label
+            htmlFor="email"
+            className="text-sm font-semibold text-foreground"
+          >
             Email
           </label>
           <input

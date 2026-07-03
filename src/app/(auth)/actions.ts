@@ -69,9 +69,7 @@ export async function resetPassword(formData: FormData): Promise<void> {
   });
 
   if (error) {
-    redirect(
-      `/forgot-password?error=${encodeURIComponent(error.message)}`,
-    );
+    redirect(`/forgot-password?error=${encodeURIComponent(error.message)}`);
   }
 
   redirect(`/forgot-password?sent=1&email=${encodeURIComponent(email)}`);

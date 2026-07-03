@@ -23,13 +23,19 @@ export async function POST(request: NextRequest) {
   try {
     body = (await request.json()) as CheckoutBody;
   } catch {
-    return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
+    return NextResponse.json(
+      { error: "Invalid request body." },
+      { status: 400 },
+    );
   }
 
   const { lookupKey } = body;
 
   if (typeof lookupKey !== "string" || !ALLOWED_LOOKUP_KEYS.has(lookupKey)) {
-    return NextResponse.json({ error: "Invalid plan selection." }, { status: 400 });
+    return NextResponse.json(
+      { error: "Invalid plan selection." },
+      { status: 400 },
+    );
   }
 
   // 2. Require an authenticated Supabase user
@@ -40,7 +46,10 @@ export async function POST(request: NextRequest) {
 
   if (!user) {
     return NextResponse.json(
-      { error: "Authentication required.", redirectTo: "/sign-in?redirect=/pricing" },
+      {
+        error: "Authentication required.",
+        redirectTo: "/sign-in?redirect=/pricing",
+      },
       { status: 401 },
     );
   }

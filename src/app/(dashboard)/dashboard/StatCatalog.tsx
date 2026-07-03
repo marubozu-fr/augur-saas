@@ -42,9 +42,7 @@ export async function StatCatalog({ instrument }: StatCatalogProps) {
           Could not load stats
         </h2>
         <p className="text-sm text-muted-foreground max-w-[26rem]">{message}</p>
-        <p className="text-xs text-subtle">
-          Refresh the page to try again.
-        </p>
+        <p className="text-xs text-subtle">Refresh the page to try again.</p>
       </div>
     );
   }

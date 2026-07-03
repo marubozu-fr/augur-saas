@@ -37,7 +37,8 @@ const PLANS: Plan[] = [
   {
     id: "starter",
     name: "Starter",
-    tagline: "For the discretionary trader testing Augur on a single instrument.",
+    tagline:
+      "For the discretionary trader testing Augur on a single instrument.",
     monthlyLookupKey: "starter_monthly",
     annualLookupKey: "starter_annual",
     monthlyPrice: "€29",
@@ -56,7 +57,8 @@ const PLANS: Plan[] = [
   {
     id: "pro",
     name: "Pro",
-    tagline: "For the active trader who wants every slice and finer conditioning.",
+    tagline:
+      "For the active trader who wants every slice and finer conditioning.",
     monthlyLookupKey: "pro_monthly",
     annualLookupKey: "pro_annual",
     monthlyPrice: "€79",
@@ -134,8 +136,7 @@ function SubscribeButton({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const sizeClass =
-    size === "lg" ? "h-12 px-6 text-base" : "h-8 px-3 text-xs";
+  const sizeClass = size === "lg" ? "h-12 px-6 text-base" : "h-8 px-3 text-xs";
   const blockClass = block ? "w-full" : "";
 
   const variantClass =
@@ -206,9 +207,7 @@ function SubscribeButton({
       >
         {loading ? "Redirecting…" : plan.cta}
       </button>
-      {error && (
-        <p className="text-xs text-down text-center">{error}</p>
-      )}
+      {error && <p className="text-xs text-down text-center">{error}</p>}
     </div>
   );
 }
@@ -489,7 +488,10 @@ export function PricingSection() {
                   </th>
                 </tr>
                 <tr>
-                  <th scope="row" className="text-left font-medium text-foreground px-5 py-3 border-b border-border whitespace-nowrap">
+                  <th
+                    scope="row"
+                    className="text-left font-medium text-foreground px-5 py-3 border-b border-border whitespace-nowrap"
+                  >
                     Tier 1 stats
                   </th>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
@@ -506,7 +508,10 @@ export function PricingSection() {
                   </td>
                 </tr>
                 <tr>
-                  <th scope="row" className="text-left font-medium text-foreground px-5 py-3 border-b border-border whitespace-nowrap">
+                  <th
+                    scope="row"
+                    className="text-left font-medium text-foreground px-5 py-3 border-b border-border whitespace-nowrap"
+                  >
                     Tier 2 stats
                   </th>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
@@ -523,7 +528,10 @@ export function PricingSection() {
                   </td>
                 </tr>
                 <tr>
-                  <th scope="row" className="text-left font-medium text-foreground px-5 py-3 border-b border-border whitespace-nowrap">
+                  <th
+                    scope="row"
+                    className="text-left font-medium text-foreground px-5 py-3 border-b border-border whitespace-nowrap"
+                  >
                     Tier 3 stats
                   </th>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
@@ -540,7 +548,10 @@ export function PricingSection() {
                   </td>
                 </tr>
                 <tr>
-                  <th scope="row" className="text-left font-medium text-foreground px-5 py-3 border-b border-border whitespace-nowrap">
+                  <th
+                    scope="row"
+                    className="text-left font-medium text-foreground px-5 py-3 border-b border-border whitespace-nowrap"
+                  >
                     Stat families included
                   </th>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
@@ -567,7 +578,10 @@ export function PricingSection() {
                   </th>
                 </tr>
                 <tr>
-                  <th scope="row" className="text-left font-medium text-foreground px-5 py-3 border-b border-border whitespace-nowrap">
+                  <th
+                    scope="row"
+                    className="text-left font-medium text-foreground px-5 py-3 border-b border-border whitespace-nowrap"
+                  >
                     Historical depth
                   </th>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
@@ -584,7 +598,10 @@ export function PricingSection() {
                   </td>
                 </tr>
                 <tr>
-                  <th scope="row" className="text-left font-medium text-foreground px-5 py-3 border-b border-border whitespace-nowrap">
+                  <th
+                    scope="row"
+                    className="text-left font-medium text-foreground px-5 py-3 border-b border-border whitespace-nowrap"
+                  >
                     Refresh frequency
                   </th>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
@@ -601,7 +618,10 @@ export function PricingSection() {
                   </td>
                 </tr>
                 <tr>
-                  <th scope="row" className="text-left font-medium text-foreground px-5 py-3 border-b border-border whitespace-nowrap">
+                  <th
+                    scope="row"
+                    className="text-left font-medium text-foreground px-5 py-3 border-b border-border whitespace-nowrap"
+                  >
                     Conditional slices
                   </th>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
@@ -618,7 +638,10 @@ export function PricingSection() {
                   </td>
                 </tr>
                 <tr>
-                  <th scope="row" className="text-left font-medium text-foreground px-5 py-3 border-b border-border whitespace-nowrap">
+                  <th
+                    scope="row"
+                    className="text-left font-medium text-foreground px-5 py-3 border-b border-border whitespace-nowrap"
+                  >
                     CSV export
                   </th>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
@@ -635,7 +658,10 @@ export function PricingSection() {
                   </td>
                 </tr>
                 <tr>
-                  <th scope="row" className="text-left font-medium text-foreground px-5 py-3 border-b border-border whitespace-nowrap">
+                  <th
+                    scope="row"
+                    className="text-left font-medium text-foreground px-5 py-3 border-b border-border whitespace-nowrap"
+                  >
                     REST API access
                   </th>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
@@ -652,7 +678,10 @@ export function PricingSection() {
                   </td>
                 </tr>
                 <tr>
-                  <th scope="row" className="text-left font-medium text-foreground px-5 py-3 border-b border-border whitespace-nowrap">
+                  <th
+                    scope="row"
+                    className="text-left font-medium text-foreground px-5 py-3 border-b border-border whitespace-nowrap"
+                  >
                     API rate limit
                   </th>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
@@ -679,7 +708,10 @@ export function PricingSection() {
                   </th>
                 </tr>
                 <tr>
-                  <th scope="row" className="text-left font-medium text-foreground px-5 py-3 border-b border-border whitespace-nowrap">
+                  <th
+                    scope="row"
+                    className="text-left font-medium text-foreground px-5 py-3 border-b border-border whitespace-nowrap"
+                  >
                     Seats included
                   </th>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
@@ -696,7 +728,10 @@ export function PricingSection() {
                   </td>
                 </tr>
                 <tr>
-                  <th scope="row" className="text-left font-medium text-foreground px-5 py-3 border-b border-border whitespace-nowrap">
+                  <th
+                    scope="row"
+                    className="text-left font-medium text-foreground px-5 py-3 border-b border-border whitespace-nowrap"
+                  >
                     Support level
                   </th>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
@@ -713,7 +748,10 @@ export function PricingSection() {
                   </td>
                 </tr>
                 <tr>
-                  <th scope="row" className="text-left font-medium text-foreground px-5 py-3 border-b border-border whitespace-nowrap">
+                  <th
+                    scope="row"
+                    className="text-left font-medium text-foreground px-5 py-3 border-b border-border whitespace-nowrap"
+                  >
                     Uptime SLA
                   </th>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">

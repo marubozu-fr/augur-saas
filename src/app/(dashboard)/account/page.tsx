@@ -34,7 +34,11 @@ export default async function AccountPage() {
   try {
     subscription = await getActiveSubscription();
   } catch (err) {
-    console.error("[AccountPage] getActiveSubscription failed for user", user.id, err);
+    console.error(
+      "[AccountPage] getActiveSubscription failed for user",
+      user.id,
+      err,
+    );
     // Fail open — keep the danger zone hidden if we can't confirm a subscription.
   }
 

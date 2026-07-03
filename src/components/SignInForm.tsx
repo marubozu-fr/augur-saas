@@ -21,14 +21,15 @@ export function SignInForm({ error }: SignInFormProps) {
 
   return (
     <>
-      {error && (
-        <p className="mb-4 text-sm text-down text-center">{error}</p>
-      )}
+      {error && <p className="mb-4 text-sm text-down text-center">{error}</p>}
 
       {/* Email/password form */}
       <form action={handleSubmit} className="grid gap-5">
         <div className="grid gap-2">
-          <label htmlFor="email" className="text-sm font-semibold text-foreground">
+          <label
+            htmlFor="email"
+            className="text-sm font-semibold text-foreground"
+          >
             Email
           </label>
           <input
@@ -45,7 +46,10 @@ export function SignInForm({ error }: SignInFormProps) {
 
         <div className="grid gap-2">
           <div className="flex items-baseline justify-between gap-3">
-            <label htmlFor="password" className="text-sm font-semibold text-foreground">
+            <label
+              htmlFor="password"
+              className="text-sm font-semibold text-foreground"
+            >
               Password
             </label>
             <Link
@@ -85,11 +89,7 @@ export function SignInForm({ error }: SignInFormProps) {
           disabled={isPending}
           className="inline-flex items-center justify-center w-full h-11 rounded-md bg-brand text-on-brand text-sm font-semibold hover:bg-brand-hover active:bg-brand-hover transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          {isPending ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            "Sign in"
-          )}
+          {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign in"}
         </button>
       </form>
     </>

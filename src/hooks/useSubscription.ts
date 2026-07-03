@@ -2,10 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import {
-  parseTier,
-  selectActiveSubscription,
-} from "@/lib/subscription";
+import { parseTier, selectActiveSubscription } from "@/lib/subscription";
 import type { Subscription } from "@/lib/subscription";
 
 interface UseSubscriptionResult {

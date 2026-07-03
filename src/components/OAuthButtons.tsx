@@ -6,8 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 // Supabase signInWithOAuth must run client-side — it triggers a browser redirect.
 // The auth callback at /auth/callback?next=/dashboard exchanges the code for a
 // session and redirects to the dashboard.
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
 const REDIRECT_URL = `${SITE_URL}/auth/callback?next=/dashboard`;
 

@@ -5,10 +5,7 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
-import {
-  parseTier,
-  selectActiveSubscription,
-} from "@/lib/subscription";
+import { parseTier, selectActiveSubscription } from "@/lib/subscription";
 import type { Subscription } from "@/lib/subscription";
 
 /**

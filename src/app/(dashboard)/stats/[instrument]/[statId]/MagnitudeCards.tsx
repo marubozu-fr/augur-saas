@@ -38,7 +38,8 @@ export function MagnitudeCards({ rows, resolver }: MagnitudeCardsProps) {
           >
             <div className="flex items-center justify-between gap-3">
               <span className="text-sm font-semibold text-muted-foreground">
-                {resolver.condition(row.condition)} · {resolver.outcome(row.outcome)}
+                {resolver.condition(row.condition)} ·{" "}
+                {resolver.outcome(row.outcome)}
               </span>
               {BadgeIcon && (
                 <span
@@ -63,7 +64,9 @@ export function MagnitudeCards({ rows, resolver }: MagnitudeCardsProps) {
             <div className="flex items-center gap-3 text-xs text-subtle pt-3 border-t border-border">
               <span>
                 N ={" "}
-                <span className="font-mono tabular-nums">{fmtNum(row.count)}</span>
+                <span className="font-mono tabular-nums">
+                  {fmtNum(row.count)}
+                </span>
               </span>
               {hasBaseline ? (
                 <span>
