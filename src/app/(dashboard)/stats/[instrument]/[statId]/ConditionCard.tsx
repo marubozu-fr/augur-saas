@@ -62,13 +62,13 @@ export function ConditionCard({
     downRow = rowB;
   }
 
-  // Condition-identity colour for colour-coded families. opening_candle encodes
-  // the candle colour in its condition code (green_open / red_open), so read it
-  // directly instead of inferring from the first row's edge — the latter only
+  // Condition-identity colour for colour-coded families. opening_candle_continuation
+  // encodes the candle colour in its condition code (green_open / red_open), so read
+  // it directly instead of inferring from the first row's edge — the latter only
   // worked while the API happened to return outcomes in alphabetical order.
   // null for families whose conditions aren't colour-coded.
   const conditionIdentity: IconColor | null =
-    statName === "opening_candle"
+    statName === "opening_candle_continuation"
       ? conditionCode.startsWith("green")
         ? "up"
         : "down"

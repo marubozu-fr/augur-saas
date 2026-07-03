@@ -29,7 +29,7 @@ export function renderStatIcon(
   props: StatIconProps,
 ): ReactElement | null {
   switch (statName) {
-    case "opening_candle":
+    case "opening_candle_continuation":
       return <CandleIcon {...props} />;
     case "engulfing_candles":
       return <EngulfingIcon {...props} />;
