@@ -52,6 +52,9 @@ export type StatSliceResult =
       timeframe: string;
       period: PeriodPreset;
       isCustomRange: boolean;
+      // Stat family identifier from the Augur API (raw.stat_name) — resolves
+      // the bespoke glyph for the visual stat display (see stat-icon-map.tsx).
+      statName: string;
     }
   | { kind: "locked"; title: string; definition: string; statTier: number }
   | { kind: "not-found" }
@@ -183,5 +186,6 @@ export async function loadStatSlice({
     timeframe,
     period,
     isCustomRange,
+    statName: result.statName,
   };
 }

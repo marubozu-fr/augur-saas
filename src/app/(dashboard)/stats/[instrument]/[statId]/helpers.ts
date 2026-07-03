@@ -29,6 +29,15 @@ export function fmtPct(n: number): string {
   return (n * 100).toFixed(3) + "%";
 }
 
+/**
+ * 1-decimal percentage formatter for the visual stat display (diverging bars,
+ * default split bar, advanced-panel caption). The exact-precision `fmtPct`
+ * above is reserved for the Advanced probability table.
+ */
+export function fmtPct1(n: number): string {
+  return (n * 100).toFixed(1) + "%";
+}
+
 export function fmtEdgePts(edge: number): string {
   const pts = edge * 100;
   const sign = pts >= 0 ? "+" : "";

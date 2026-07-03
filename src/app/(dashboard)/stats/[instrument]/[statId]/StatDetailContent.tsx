@@ -9,9 +9,11 @@ import { makeLabelResolver } from "./helpers";
 import { LockedState } from "./LockedState";
 import { MagnitudeCards } from "./MagnitudeCards";
 import { ProbabilityTable } from "./ProbabilityTable";
+import { ConditionCard } from "./ConditionCard";
 import { SliceAccordion } from "./SliceAccordion";
 import { MetadataStrip } from "@/components/stat-detail/MetadataStrip";
 import type { StatSliceResult } from "./load-stat-slice";
+import type { StatResultRow } from "@/types/stats";
 
 interface StatDetailContentProps {
   result: StatSliceResult;
@@ -75,10 +77,26 @@ export function StatDetailContent({ result }: StatDetailContentProps) {
         timeframe,
         period,
         isCustomRange,
+        statName,
       } = result;
 
       // Build the label resolver once; pass it down to all rendering components.
       const resolver = makeLabelResolver(labels);
+
+      // Group probability rows by condition to decide whether the new visual
+      // display (one ConditionCard per condition) applies: it requires EVERY
+      // condition to be a genuine two-outcome split. Any condition with 1 or
+      // 3+ outcomes falls back to the existing ProbabilityTable, unchanged.
+      const rowsByCondition = new Map<string, StatResultRow[]>();
+      for (const row of probRows) {
+        const existing = rowsByCondition.get(row.condition);
+        if (existing) existing.push(row);
+        else rowsByCondition.set(row.condition, [row]);
+      }
+      const conditionGroups = Array.from(rowsByCondition.entries());
+      const isVisualShape =
+        conditionGroups.length > 0 &&
+        conditionGroups.every(([, rows]) => rows.length === 2);
 
       return (
         <>
@@ -114,12 +132,31 @@ export function StatDetailContent({ result }: StatDetailContentProps) {
                 </span>
               </h2>
 
-              <div className="border border-border rounded-xl bg-card overflow-x-auto">
-                <ProbabilityTable
-                  rows={probRows.map((row) => ({ row }))}
-                  resolver={resolver}
-                />
-              </div>
+              {isVisualShape ? (
+                <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-5">
+                  {conditionGroups.map(([conditionCode, rows]) => (
+                    <ConditionCard
+                      key={conditionCode}
+                      conditionCode={conditionCode}
+                      rows={rows}
+                      resolver={resolver}
+                      statName={statName}
+                      timeframe={timeframe}
+                      dataRange={dataRange}
+                      totalSamples={totalSamples}
+                      isCustomRange={isCustomRange}
+                      period={period}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="border border-border rounded-xl bg-card overflow-x-auto">
+                  <ProbabilityTable
+                    rows={probRows.map((row) => ({ row }))}
+                    resolver={resolver}
+                  />
+                </div>
+              )}
 
               <p className="mt-5 text-xs text-subtle leading-normal">
                 Probabilities are observed frequencies over the selected period.
