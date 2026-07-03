@@ -132,9 +132,6 @@ export function StatDetailContent({ result }: StatDetailContentProps) {
             <>
               <h2 className="flex items-center gap-3 text-lg font-bold tracking-tight text-foreground mt-6 mb-4">
                 Pattern frequency
-                <span className="text-xs font-medium text-subtle ml-auto">
-                  probability of each outcome · {instrument} {timeframe}
-                </span>
               </h2>
 
               {isVisualShape ? (

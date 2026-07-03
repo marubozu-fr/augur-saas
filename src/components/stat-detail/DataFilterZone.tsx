@@ -4,7 +4,6 @@
 
 "use client";
 
-import { Info } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 interface DataFilterZoneProps {
@@ -50,11 +49,6 @@ export function DataFilterZone({
           ))}
         </ToggleGroup>
       </div>
-
-      <span className="md:ml-auto inline-flex items-center gap-2 text-xs text-subtle">
-        <Info size={14} aria-hidden="true" />
-        More filters appear here per stat family
-      </span>
     </section>
   );
 }
