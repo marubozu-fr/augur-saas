@@ -1,4 +1,4 @@
-// Breadcrumb — Dashboard / Catalog / {stat title}.
+// Breadcrumb — Dashboard / {stat title}.
 // The title now comes from the stat catalog (already fetched once in
 // page.tsx), so this is a plain presentational component: no fetch, no
 // Suspense boundary needed anymore.
@@ -10,7 +10,7 @@ interface StatBreadcrumbProps {
   // the catalog doesn't know this family).
   title: string;
   // Canonical uppercase instrument code (e.g. "NQ"). Used to point the
-  // "Dashboard" / "Catalog" links back to the instrument-specific catalog.
+  // "Dashboard" link back to the instrument-specific catalog.
   instrument: string;
 }
 
@@ -31,15 +31,6 @@ export function StatBreadcrumb({ title, instrument }: StatBreadcrumbProps) {
         className="text-muted-foreground hover:text-foreground transition-colors"
       >
         Dashboard
-      </Link>
-      <span aria-hidden="true" className="text-subtle">
-        /
-      </span>
-      <Link
-        href={dashboardHref}
-        className="text-muted-foreground hover:text-foreground transition-colors"
-      >
-        Catalog
       </Link>
       <span aria-hidden="true" className="text-subtle">
         /
