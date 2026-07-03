@@ -1,0 +1,1611 @@
+<!DOCTYPE html>
+<!--
+  Augur SaaS — Visual-first stat display system (GitHub issue #95)
+
+  An evolution of stat-detail.html / stat-detail-v2.html. Where v2 leads with a
+  probability TABLE, this system leads with an at-a-glance VISUAL for each
+  condition: a custom glyph (candle-based, per stat family) paired with a
+  diverging up/down bar chart. The precise table is demoted to a discrete,
+  collapsible "Advanced" panel beneath each visual — so the page reads instantly
+  but stays exact when a trader wants the numbers.
+
+  Reused verbatim from the existing stat-detail pages: the sidebar app-shell,
+  breadcrumb, page header, .meta-strip, .stat-table / .edge-pill / .table-wrap,
+  footnote voice, .mockup-divider / .mockup-note stacking, and .narrow-frame.
+  Every colour / spacing / radius / font references a token from styles.css — no
+  new token values are introduced.
+
+  DATA (NQ · 15min · YTD — per issue #95): total sessions N = 4,332,
+  per-condition N = 4,331, range 2008-12-11 → 2026-05-05. Each stat is framed as
+  a genuine 2-outcome split summing to 100% so the diverging bars read instantly.
+  The invented split percentages are internally consistent with the Advanced
+  table's probability / baseline / edge for the same card.
+
+  Component vocabulary introduced here (for frontend-dev):
+    • .glyph          — custom inline-SVG candle icon set (single / engulfing /
+                        inside-bar), coherent stroke language, timeframe baked in.
+    • .dbars          — diverging bars: green outcome grows UP, red grows DOWN
+                        from a shared zero axis; % labels are real text.
+    • .splitbar       — DEFAULT fallback for stats with no custom glyph:
+                        colored dot + hero % + horizontal green/red split bar.
+    • .adv (details)  — discrete "Advanced" toggle → metadata strip + full table.
+
+  Stacked, labelled states for review (like the other mockups):
+    1. Visual display row (default)  — 4 cards side by side, Advanced collapsed.
+    2. Advanced toggle — expanded    — one card with the panel OPEN.
+    3. Glyph specimen                — the icon set shown in isolation.
+    4. Mobile ≤768px                 — narrow-frame preview, cards stacked.
+
+  Dark theme is canonical; the light theme comes "for free" because every colour
+  is a token — flip data-theme="light" on <html> to preview.
+-->
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Augur — Visual Stat Display</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      /* ====================================================================
+         App shell — reused verbatim from dashboard.html / stat-detail-v2.html.
+         shadcn/ui: custom layout, aside (desktop) / Sheet (mobile).
+         ==================================================================== */
+      .app {
+        display: grid;
+        grid-template-columns: 248px 1fr;
+        min-height: 100vh;
+      }
+      .sidebar {
+        position: sticky;
+        top: 0;
+        align-self: start;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+        padding: var(--space-5) var(--space-4);
+        background-color: var(--color-bg-subtle);
+        border-right: 1px solid var(--color-border);
+      }
+      .sidebar__brand {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-3);
+        font-weight: 700;
+        font-size: var(--text-lg);
+        letter-spacing: var(--tracking-tight);
+        padding: var(--space-2) var(--space-2) var(--space-5);
+      }
+      .sidebar__brand-mark {
+        width: 2rem;
+        height: 2rem;
+        border-radius: var(--radius-md);
+        background: linear-gradient(135deg, var(--color-accent), #06b6d4);
+        display: grid;
+        place-items: center;
+        color: var(--color-on-accent);
+        box-shadow: var(--shadow-sm);
+      }
+      .sidebar__section-label {
+        font-size: var(--text-xs);
+        font-weight: 600;
+        letter-spacing: var(--tracking-wide);
+        text-transform: uppercase;
+        color: var(--color-text-subtle);
+        padding: var(--space-4) var(--space-2) var(--space-2);
+      }
+      .nav-item {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        padding: var(--space-2) var(--space-3);
+        border-radius: var(--radius-md);
+        font-size: var(--text-sm);
+        font-weight: 500;
+        color: var(--color-text-muted);
+        cursor: pointer;
+        transition: background-color var(--transition), color var(--transition);
+      }
+      .nav-item svg {
+        flex: none;
+        color: var(--color-text-subtle);
+        transition: color var(--transition);
+      }
+      .nav-item:hover {
+        background-color: var(--color-surface);
+        color: var(--color-text);
+      }
+      .nav-item:hover svg {
+        color: var(--color-text-muted);
+      }
+      .nav-item--active {
+        background-color: var(--color-accent-soft);
+        color: var(--color-accent);
+      }
+      .nav-item--active svg {
+        color: var(--color-accent);
+      }
+      .nav-item--danger:hover {
+        color: var(--color-down);
+      }
+      .nav-item--danger:hover svg {
+        color: var(--color-down);
+      }
+      .sidebar__spacer {
+        flex: 1;
+      }
+      .tier-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
+        padding: var(--space-2) var(--space-3);
+        border-radius: var(--radius-full);
+        border: 1px solid var(--color-border);
+        background-color: var(--color-surface);
+        font-size: var(--text-xs);
+        font-weight: 600;
+      }
+      .tier-pill--sidebar {
+        display: flex;
+        width: 100%;
+        justify-content: flex-start;
+        border-radius: var(--radius-lg);
+        padding: var(--space-3);
+      }
+      .tier-pill--sidebar .tier-pill__plan {
+        margin-left: auto;
+      }
+      .tier-pill__dot {
+        width: 0.5rem;
+        height: 0.5rem;
+        border-radius: var(--radius-full);
+        background-color: var(--color-accent);
+        box-shadow: 0 0 0 3px var(--color-accent-soft);
+      }
+      .tier-pill__label {
+        color: var(--color-text-muted);
+      }
+      .tier-pill__plan {
+        color: var(--color-text);
+      }
+      .sidebar__footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-3);
+        padding: var(--space-2) var(--space-2) 0;
+      }
+      .sidebar__footer-label {
+        font-size: var(--text-xs);
+        font-weight: 600;
+        letter-spacing: var(--tracking-wide);
+        text-transform: uppercase;
+        color: var(--color-text-subtle);
+      }
+      .content {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+      }
+      .mobile-nav {
+        display: none;
+      }
+      .icon-btn {
+        display: inline-grid;
+        place-items: center;
+        width: 2.25rem;
+        height: 2.25rem;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--color-border);
+        background-color: var(--color-surface);
+        color: var(--color-text-muted);
+        cursor: pointer;
+        transition: color var(--transition), border-color var(--transition);
+      }
+      .icon-btn:hover {
+        color: var(--color-text);
+        border-color: var(--color-border-strong);
+      }
+      .main {
+        padding: var(--space-6);
+        width: 100%;
+      }
+
+      /* ---- Breadcrumb + header (carried from stat-detail-v2) ------------- */
+      .breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        font-size: var(--text-sm);
+        color: var(--color-text-subtle);
+        margin-bottom: var(--space-5);
+      }
+      .breadcrumb a {
+        color: var(--color-text-muted);
+        transition: color var(--transition);
+      }
+      .breadcrumb a:hover {
+        color: var(--color-text);
+      }
+      .breadcrumb__current {
+        color: var(--color-text);
+        font-weight: 600;
+      }
+      .stat-header {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--space-5);
+        flex-wrap: wrap;
+        margin-bottom: var(--space-5);
+      }
+      .stat-header__main {
+        max-width: 720px;
+      }
+      .stat-header__titlerow {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        flex-wrap: wrap;
+      }
+      .stat-header h1 {
+        font-size: var(--text-2xl);
+      }
+      .stat-header__def {
+        margin-top: var(--space-3);
+        font-size: var(--text-sm);
+        line-height: var(--leading-normal);
+        color: var(--color-text-muted);
+      }
+
+      /* ====================================================================
+         NEW · VISUAL DISPLAY GRID — one card per condition, side by side on
+         desktop, stacked on mobile.
+         shadcn/ui: responsive grid of <Card>; each Card = glyph + chart.
+         ==================================================================== */
+      .vgrid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: var(--space-5);
+      }
+
+      .vcard {
+        display: flex;
+        flex-direction: column;
+        background-color: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-xl);
+        padding: var(--space-5);
+        transition: border-color var(--transition), box-shadow var(--transition);
+      }
+      .vcard:hover {
+        border-color: var(--color-border-strong);
+        box-shadow: var(--shadow-md);
+      }
+      .vcard__title {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--space-3);
+        margin-bottom: var(--space-4);
+      }
+      .vcard__title h3 {
+        font-size: var(--text-base);
+        font-weight: 700;
+      }
+      .vcard__sub {
+        margin-top: 2px;
+        font-size: var(--text-xs);
+        color: var(--color-text-subtle);
+      }
+      .vcard__title .badge {
+        margin-left: auto;
+        flex: none;
+      }
+
+      /* Card body: glyph (left) + chart (right). */
+      .vcard__body {
+        display: flex;
+        align-items: center;
+        gap: var(--space-5);
+      }
+      .vcard__viz {
+        flex: 1;
+        min-width: 0;
+      }
+      .vcard__caption {
+        margin-top: var(--space-4);
+        font-size: var(--text-xs);
+        color: var(--color-text-subtle);
+        line-height: var(--leading-snug);
+      }
+      .vcard__caption strong {
+        font-family: var(--font-mono);
+        font-variant-numeric: tabular-nums;
+      }
+      /* The caption now lives as the first row of the Advanced panel, which
+         already supplies its own top padding — drop the caption's own margin. */
+      .adv__panel > .vcard__caption:first-child {
+        margin-top: 0;
+        margin-bottom: var(--space-4);
+      }
+
+      /* ---- Custom candle glyph set. shadcn/ui: inline SVG (no component). ---
+         All three share one stroke language: 2.5px round-cap wicks, rounded
+         bodies, a mono timeframe baked into the "signal" candle body. Bullish
+         elements use --color-up, bearish use --color-down. */
+      .glyph {
+        flex: none;
+        width: 64px;
+        height: 72px;
+      }
+      .glyph line {
+        stroke-width: 2.5;
+        stroke-linecap: round;
+      }
+      .glyph rect {
+        stroke-width: 2.5;
+      }
+      .glyph .g-up {
+        stroke: var(--color-up);
+      }
+      .glyph rect.g-up {
+        fill: var(--color-up);
+      }
+      .glyph .g-down {
+        stroke: var(--color-down);
+      }
+      .glyph rect.g-down {
+        fill: var(--color-down);
+      }
+      .glyph .tf {
+        font-family: var(--font-mono);
+        font-weight: 700;
+        text-anchor: middle;
+        dominant-baseline: middle;
+      }
+      /* Timeframe label sits ON the solid candle body — dark ink for contrast
+         on the bright fill (same treatment as .splitbar__seg). */
+      .glyph .tf-up,
+      .glyph .tf-down {
+        fill: rgba(3, 8, 6, 0.82);
+      }
+
+      /* ---- Diverging bars. shadcn/ui: custom (Recharts-style) chart. -------
+         Two outcomes summing to 100%: green outcome grows UP, red outcome grows
+         DOWN from a shared dashed zero axis. Bar height ∝ probability; the exact
+         % is real text at each bar's tip (never baked into an image). */
+      .dbars__plot {
+        display: flex;
+        flex-direction: column;
+      }
+      .dbars__half {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        height: 84px;
+      }
+      .dbars__half--up {
+        justify-content: flex-end;
+      }
+      .dbars__half--down {
+        justify-content: flex-start;
+      }
+      .dbars__pct {
+        font-size: var(--text-lg);
+        font-weight: 700;
+        line-height: 1;
+      }
+      .dbars__half--up .dbars__pct {
+        margin-bottom: var(--space-2);
+      }
+      .dbars__half--down .dbars__pct {
+        margin-top: var(--space-2);
+      }
+      .dbars__bar {
+        width: 64px;
+        max-width: 72%;
+      }
+      .dbars__bar--up {
+        background-color: var(--color-up);
+        border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+      }
+      .dbars__bar--down {
+        background-color: var(--color-down);
+        border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+      }
+      .dbars__axis {
+        height: 0;
+        border-top: 1px dashed var(--color-border-strong);
+      }
+      .dbars__legend {
+        display: flex;
+        justify-content: center;
+        gap: var(--space-4);
+        margin-top: var(--space-3);
+        font-size: var(--text-xs);
+        color: var(--color-text-muted);
+      }
+      .dbars__leg {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
+      }
+      .sw {
+        width: 10px;
+        height: 10px;
+        border-radius: 2px;
+        flex: none;
+      }
+      .sw--up {
+        background-color: var(--color-up);
+      }
+      .sw--down {
+        background-color: var(--color-down);
+      }
+
+      /* ---- DEFAULT template (no custom glyph): dot + hero % + split bar. ---
+         Reusable fallback for any stat family without a bespoke icon. */
+      .vcard__hero {
+        display: flex;
+        align-items: baseline;
+        gap: var(--space-3);
+        margin: var(--space-2) 0 var(--space-4);
+      }
+      .vdot {
+        width: 0.7rem;
+        height: 0.7rem;
+        border-radius: var(--radius-full);
+        align-self: center;
+        flex: none;
+      }
+      .vdot--up {
+        background-color: var(--color-up);
+        box-shadow: 0 0 0 4px var(--color-up-soft);
+      }
+      .vhero__num {
+        font-family: var(--font-mono);
+        font-variant-numeric: tabular-nums;
+        font-size: var(--text-4xl);
+        font-weight: 700;
+        line-height: 1;
+      }
+      .vhero__pct {
+        font-size: var(--text-2xl);
+        font-weight: 700;
+      }
+      .vhero__label {
+        font-size: var(--text-sm);
+        color: var(--color-text-muted);
+      }
+      .splitbar {
+        display: flex;
+        height: 2.5rem;
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        border: 1px solid var(--color-border);
+      }
+      .splitbar__seg {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-mono);
+        font-variant-numeric: tabular-nums;
+        font-size: var(--text-sm);
+        font-weight: 700;
+        color: rgba(3, 8, 6, 0.82); /* dark ink for contrast on bright bars */
+        white-space: nowrap;
+      }
+      .splitbar__seg--up {
+        background-color: var(--color-up);
+      }
+      .splitbar__seg--down {
+        background-color: var(--color-down);
+      }
+      .splitbar__legend {
+        display: flex;
+        justify-content: space-between;
+        margin-top: var(--space-2);
+        font-size: var(--text-xs);
+        color: var(--color-text-muted);
+      }
+      .splitbar__legend .dbars__leg {
+        gap: var(--space-2);
+      }
+
+      /* ---- Discrete "Advanced" toggle. shadcn/ui: Collapsible + Button(ghost)
+         wrapping the metadata strip + the exact <Table>. Native <details> so
+         the mockup toggles with no JS. */
+      .adv {
+        margin-top: var(--space-4);
+        padding-top: var(--space-4);
+        border-top: 1px solid var(--color-border);
+      }
+      .adv > summary {
+        list-style: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
+        font-size: var(--text-xs);
+        font-weight: 600;
+        letter-spacing: var(--tracking-wide);
+        text-transform: uppercase;
+        color: var(--color-text-muted);
+        transition: color var(--transition);
+      }
+      .adv > summary::-webkit-details-marker {
+        display: none;
+      }
+      .adv > summary:hover {
+        color: var(--color-text);
+      }
+      .adv > summary .chev {
+        color: var(--color-text-subtle);
+        transition: transform var(--transition), color var(--transition);
+      }
+      .adv[open] > summary .chev {
+        transform: rotate(90deg);
+        color: var(--color-accent);
+      }
+      .adv__panel {
+        padding-top: var(--space-4);
+      }
+
+      /* ---- Single context line under the card row. ---------------------- */
+      .context-line {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-2) var(--space-3);
+        margin-top: var(--space-5);
+        padding: var(--space-3) var(--space-4);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-full);
+        background-color: var(--color-bg-subtle);
+        font-size: var(--text-sm);
+        color: var(--color-text-muted);
+        width: fit-content;
+        margin-inline: auto;
+        max-width: 100%;
+      }
+      .context-line .mono {
+        color: var(--color-text);
+        font-weight: 600;
+      }
+      .context-line .sep {
+        color: var(--color-text-subtle);
+      }
+
+      /* ---- Metadata strip (carried from stat-detail-v2). ---------------- */
+      .meta-strip {
+        display: flex;
+        gap: var(--space-7);
+        flex-wrap: wrap;
+        padding: var(--space-4) var(--space-5);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-lg);
+        background-color: var(--color-surface);
+        margin-bottom: var(--space-5);
+      }
+      .meta-item__label {
+        font-size: var(--text-xs);
+        letter-spacing: var(--tracking-wide);
+        text-transform: uppercase;
+        color: var(--color-text-subtle);
+      }
+      .meta-item__value {
+        font-size: var(--text-sm);
+        font-weight: 600;
+        color: var(--color-text);
+        margin-top: 2px;
+      }
+
+      /* ---- Probability table (carried from stat-detail-v2). ------------- */
+      .table-wrap {
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-lg);
+        background-color: var(--color-surface);
+        overflow-x: auto;
+      }
+      table.stat-table {
+        width: 100%;
+        min-width: 560px;
+        border-collapse: collapse;
+        font-size: var(--text-sm);
+      }
+      .stat-table thead th {
+        text-align: left;
+        font-size: var(--text-xs);
+        font-weight: 600;
+        letter-spacing: var(--tracking-wide);
+        text-transform: uppercase;
+        color: var(--color-text-subtle);
+        padding: var(--space-3) var(--space-4);
+        border-bottom: 1px solid var(--color-border);
+        background-color: var(--color-bg-subtle);
+        white-space: nowrap;
+      }
+      .stat-table th.is-num,
+      .stat-table td.is-num {
+        text-align: right;
+      }
+      .stat-table tbody td {
+        padding: var(--space-3) var(--space-4);
+        border-bottom: 1px solid var(--color-border);
+        color: var(--color-text);
+        vertical-align: middle;
+      }
+      .stat-table tbody tr:last-child td {
+        border-bottom: none;
+      }
+      .stat-table tbody tr:hover td {
+        background-color: var(--color-surface-2);
+      }
+      .stat-table .cell-condition {
+        font-weight: 600;
+      }
+      .stat-table .cell-outcome {
+        color: var(--color-text-muted);
+      }
+      .cell-num {
+        font-family: var(--font-mono);
+        font-variant-numeric: tabular-nums;
+        letter-spacing: -0.01em;
+      }
+      .cell-prob {
+        font-weight: 700;
+      }
+      .cell-baseline {
+        color: var(--color-text-subtle);
+      }
+      .cell-n {
+        color: var(--color-text-muted);
+      }
+      .edge-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-1);
+        font-family: var(--font-mono);
+        font-variant-numeric: tabular-nums;
+        font-size: var(--text-xs);
+        font-weight: 600;
+        padding: 0.25rem var(--space-2);
+        border-radius: var(--radius-full);
+      }
+      .edge-pill--up {
+        background-color: var(--color-up-soft);
+        color: var(--color-up);
+      }
+      .edge-pill--down {
+        background-color: var(--color-down-soft);
+        color: var(--color-down);
+      }
+
+      .footnote {
+        margin-top: var(--space-4);
+        font-size: var(--text-xs);
+        color: var(--color-text-subtle);
+        line-height: var(--leading-normal);
+      }
+
+      /* ---- Glyph specimen strip (mockup documentation). ----------------- */
+      .specimen {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-5);
+      }
+      .specimen__item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--space-3);
+        padding: var(--space-5);
+        min-width: 150px;
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-lg);
+        background-color: var(--color-surface);
+      }
+      .specimen__label {
+        font-size: var(--text-xs);
+        font-weight: 600;
+        color: var(--color-text-muted);
+        text-align: center;
+      }
+      .specimen .glyph {
+        width: 80px;
+        height: 90px;
+      }
+
+      /* ---- Mockup scaffolding (carried from stat-detail-v2). ------------ */
+      .mockup-divider {
+        display: flex;
+        align-items: center;
+        gap: var(--space-4);
+        margin: var(--space-8) 0 var(--space-5);
+        font-size: var(--text-xs);
+        font-weight: 600;
+        letter-spacing: var(--tracking-wide);
+        text-transform: uppercase;
+        color: var(--color-text-subtle);
+      }
+      .mockup-divider::before,
+      .mockup-divider::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        border-top: 1px dashed var(--color-border-strong);
+      }
+      .mockup-note {
+        font-size: var(--text-xs);
+        color: var(--color-text-subtle);
+        margin: calc(-1 * var(--space-3)) 0 var(--space-4);
+        line-height: var(--leading-normal);
+      }
+
+      /* ---- Mobile narrow-frame preview (carried from stat-detail-v2). --- */
+      .narrow-frame {
+        width: 390px;
+        max-width: 100%;
+        margin-top: var(--space-2);
+        padding: var(--space-4);
+        border: 1px solid var(--color-border-strong);
+        border-radius: var(--radius-2xl);
+        background-color: var(--color-bg);
+        box-shadow: var(--shadow-lg);
+      }
+      .narrow-frame .vgrid {
+        grid-template-columns: 1fr;
+        gap: var(--space-4);
+      }
+      .narrow-frame .context-line {
+        font-size: var(--text-xs);
+      }
+
+      /* ====================================================================
+         Responsive
+         ==================================================================== */
+      /* Card grid stacks to a single column on phones; the glyph + chart stay
+         side by side inside each card (the glyph is small). */
+      @media (max-width: 768px) {
+        .vgrid {
+          grid-template-columns: 1fr;
+        }
+        .meta-strip {
+          flex-direction: column;
+          gap: var(--space-3);
+        }
+        .context-line {
+          border-radius: var(--radius-lg);
+        }
+      }
+
+      /* Sidebar → Sheet drawer (carried from stat-detail-v2). */
+      @media (max-width: 860px) {
+        .app {
+          grid-template-columns: 1fr;
+        }
+        .sidebar {
+          display: none;
+        }
+        .mobile-nav {
+          display: inline-grid;
+          position: sticky;
+          top: var(--space-4);
+          align-self: flex-start;
+          margin: var(--space-4) 0 0 var(--space-4);
+          z-index: 40;
+          box-shadow: var(--shadow-sm);
+        }
+      }
+      @media (max-width: 620px) {
+        .main {
+          padding: var(--space-5) var(--space-4);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <!-- ===================================================================
+           SIDEBAR — reused verbatim from the member app-shell.
+           shadcn/ui: aside (desktop) / Sheet (mobile), Button(ghost) rows,
+                      Badge (plan/tier), Toggle (theme).
+           ================================================================ -->
+      <aside class="sidebar">
+        <a class="sidebar__brand" href="landing.html" aria-label="Augur home">
+          <span class="sidebar__brand-mark" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M6 5h12L11 12l7 7H6" />
+            </svg>
+          </span>
+          Augur
+        </a>
+
+        <nav aria-label="Primary">
+          <a class="nav-item" href="dashboard.html">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true">
+              <rect x="3" y="3" width="7" height="9" rx="1" />
+              <rect x="14" y="3" width="7" height="5" rx="1" />
+              <rect x="14" y="12" width="7" height="9" rx="1" />
+              <rect x="3" y="16" width="7" height="5" rx="1" />
+            </svg>
+            Dashboard
+          </a>
+          <a class="nav-item" href="account.html">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 21a8 8 0 0 1 16 0" />
+            </svg>
+            Account
+          </a>
+        </nav>
+
+        <p class="sidebar__section-label">Catalog</p>
+        <nav aria-label="Stat categories">
+          <a class="nav-item nav-item--active" href="dashboard.html" aria-current="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 18V8M10 18V4M16 18v-6M22 18h-2M2 18h20" />
+            </svg>
+            Candle patterns
+          </a>
+          <a class="nav-item" href="dashboard.html">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 3v18h18" /><path d="M7 14l4-4 3 3 5-6" />
+            </svg>
+            Gaps &amp; opens
+          </a>
+          <a class="nav-item" href="dashboard.html">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true">
+              <rect x="3" y="4" width="18" height="16" rx="2" />
+              <path d="M3 9h18M8 4v16" />
+            </svg>
+            Seasonality
+          </a>
+        </nav>
+
+        <div class="sidebar__spacer"></div>
+
+        <span class="tier-pill tier-pill--sidebar" title="Your current plan">
+          <span class="tier-pill__dot" aria-hidden="true"></span>
+          <span class="tier-pill__label">Plan</span>
+          <span class="tier-pill__plan">Pro</span>
+        </span>
+
+        <nav aria-label="Session">
+          <a class="nav-item nav-item--danger" href="landing.html">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true">
+              <path d="M16 17l5-5-5-5M21 12H9M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            </svg>
+            Logout
+          </a>
+        </nav>
+
+        <div class="sidebar__footer">
+          <span class="sidebar__footer-label">Theme</span>
+          <button class="icon-btn" aria-label="Toggle dark / light theme">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
+            </svg>
+          </button>
+        </div>
+      </aside>
+
+      <!-- ===================================================================
+           CONTENT COLUMN
+           ================================================================ -->
+      <div class="content">
+        <button class="mobile-nav icon-btn" aria-label="Open navigation">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            aria-hidden="true">
+            <path d="M4 7h16M4 12h16M4 17h16" />
+          </svg>
+        </button>
+
+        <main class="main">
+          <!-- BREADCRUMB — shadcn/ui: Breadcrumb -->
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="dashboard.html">Dashboard</a>
+            <span aria-hidden="true">/</span>
+            <a href="dashboard.html">Candle patterns</a>
+            <span aria-hidden="true">/</span>
+            <span class="breadcrumb__current" aria-current="page">Visual display</span>
+          </nav>
+
+          <!-- HEADER — shadcn/ui: page header + Badge -->
+          <div class="stat-header">
+            <div class="stat-header__main">
+              <div class="stat-header__titlerow">
+                <h1>Candle pattern signals</h1>
+                <span class="badge badge--accent">Tier 2</span>
+              </div>
+              <p class="stat-header__def">
+                Each pattern is a two-outcome split — how often it plays out one
+                way versus the other. The visual reads the edge at a glance;
+                expand <strong>Advanced</strong> on any card for the exact
+                probability, baseline, sample size and edge.
+              </p>
+            </div>
+          </div>
+
+          <!-- =============================================================
+               STATE 1 — VISUAL DISPLAY ROW (default: Advanced collapsed)
+               Five cards side by side on desktop, stacked on mobile:
+               Green / Red Opening Candle, Engulfing, Inside Bars, Gap Fill.
+               ============================================================= -->
+          <div class="mockup-divider">State · Visual display row (default)</div>
+          <p class="mockup-note">
+            One card per condition. Opening Candle Continuation has two
+            conditions (green / red opening candle), so it renders as two cards;
+            these plus Engulfing and Inside Bars use a bespoke candle glyph +
+            diverging bars. The last card (Gap Fill) is the DEFAULT fallback
+            template (dot + hero % + horizontal split bar) for families without a
+            custom icon. The single context line sits below the row. Every card's
+            <strong>Advanced</strong> toggle is shown collapsed — the default;
+            the edge / baseline / N detail lives inside it, not in the default
+            view.
+          </p>
+
+          <section class="vgrid" aria-label="Pattern signal cards">
+            <!-- CARD 1A — Green Opening Candle (custom single-candle glyph)
+                 The stat has TWO conditions (green / red opening candle), each a
+                 Green-day vs Red-day split — one card per condition.
+                 shadcn/ui: Card + inline SVG + custom chart + Collapsible -->
+            <article class="vcard">
+              <div class="vcard__title">
+                <div>
+                  <h3>Green Opening Candle</h3>
+                  <p class="vcard__sub">Green day vs red day</p>
+                </div>
+                <span class="badge badge--up">+23.2 pts</span>
+              </div>
+
+              <div class="vcard__body">
+                <!-- Custom glyph: single bullish candlestick, timeframe in body. -->
+                <svg class="glyph" viewBox="0 0 64 72" role="img"
+                  aria-label="Single green (bullish) candlestick, 15-minute timeframe">
+                  <line class="g-up" x1="32" y1="6" x2="32" y2="66" />
+                  <rect class="g-up" x="15" y="22" width="34" height="28" rx="3" />
+                  <text class="tf tf-up" x="32" y="37" font-size="12">15m</text>
+                </svg>
+
+                <!-- Diverging bars: 73.2% green day up vs 26.8% red day down. -->
+                <div class="vcard__viz">
+                  <div class="dbars" role="img"
+                    aria-label="Green day 73.2 percent (green, up); Red day 26.8 percent (red, down)">
+                    <div class="dbars__plot">
+                      <div class="dbars__half dbars__half--up">
+                        <span class="dbars__pct val-up">73.2%</span>
+                        <div class="dbars__bar dbars__bar--up" style="height: 59px;"></div>
+                      </div>
+                      <div class="dbars__axis" aria-hidden="true"></div>
+                      <div class="dbars__half dbars__half--down">
+                        <div class="dbars__bar dbars__bar--down" style="height: 21px;"></div>
+                        <span class="dbars__pct val-down">26.8%</span>
+                      </div>
+                    </div>
+                    <div class="dbars__legend">
+                      <span class="dbars__leg"><i class="sw sw--up" aria-hidden="true"></i>Green day</span>
+                      <span class="dbars__leg"><i class="sw sw--down" aria-hidden="true"></i>Red day</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Advanced — collapsed by default. shadcn/ui: Collapsible -->
+              <details class="adv">
+                <summary>
+                  <svg class="chev" width="14" height="14" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" stroke-width="2.4"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M9 6l6 6-6 6" />
+                  </svg>
+                  Advanced
+                </summary>
+                <div class="adv__panel">
+                  <p class="vcard__caption">
+                    Green day <strong class="val-up">+23.2 pts</strong> vs
+                    <strong>50.0%</strong> baseline · N <strong>4,331</strong>
+                  </p>
+                  <p class="text-subtle" style="font-size: var(--text-xs);">
+                    Expand to reveal the metadata strip + exact probability table
+                    (see State 2 for the fully rendered open panel).
+                  </p>
+                </div>
+              </details>
+            </article>
+
+            <!-- CARD 1B — Red Opening Candle (custom single-candle glyph) -->
+            <article class="vcard">
+              <div class="vcard__title">
+                <div>
+                  <h3>Red Opening Candle</h3>
+                  <p class="vcard__sub">Green day vs red day</p>
+                </div>
+                <span class="badge badge--down">+21.9 pts</span>
+              </div>
+
+              <div class="vcard__body">
+                <!-- Custom glyph: single bearish candlestick, timeframe in body. -->
+                <svg class="glyph" viewBox="0 0 64 72" role="img"
+                  aria-label="Single red (bearish) candlestick, 15-minute timeframe">
+                  <line class="g-down" x1="32" y1="6" x2="32" y2="66" />
+                  <rect class="g-down" x="15" y="22" width="34" height="28" rx="3" />
+                  <text class="tf tf-down" x="32" y="37" font-size="12">15m</text>
+                </svg>
+
+                <!-- Diverging bars: 28.1% green day up vs 71.9% red day down. -->
+                <div class="vcard__viz">
+                  <div class="dbars" role="img"
+                    aria-label="Green day 28.1 percent (green, up); Red day 71.9 percent (red, down)">
+                    <div class="dbars__plot">
+                      <div class="dbars__half dbars__half--up">
+                        <span class="dbars__pct val-up">28.1%</span>
+                        <div class="dbars__bar dbars__bar--up" style="height: 22px;"></div>
+                      </div>
+                      <div class="dbars__axis" aria-hidden="true"></div>
+                      <div class="dbars__half dbars__half--down">
+                        <div class="dbars__bar dbars__bar--down" style="height: 58px;"></div>
+                        <span class="dbars__pct val-down">71.9%</span>
+                      </div>
+                    </div>
+                    <div class="dbars__legend">
+                      <span class="dbars__leg"><i class="sw sw--up" aria-hidden="true"></i>Green day</span>
+                      <span class="dbars__leg"><i class="sw sw--down" aria-hidden="true"></i>Red day</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <details class="adv">
+                <summary>
+                  <svg class="chev" width="14" height="14" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" stroke-width="2.4"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M9 6l6 6-6 6" />
+                  </svg>
+                  Advanced
+                </summary>
+                <div class="adv__panel">
+                  <p class="vcard__caption">
+                    Red day <strong class="val-down">+21.9 pts</strong> vs
+                    <strong>50.0%</strong> baseline · N <strong>4,331</strong>
+                  </p>
+                  <p class="text-subtle" style="font-size: var(--text-xs);">
+                    Metadata strip + exact probability table (collapsed).
+                  </p>
+                </div>
+              </details>
+            </article>
+
+            <!-- CARD 2 — Engulfing Candles (custom engulfing glyph) -->
+            <article class="vcard">
+              <div class="vcard__title">
+                <div>
+                  <h3>Engulfing Candles</h3>
+                  <p class="vcard__sub">Follow-through vs fade</p>
+                </div>
+                <span class="badge badge--up">+3.9 pts</span>
+              </div>
+
+              <div class="vcard__body">
+                <!-- Custom glyph: small bearish candle engulfed by a large
+                     bullish candle; timeframe in the large body. -->
+                <svg class="glyph" viewBox="0 0 64 72" role="img"
+                  aria-label="Small bearish candle engulfed by a large bullish candle, 15-minute timeframe">
+                  <line class="g-down" x1="20" y1="26" x2="20" y2="48" />
+                  <rect class="g-down" x="12" y="30" width="16" height="14" rx="2" />
+                  <line class="g-up" x1="44" y1="12" x2="44" y2="62" />
+                  <rect class="g-up" x="33" y="20" width="22" height="34" rx="3" />
+                  <text class="tf tf-up" x="44" y="37" font-size="10">15m</text>
+                </svg>
+
+                <div class="vcard__viz">
+                  <div class="dbars" role="img"
+                    aria-label="Follow-through 53.9 percent (green, up); Fade 46.1 percent (red, down)">
+                    <div class="dbars__plot">
+                      <div class="dbars__half dbars__half--up">
+                        <span class="dbars__pct val-up">53.9%</span>
+                        <div class="dbars__bar dbars__bar--up" style="height: 43px;"></div>
+                      </div>
+                      <div class="dbars__axis" aria-hidden="true"></div>
+                      <div class="dbars__half dbars__half--down">
+                        <div class="dbars__bar dbars__bar--down" style="height: 37px;"></div>
+                        <span class="dbars__pct val-down">46.1%</span>
+                      </div>
+                    </div>
+                    <div class="dbars__legend">
+                      <span class="dbars__leg"><i class="sw sw--up" aria-hidden="true"></i>Follow-through</span>
+                      <span class="dbars__leg"><i class="sw sw--down" aria-hidden="true"></i>Fade</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <details class="adv">
+                <summary>
+                  <svg class="chev" width="14" height="14" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" stroke-width="2.4"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M9 6l6 6-6 6" />
+                  </svg>
+                  Advanced
+                </summary>
+                <div class="adv__panel">
+                  <p class="vcard__caption">
+                    Follow-through <strong class="val-up">+3.9 pts</strong> vs
+                    <strong>50.0%</strong> baseline · N <strong>4,331</strong>
+                  </p>
+                  <p class="text-subtle" style="font-size: var(--text-xs);">
+                    Metadata strip + exact probability table (collapsed).
+                  </p>
+                </div>
+              </details>
+            </article>
+
+            <!-- CARD 3 — Inside Bars (custom inside-bar glyph) -->
+            <article class="vcard">
+              <div class="vcard__title">
+                <div>
+                  <h3>Inside Bars</h3>
+                  <p class="vcard__sub">Upside vs downside break</p>
+                </div>
+                <span class="badge badge--up">+5.1 pts</span>
+              </div>
+
+              <div class="vcard__body">
+                <!-- Custom glyph: large candle followed by a smaller candle
+                     whose range is contained within it; timeframe in the small
+                     (inside) candle body. -->
+                <svg class="glyph" viewBox="0 0 64 72" role="img"
+                  aria-label="Large candle followed by a smaller inside candle contained within its range, 15-minute timeframe">
+                  <line class="g-up" x1="22" y1="8" x2="22" y2="64" />
+                  <rect class="g-up" x="11" y="18" width="22" height="36" rx="3" />
+                  <line class="g-down" x1="49" y1="28" x2="49" y2="46" />
+                  <rect class="g-down" x="38" y="31" width="22" height="12" rx="2" />
+                  <text class="tf tf-down" x="49" y="37" font-size="8">15m</text>
+                </svg>
+
+                <div class="vcard__viz">
+                  <div class="dbars" role="img"
+                    aria-label="Upside break 55.1 percent (green, up); Downside break 44.9 percent (red, down)">
+                    <div class="dbars__plot">
+                      <div class="dbars__half dbars__half--up">
+                        <span class="dbars__pct val-up">55.1%</span>
+                        <div class="dbars__bar dbars__bar--up" style="height: 44px;"></div>
+                      </div>
+                      <div class="dbars__axis" aria-hidden="true"></div>
+                      <div class="dbars__half dbars__half--down">
+                        <div class="dbars__bar dbars__bar--down" style="height: 36px;"></div>
+                        <span class="dbars__pct val-down">44.9%</span>
+                      </div>
+                    </div>
+                    <div class="dbars__legend">
+                      <span class="dbars__leg"><i class="sw sw--up" aria-hidden="true"></i>Upside break</span>
+                      <span class="dbars__leg"><i class="sw sw--down" aria-hidden="true"></i>Downside break</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <details class="adv">
+                <summary>
+                  <svg class="chev" width="14" height="14" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" stroke-width="2.4"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M9 6l6 6-6 6" />
+                  </svg>
+                  Advanced
+                </summary>
+                <div class="adv__panel">
+                  <p class="vcard__caption">
+                    Upside break <strong class="val-up">+5.1 pts</strong> vs
+                    <strong>50.0%</strong> baseline · N <strong>4,331</strong>
+                  </p>
+                  <p class="text-subtle" style="font-size: var(--text-xs);">
+                    Metadata strip + exact probability table (collapsed).
+                  </p>
+                </div>
+              </details>
+            </article>
+
+            <!-- CARD 4 — Gap Fill (DEFAULT template: dot + hero % + split bar) -->
+            <article class="vcard">
+              <div class="vcard__title">
+                <div>
+                  <h3>Gap Fill</h3>
+                  <p class="vcard__sub">Fills vs holds · default template</p>
+                </div>
+                <span class="badge badge--up">+4.3 pts</span>
+              </div>
+
+              <!-- No custom glyph — reusable fallback. -->
+              <div class="vcard__hero">
+                <span class="vdot vdot--up" aria-hidden="true"></span>
+                <span class="vhero__num val-up">72.3<span class="vhero__pct">%</span></span>
+                <span class="vhero__label">fill same session</span>
+              </div>
+
+              <div class="splitbar" role="img"
+                aria-label="Gap fills 72.3 percent (green); gap holds 27.7 percent (red)">
+                <div class="splitbar__seg splitbar__seg--up" style="width: 72.3%;">72.3%</div>
+                <div class="splitbar__seg splitbar__seg--down" style="width: 27.7%;">27.7%</div>
+              </div>
+              <div class="splitbar__legend">
+                <span class="dbars__leg"><i class="sw sw--up" aria-hidden="true"></i>Fills</span>
+                <span class="dbars__leg"><i class="sw sw--down" aria-hidden="true"></i>Holds</span>
+              </div>
+
+              <details class="adv">
+                <summary>
+                  <svg class="chev" width="14" height="14" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" stroke-width="2.4"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M9 6l6 6-6 6" />
+                  </svg>
+                  Advanced
+                </summary>
+                <div class="adv__panel">
+                  <p class="vcard__caption">
+                    Fill <strong class="val-up">+4.3 pts</strong> vs
+                    <strong>68.0%</strong> baseline · N <strong>4,331</strong>
+                  </p>
+                  <p class="text-subtle" style="font-size: var(--text-xs);">
+                    Metadata strip + exact probability table (collapsed).
+                  </p>
+                </div>
+              </details>
+            </article>
+          </section>
+
+          <!-- Single context line under the card row. -->
+          <p class="context-line">
+            <span class="mono">NQ</span>
+            <span class="sep" aria-hidden="true">·</span>
+            <span class="mono">15min</span>
+            <span class="sep" aria-hidden="true">·</span>
+            <span class="mono">YTD</span>
+            <span class="sep" aria-hidden="true">·</span>
+            <span><span class="mono">4,332</span> sessions</span>
+            <span class="sep" aria-hidden="true">·</span>
+            <span class="mono">2008-12-11 → 2026-05-05</span>
+          </p>
+
+          <!-- =============================================================
+               STATE 2 — ADVANCED TOGGLE (expanded / open)
+               A single card with the Advanced panel OPEN: metadata strip +
+               full detail table. Shown here isolated for review.
+               ============================================================= -->
+          <div class="mockup-divider">State · Advanced toggle — expanded</div>
+          <p class="mockup-note">
+            The Green Opening Candle card with <strong>Advanced</strong>
+            expanded. The panel holds (a) the edge / baseline / N caption,
+            (b) a metadata strip and (c) the exact Condition / Outcome /
+            Probability / Baseline / N / Edge table — its numbers match the hero
+            visual above (73.2% green day vs 26.8% red day, +23.2 pts).
+          </p>
+
+          <section class="vgrid" aria-label="Advanced expanded example">
+            <article class="vcard" style="grid-column: 1 / -1; max-width: 720px;">
+              <div class="vcard__title">
+                <div>
+                  <h3>Green Opening Candle</h3>
+                  <p class="vcard__sub">Green day vs red day</p>
+                </div>
+                <span class="badge badge--up">+23.2 pts</span>
+              </div>
+
+              <div class="vcard__body">
+                <svg class="glyph" viewBox="0 0 64 72" role="img"
+                  aria-label="Single green (bullish) candlestick, 15-minute timeframe">
+                  <line class="g-up" x1="32" y1="6" x2="32" y2="66" />
+                  <rect class="g-up" x="15" y="22" width="34" height="28" rx="3" />
+                  <text class="tf tf-up" x="32" y="37" font-size="12">15m</text>
+                </svg>
+                <div class="vcard__viz">
+                  <div class="dbars" role="img"
+                    aria-label="Green day 73.2 percent (green, up); Red day 26.8 percent (red, down)">
+                    <div class="dbars__plot">
+                      <div class="dbars__half dbars__half--up">
+                        <span class="dbars__pct val-up">73.2%</span>
+                        <div class="dbars__bar dbars__bar--up" style="height: 59px;"></div>
+                      </div>
+                      <div class="dbars__axis" aria-hidden="true"></div>
+                      <div class="dbars__half dbars__half--down">
+                        <div class="dbars__bar dbars__bar--down" style="height: 21px;"></div>
+                        <span class="dbars__pct val-down">26.8%</span>
+                      </div>
+                    </div>
+                    <div class="dbars__legend">
+                      <span class="dbars__leg"><i class="sw sw--up" aria-hidden="true"></i>Green day</span>
+                      <span class="dbars__leg"><i class="sw sw--down" aria-hidden="true"></i>Red day</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Advanced — OPEN. shadcn/ui: Collapsible(defaultOpen) -->
+              <details class="adv" open>
+                <summary>
+                  <svg class="chev" width="14" height="14" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" stroke-width="2.4"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M9 6l6 6-6 6" />
+                  </svg>
+                  Advanced
+                </summary>
+                <div class="adv__panel">
+                  <!-- (a) Edge / baseline / N caption (moved out of the default view). -->
+                  <p class="vcard__caption">
+                    Green day <strong class="val-up">+23.2 pts</strong> vs
+                    <strong>50.0%</strong> baseline · N <strong>4,331</strong>
+                  </p>
+
+                  <!-- (b) Metadata strip. shadcn/ui: Card (muted, inline stats) -->
+                  <div class="meta-strip">
+                    <div class="meta-item">
+                      <div class="meta-item__label">Data range</div>
+                      <div class="meta-item__value mono">2008-12-11 → 2026-05-05</div>
+                    </div>
+                    <div class="meta-item">
+                      <div class="meta-item__label">Total sessions</div>
+                      <div class="meta-item__value mono">4,332</div>
+                    </div>
+                    <div class="meta-item">
+                      <div class="meta-item__label">Period</div>
+                      <div class="meta-item__value">YTD</div>
+                    </div>
+                  </div>
+
+                  <!-- (c) Full detail table. shadcn/ui: Table; edge = Badge -->
+                  <div class="table-wrap">
+                    <table class="stat-table">
+                      <thead>
+                        <tr>
+                          <th scope="col">Condition</th>
+                          <th scope="col">Outcome</th>
+                          <th scope="col" class="is-num">Probability</th>
+                          <th scope="col" class="is-num">Baseline</th>
+                          <th scope="col" class="is-num">N</th>
+                          <th scope="col" class="is-num">Edge</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td class="cell-condition">Green opening candle</td>
+                          <td class="cell-outcome">Green day</td>
+                          <td class="is-num cell-num cell-prob val-up">73.2%</td>
+                          <td class="is-num cell-num cell-baseline">50.0%</td>
+                          <td class="is-num cell-num cell-n">4,331</td>
+                          <td class="is-num">
+                            <span class="edge-pill edge-pill--up">
+                              <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2.8" stroke-linecap="round"
+                                stroke-linejoin="round" aria-hidden="true">
+                                <path d="M5 15l7-7 7 7" />
+                              </svg>
+                              +23.2 pts
+                            </span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td class="cell-condition">Green opening candle</td>
+                          <td class="cell-outcome">Red day</td>
+                          <td class="is-num cell-num cell-prob val-down">26.8%</td>
+                          <td class="is-num cell-num cell-baseline">50.0%</td>
+                          <td class="is-num cell-num cell-n">4,331</td>
+                          <td class="is-num">
+                            <span class="edge-pill edge-pill--down">
+                              <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2.8" stroke-linecap="round"
+                                stroke-linejoin="round" aria-hidden="true">
+                                <path d="M5 9l7 7 7-7" />
+                              </svg>
+                              −23.2 pts
+                            </span>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <p class="footnote">
+                    Probabilities are observed frequencies over the selected
+                    period. The baseline is the outcome's unconditional rate
+                    (50.0% for a two-way split); edge is
+                    <span class="mono">probability − baseline</span>, in
+                    percentage points. Green day and red day are mutually
+                    exclusive session outcomes and sum to 100%.
+                  </p>
+                </div>
+              </details>
+            </article>
+          </section>
+
+          <!-- =============================================================
+               STATE 3 — GLYPH SPECIMEN (icon set in isolation)
+               ============================================================= -->
+          <div class="mockup-divider">Reference · Custom glyph set</div>
+          <p class="mockup-note">
+            The three candle glyphs as a coherent set — same 2.5px round-cap
+            wick, rounded bodies, and a mono timeframe baked into the "signal"
+            candle. Bullish elements use <code>--color-up</code>, bearish use
+            <code>--color-down</code>. Pure inline SVG, no raster assets. The
+            Gap Fill card intentionally has no glyph (default template).
+          </p>
+
+          <div class="specimen">
+            <div class="specimen__item">
+              <svg class="glyph" viewBox="0 0 64 72" aria-hidden="true">
+                <line class="g-up" x1="32" y1="6" x2="32" y2="66" />
+                <rect class="g-up" x="15" y="22" width="34" height="28" rx="3" />
+                <text class="tf tf-up" x="32" y="37" font-size="12">15m</text>
+              </svg>
+              <span class="specimen__label">Single candle<br />(Opening Candle Continuation)</span>
+            </div>
+            <div class="specimen__item">
+              <svg class="glyph" viewBox="0 0 64 72" aria-hidden="true">
+                <line class="g-down" x1="20" y1="26" x2="20" y2="48" />
+                <rect class="g-down" x="12" y="30" width="16" height="14" rx="2" />
+                <line class="g-up" x1="44" y1="12" x2="44" y2="62" />
+                <rect class="g-up" x="33" y="20" width="22" height="34" rx="3" />
+                <text class="tf tf-up" x="44" y="37" font-size="10">15m</text>
+              </svg>
+              <span class="specimen__label">Engulfing<br />(small candle engulfed)</span>
+            </div>
+            <div class="specimen__item">
+              <svg class="glyph" viewBox="0 0 64 72" aria-hidden="true">
+                <line class="g-up" x1="22" y1="8" x2="22" y2="64" />
+                <rect class="g-up" x="11" y="18" width="22" height="36" rx="3" />
+                <line class="g-down" x1="49" y1="28" x2="49" y2="46" />
+                <rect class="g-down" x="38" y="31" width="22" height="12" rx="2" />
+                <text class="tf tf-down" x="49" y="37" font-size="8">15m</text>
+              </svg>
+              <span class="specimen__label">Inside bar<br />(range contained)</span>
+            </div>
+          </div>
+
+          <!-- =============================================================
+               STATE 4 — MOBILE (≤768px) narrow-frame preview
+               ============================================================= -->
+          <div class="mockup-divider">State · Mobile ≤768px (narrow-frame preview)</div>
+          <p class="mockup-note">
+            The page is genuinely responsive at 768px (resize to verify). This
+            fixed 390px frame forces the stacked layout so it is reviewable on
+            desktop: the card grid collapses to a single column while the glyph +
+            chart stay side by side inside each card, and the context line wraps.
+          </p>
+
+          <div class="narrow-frame">
+            <section class="vgrid" aria-label="Pattern signal cards (mobile)">
+              <article class="vcard">
+                <div class="vcard__title">
+                  <div>
+                    <h3>Green Opening Candle</h3>
+                    <p class="vcard__sub">Green day vs red day</p>
+                  </div>
+                  <span class="badge badge--up">+23.2 pts</span>
+                </div>
+                <div class="vcard__body">
+                  <svg class="glyph" viewBox="0 0 64 72" aria-hidden="true">
+                    <line class="g-up" x1="32" y1="6" x2="32" y2="66" />
+                    <rect class="g-up" x="15" y="22" width="34" height="28" rx="3" />
+                    <text class="tf tf-up" x="32" y="37" font-size="12">15m</text>
+                  </svg>
+                  <div class="vcard__viz">
+                    <div class="dbars" role="img"
+                      aria-label="Green day 73.2 percent up; Red day 26.8 percent down">
+                      <div class="dbars__plot">
+                        <div class="dbars__half dbars__half--up">
+                          <span class="dbars__pct val-up">73.2%</span>
+                          <div class="dbars__bar dbars__bar--up" style="height: 59px;"></div>
+                        </div>
+                        <div class="dbars__axis" aria-hidden="true"></div>
+                        <div class="dbars__half dbars__half--down">
+                          <div class="dbars__bar dbars__bar--down" style="height: 21px;"></div>
+                          <span class="dbars__pct val-down">26.8%</span>
+                        </div>
+                      </div>
+                      <div class="dbars__legend">
+                        <span class="dbars__leg"><i class="sw sw--up" aria-hidden="true"></i>Green day</span>
+                        <span class="dbars__leg"><i class="sw sw--down" aria-hidden="true"></i>Red day</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <details class="adv">
+                  <summary>
+                    <svg class="chev" width="14" height="14" viewBox="0 0 24 24"
+                      fill="none" stroke="currentColor" stroke-width="2.4"
+                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M9 6l6 6-6 6" />
+                    </svg>
+                    Advanced
+                  </summary>
+                  <div class="adv__panel">
+                    <p class="vcard__caption">
+                      Green day <strong class="val-up">+23.2 pts</strong> vs
+                      <strong>50.0%</strong> baseline · N <strong>4,331</strong>
+                    </p>
+                    <p class="text-subtle" style="font-size: var(--text-xs);">
+                      Table scrolls horizontally inside its container on mobile.
+                    </p>
+                  </div>
+                </details>
+              </article>
+
+              <article class="vcard">
+                <div class="vcard__title">
+                  <div>
+                    <h3>Gap Fill</h3>
+                    <p class="vcard__sub">Fills vs holds · default template</p>
+                  </div>
+                  <span class="badge badge--up">+4.3 pts</span>
+                </div>
+                <div class="vcard__hero">
+                  <span class="vdot vdot--up" aria-hidden="true"></span>
+                  <span class="vhero__num val-up">72.3<span class="vhero__pct">%</span></span>
+                  <span class="vhero__label">fill same session</span>
+                </div>
+                <div class="splitbar" role="img"
+                  aria-label="Gap fills 72.3 percent; gap holds 27.7 percent">
+                  <div class="splitbar__seg splitbar__seg--up" style="width: 72.3%;">72.3%</div>
+                  <div class="splitbar__seg splitbar__seg--down" style="width: 27.7%;">27.7%</div>
+                </div>
+                <div class="splitbar__legend">
+                  <span class="dbars__leg"><i class="sw sw--up" aria-hidden="true"></i>Fills</span>
+                  <span class="dbars__leg"><i class="sw sw--down" aria-hidden="true"></i>Holds</span>
+                </div>
+                <details class="adv">
+                  <summary>
+                    <svg class="chev" width="14" height="14" viewBox="0 0 24 24"
+                      fill="none" stroke="currentColor" stroke-width="2.4"
+                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M9 6l6 6-6 6" />
+                    </svg>
+                    Advanced
+                  </summary>
+                  <div class="adv__panel">
+                    <p class="vcard__caption">
+                      Fill <strong class="val-up">+4.3 pts</strong> vs
+                      <strong>68.0%</strong> baseline · N <strong>4,331</strong>
+                    </p>
+                    <p class="text-subtle" style="font-size: var(--text-xs);">
+                      Metadata strip + exact probability table (collapsed).
+                    </p>
+                  </div>
+                </details>
+              </article>
+            </section>
+
+            <p class="context-line">
+              <span class="mono">NQ</span>
+              <span class="sep" aria-hidden="true">·</span>
+              <span class="mono">15min</span>
+              <span class="sep" aria-hidden="true">·</span>
+              <span class="mono">YTD</span>
+              <span class="sep" aria-hidden="true">·</span>
+              <span><span class="mono">4,332</span> sessions</span>
+            </p>
+          </div>
+        </main>
+      </div>
+    </div>
+  </body>
+</html>
