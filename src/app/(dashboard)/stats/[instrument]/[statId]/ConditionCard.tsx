@@ -32,25 +32,51 @@ export function ConditionCard({
 }: ConditionCardProps) {
   const [rowA, rowB] = rows;
 
-  // Up/down assignment rule: the outcome whose probability is above its
-  // baseline is the green "up" bar; the other outcome (necessarily below its
-  // baseline in a complementary 2-way split) is the red "down" bar. Matches
-  // the repo's documented colour semantic (green = above baseline, red =
-  // below). Fallback for an exact tie (neither outcome above baseline):
-  // deterministically treat the first row as "up".
-  let upRow: StatResultRow;
-  let downRow: StatResultRow;
+  // Dominant-outcome rule (edge-based): the outcome whose probability is
+  // above its baseline is "dominant". Fallback for an exact tie (neither
+  // outcome above baseline): deterministically treat the first row as
+  // dominant. Used for the title badge (always the positive edge) and, for
+  // stats without an outcome identity, for the bar assignment too.
+  let dominantRow: StatResultRow;
   if (edgeDirection(computeEdge(rowA)) === "up") {
-    upRow = rowA;
-    downRow = rowB;
+    dominantRow = rowA;
   } else if (edgeDirection(computeEdge(rowB)) === "up") {
-    upRow = rowB;
-    downRow = rowA;
+    dominantRow = rowB;
   } else {
     // Neither outcome is strictly above its baseline (exact tie / degenerate
-    // case) — deterministic fallback: treat the first row as "up".
-    upRow = rowA;
-    downRow = rowB;
+    // case) — deterministic fallback: treat the first row as dominant.
+    dominantRow = rowA;
+  }
+
+  // Outcome-identity colour for outcomes that carry an inherent meaning
+  // (e.g. a "red" or "green" session close) independent of which one
+  // currently has the edge. Bar colour must reflect what the outcome means,
+  // not which one is statistically dominant. null for families whose
+  // outcomes aren't colour-coded, in which case we fall back to the
+  // edge-based dominant/other split below.
+  const outcomeIdentity: Record<string, IconColor> | null =
+    statName === "opening_candle_continuation"
+      ? { green_close: "up", red_close: "down" }
+      : statName === "engulfing_candles"
+        ? { bullish: "up", bearish: "down" }
+        : null;
+
+  // Up/down assignment rule: prefer the outcome identity when the stat has
+  // one (green bar = green_close / bullish, red bar = red_close / bearish);
+  // otherwise fall back to the edge-based dominant outcome as "up".
+  let upRow: StatResultRow;
+  let downRow: StatResultRow;
+  if (outcomeIdentity) {
+    if (outcomeIdentity[rowA.outcome] === "up") {
+      upRow = rowA;
+      downRow = rowB;
+    } else {
+      upRow = rowB;
+      downRow = rowA;
+    }
+  } else {
+    upRow = dominantRow;
+    downRow = dominantRow === rowA ? rowB : rowA;
   }
 
   // Condition-identity colour for colour-coded families. opening_candle_continuation
@@ -97,7 +123,7 @@ export function ConditionCard({
               badgeClass,
             ].join(" ")}
           >
-            {fmtEdgePts(computeEdge(upRow))}
+            {fmtEdgePts(computeEdge(dominantRow))}
           </span>
         </div>
       </div>
