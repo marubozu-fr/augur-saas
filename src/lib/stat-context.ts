@@ -56,7 +56,11 @@ export function getGlobalInstruments(catalog: StatFamilyMeta[]): string[] {
   return Array.from(set).sort();
 }
 
-/** Timeframe codes available for a given family + instrument, sorted. */
+/**
+ * Timeframe codes available for a given family + instrument, in the API's
+ * semantic order (smallest to largest). We deliberately do NOT sort: a
+ * lexicographic sort would break the order (e.g. "1h" < "30min").
+ */
 export function getFamilyTimeframes(
   catalog: StatFamilyMeta[],
   statId: string,
@@ -70,7 +74,7 @@ export function getFamilyTimeframes(
         .filter((t) => t.instrument === instrument)
         .map((t) => t.timeframe),
     ),
-  ).sort();
+  );
 }
 
 /**
