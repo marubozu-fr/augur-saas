@@ -6,6 +6,7 @@
 // success / error feedback inline.
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { changeEmail } from "./actions";
 
 interface EmailFieldProps {
@@ -13,6 +14,7 @@ interface EmailFieldProps {
 }
 
 export function EmailField({ currentEmail }: EmailFieldProps) {
+  const t = useTranslations("account.profile");
   const [editing, setEditing] = useState(false);
   const [feedback, setFeedback] = useState<{
     type: "success" | "error";
@@ -41,8 +43,7 @@ export function EmailField({ currentEmail }: EmailFieldProps) {
         setEditing(false);
         setFeedback({
           type: "success",
-          message:
-            "Confirmation link sent — check your new inbox to confirm the change.",
+          message: t("emailChangeConfirmationSent"),
         });
       }
     });
@@ -54,7 +55,7 @@ export function EmailField({ currentEmail }: EmailFieldProps) {
         htmlFor="current-email"
         className="text-sm font-semibold text-foreground"
       >
-        Email address
+        {t("emailAddress")}
       </label>
 
       {!editing ? (
@@ -73,11 +74,11 @@ export function EmailField({ currentEmail }: EmailFieldProps) {
               onClick={handleEdit}
               className="flex-shrink-0 h-10 px-4 rounded-md border border-border-strong text-sm font-semibold text-foreground hover:bg-surface-2 transition-colors"
             >
-              Change
+              {t("change")}
             </button>
           </div>
           <p id="email-hint" className="text-xs text-subtle">
-            We&apos;ll email a confirmation link before any change takes effect.
+            {t("emailChangeHint")}
           </p>
         </>
       ) : (
@@ -97,19 +98,17 @@ export function EmailField({ currentEmail }: EmailFieldProps) {
               disabled={isPending}
               className="flex-shrink-0 h-10 px-4 rounded-md bg-brand text-sm font-semibold text-on-brand hover:bg-brand-hover transition-colors disabled:opacity-60"
             >
-              {isPending ? "Saving…" : "Save"}
+              {isPending ? t("saving") : t("save")}
             </button>
             <button
               type="button"
               onClick={handleCancel}
               className="flex-shrink-0 h-10 px-4 rounded-md border border-border text-sm font-semibold text-muted-foreground hover:bg-surface-2 transition-colors"
             >
-              Cancel
+              {t("cancel")}
             </button>
           </div>
-          <p className="text-xs text-subtle">
-            We&apos;ll email a confirmation link before any change takes effect.
-          </p>
+          <p className="text-xs text-subtle">{t("emailChangeHint")}</p>
         </form>
       )}
 

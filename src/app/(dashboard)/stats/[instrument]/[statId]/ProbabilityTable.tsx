@@ -5,6 +5,7 @@
 // The Condition and Outcome columns are always shown, resolved via the
 // LabelResolver so human-readable labels appear instead of raw API codes.
 
+import { useTranslations } from "next-intl";
 import type { StatResultRow } from "@/types/stats";
 import type { LabelResolver } from "./helpers";
 import { computeEdge, edgeDirection, fmtPct, fmtNum } from "./helpers";
@@ -28,6 +29,7 @@ export function ProbabilityTable({
   resolver,
   headBg = "bg-muted",
 }: ProbabilityTableProps) {
+  const t = useTranslations("statDetail");
   const showGroup = rows.some((r) => r.group !== undefined);
 
   const thClass = `text-left text-xs font-semibold tracking-wider uppercase text-subtle px-4 py-3 border-b border-border ${headBg} whitespace-nowrap`;
@@ -40,26 +42,26 @@ export function ProbabilityTable({
           <tr>
             {showGroup && (
               <th scope="col" className={thClass}>
-                Group
+                {t("table.group")}
               </th>
             )}
             <th scope="col" className={thClass}>
-              Condition
+              {t("table.condition")}
             </th>
             <th scope="col" className={thClass}>
-              Outcome
+              {t("table.outcome")}
             </th>
             <th scope="col" className={thNumClass}>
-              Probability
+              {t("table.probability")}
             </th>
             <th scope="col" className={thNumClass}>
-              Baseline
+              {t("table.baseline")}
             </th>
             <th scope="col" className={thNumClass}>
-              N
+              {t("table.n")}
             </th>
             <th scope="col" className={thNumClass}>
-              Edge
+              {t("table.edge")}
             </th>
           </tr>
         </thead>

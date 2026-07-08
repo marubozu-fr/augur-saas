@@ -4,6 +4,7 @@
 
 "use client";
 
+import { useTranslations } from "next-intl";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 interface DataFilterZoneProps {
@@ -17,11 +18,13 @@ export function DataFilterZone({
   activeTimeframe,
   onTimeframeChange,
 }: DataFilterZoneProps) {
+  const t = useTranslations("statDetail");
+
   if (timeframes.length === 0) return null;
 
   return (
     <section
-      aria-label="Data filters"
+      aria-label={t("dataFiltersAriaLabel")}
       className="flex flex-col md:flex-row md:items-center gap-3 md:gap-5 p-3 px-4 mb-5 border border-border rounded-lg bg-muted"
     >
       <div className="flex items-center gap-3">
@@ -29,7 +32,7 @@ export function DataFilterZone({
           id="lbl-timeframe"
           className="text-xs font-semibold tracking-wider uppercase text-subtle"
         >
-          Timeframe
+          {t("timeframe")}
         </span>
         <ToggleGroup
           type="single"

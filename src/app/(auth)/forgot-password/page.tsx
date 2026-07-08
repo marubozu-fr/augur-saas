@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { resetPassword } from "@/app/(auth)/actions";
 
 interface ForgotPasswordPageProps {
@@ -9,6 +10,8 @@ export default async function ForgotPasswordPage({
   searchParams,
 }: ForgotPasswordPageProps) {
   const { error, sent, email } = await searchParams;
+  const t = await getTranslations("auth");
+  const tForm = await getTranslations("auth.form");
 
   // Success state — "email sent" (.auth-card .auth-success in the mockup)
   if (sent === "1") {
@@ -35,12 +38,15 @@ export default async function ForgotPasswordPage({
         </span>
 
         <h2 className="text-[1.375rem] font-bold tracking-tight text-foreground">
-          Check your inbox
+          {t("forgotPassword.checkInbox.title")}
         </h2>
         <p className="mt-3 text-sm text-muted-foreground leading-normal">
-          If an account exists for{" "}
-          <strong className="text-foreground font-mono">{email}</strong>,
-          we&apos;ve sent a password reset link. It expires in 60 minutes.
+          {t.rich("forgotPassword.checkInbox.description", {
+            email: email ?? "",
+            strong: (chunks) => (
+              <strong className="text-foreground font-mono">{chunks}</strong>
+            ),
+          })}
         </p>
 
         {/* Resend + back buttons */}
@@ -49,13 +55,13 @@ export default async function ForgotPasswordPage({
             href="/forgot-password"
             className="inline-flex items-center justify-center w-full h-11 rounded-md border border-border-strong bg-transparent text-foreground text-sm font-semibold hover:bg-card transition-colors"
           >
-            Resend email
+            {t("forgotPassword.checkInbox.resend")}
           </Link>
           <Link
             href="/sign-in"
             className="inline-flex items-center justify-center w-full h-11 rounded-md bg-transparent text-muted-foreground text-sm font-semibold hover:bg-card hover:text-foreground transition-colors"
           >
-            Back to sign in
+            {t("forgotPassword.backToSignIn")}
           </Link>
         </div>
       </div>
@@ -68,10 +74,10 @@ export default async function ForgotPasswordPage({
       {/* .auth-card__head */}
       <div className="text-center mb-8">
         <h1 className="text-[1.75rem] font-bold tracking-tight text-foreground">
-          Reset your password
+          {t("forgotPassword.title")}
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Enter your account email and we&apos;ll send you a reset link.
+          {t("forgotPassword.subtitle")}
         </p>
       </div>
 
@@ -83,7 +89,7 @@ export default async function ForgotPasswordPage({
             htmlFor="email"
             className="text-sm font-semibold text-foreground"
           >
-            Email
+            {tForm("email")}
           </label>
           <input
             id="email"
@@ -91,7 +97,7 @@ export default async function ForgotPasswordPage({
             type="email"
             required
             autoComplete="email"
-            placeholder="you@example.com"
+            placeholder={tForm("emailPlaceholder")}
             className="w-full h-11 px-4 text-sm text-foreground bg-background border border-border-strong rounded-md placeholder:text-subtle transition-colors hover:border-neutral focus:outline-none focus:border-brand focus:ring-3 focus:ring-brand-ring"
           />
         </div>
@@ -100,18 +106,18 @@ export default async function ForgotPasswordPage({
           type="submit"
           className="w-full h-11 rounded-md bg-brand text-on-brand text-sm font-semibold hover:bg-brand-hover active:bg-brand-hover transition-colors"
         >
-          Send reset link
+          {t("forgotPassword.submit")}
         </button>
       </form>
 
       {/* .auth-foot */}
       <p className="mt-6 text-center text-sm text-muted-foreground">
-        Remembered it?{" "}
+        {t("forgotPassword.remembered")}{" "}
         <Link
           href="/sign-in"
           className="font-semibold text-brand hover:text-brand-hover transition-colors"
         >
-          Back to sign in
+          {t("forgotPassword.backToSignIn")}
         </Link>
       </p>
     </div>

@@ -10,6 +10,7 @@
 
 import "server-only";
 
+import { getActiveLocale } from "@/lib/i18n/get-locale";
 import {
   getStatDetail,
   getStatTimeframe,
@@ -18,6 +19,7 @@ import {
 import { getCurrentUserTier } from "@/lib/subscription.server";
 import { canAccessStat } from "@/lib/subscription";
 import { getStatTier } from "@/lib/stat-tiers";
+import { pickLocale } from "@/lib/i18n/pick";
 import type {
   StatRunResult,
   TimeframeResult,
@@ -131,10 +133,11 @@ export async function loadStatSlice({
   // -------------------------------------------------------------------------
   const statTier = getStatTier(statId);
   if (!canAccessStat(userTier, statTier)) {
+    const locale = await getActiveLocale();
     return {
       kind: "locked",
-      title: result.title.en,
-      definition: result.definition.en,
+      title: pickLocale(result.title, locale),
+      definition: pickLocale(result.definition, locale),
       statTier,
     };
   }

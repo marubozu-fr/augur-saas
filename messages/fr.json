@@ -1,0 +1,489 @@
+{
+  "common": {},
+  "nav": {
+    "features": "Fonctionnalités",
+    "howItWorks": "Fonctionnement",
+    "pricing": "Tarifs",
+    "customers": "Clients",
+    "signIn": "Connexion",
+    "getStarted": "Commencer",
+    "changeLanguage": "Changer de langue, actuelle : {language}"
+  },
+  "landing": {
+    "metaTitle": "Augur — Probabilités statistiques de marché pour traders de futures",
+    "metaDescription": "Augur transforme 18 ans de données futures NQ et ES en probabilités conditionnelles claires. Chaque avantage est comparé à sa référence, avec la taille d'échantillon bien visible.",
+    "hero": {
+      "badge": "Nouveau — les statistiques de continuation de gap nocturne sont en ligne",
+      "headline": "Négociez les <hl>probabilités</hl>,<br></br>pas les prédictions.",
+      "subtitle": "Augur transforme 18 ans de données futures NQ et ES en probabilités conditionnelles claires. Chaque avantage est comparé à sa référence, avec la taille d'échantillon bien visible — pour que vous sachiez exactement à quel point un setup est réellement solide.",
+      "ctaPrimary": "Essai gratuit de 7 jours",
+      "ctaSecondary": "Voir les données",
+      "checklist": {
+        "noCard": "Sans carte bancaire",
+        "cancelAnytime": "Annulation à tout moment",
+        "updatedDaily": "Mis à jour chaque jour après la clôture"
+      },
+      "preview": {
+        "ariaLabel": "Exemple de statistique",
+        "title": "Continuation de gap haussier — NQ",
+        "subtitle": "P(clôture au-dessus de l'ouverture | gap > 0,30 %) · séance RTH",
+        "tier": "Palier 1",
+        "edge": "+9,8 pts d'avantage",
+        "baselineLabel": "Référence (toutes séances) :",
+        "row1Label": "Ouverture du lundi",
+        "row2Label": "Gap > 0,75 %",
+        "row3Label": "Ouverture du vendredi",
+        "row4Label": "Jour de FOMC"
+      }
+    },
+    "trustStrip": {
+      "heading": "Une couverture sur les instruments que vous tradez vraiment",
+      "ariaLabel": "Instruments couverts",
+      "sessions": "Séances RTH et ETH",
+      "history": "2007 – aujourd'hui",
+      "timeframes": "1m · 5m · quotidien"
+    },
+    "features": {
+      "eyebrow": "Pourquoi Augur",
+      "heading": "Des avantages en qui vous pouvez vraiment avoir confiance",
+      "subtitle": "Pas de boîte noire, pas de signaux surajustés. Juste des statistiques conditionnelles transparentes, avec le contexte nécessaire pour dimensionner un trade en toute confiance.",
+      "baseline": {
+        "title": "Avantages relatifs à une référence",
+        "description": "Chaque probabilité est présentée à côté de sa référence inconditionnelle. Un taux de réussite de 56 % ne veut rien dire tant que vous ne connaissez pas le taux de base — nous les mettons toujours côte à côte."
+      },
+      "sliced": {
+        "title": "Découpé de toutes les façons",
+        "description": "Explorez chaque statistique par jour de la semaine, taille de gap, range de la veille, séance ou régime de volatilité. Chaque tranche affiche sa propre taille d'échantillon pour que les groupes trop petits ne vous induisent jamais en erreur."
+      },
+      "refreshed": {
+        "title": "Actualisé chaque jour",
+        "description": "Les statistiques se recalculent automatiquement après chaque clôture, en intégrant la dernière séance pour que vos avantages reflètent le marché de cette semaine — pas un backtest figé en 2019."
+      },
+      "significance": {
+        "title": "Significativité intégrée",
+        "description": "Les intervalles de confiance et les seuils de N minimum éliminent le bruit du chiffre principal. Nous grisons les avantages qui ne sont pas statistiquement significatifs plutôt que de les survendre."
+      }
+    },
+    "howItWorks": {
+      "eyebrow": "Fonctionnement",
+      "heading": "De l'inscription à votre premier avantage en quelques minutes",
+      "step1": {
+        "title": "Choisissez votre offre",
+        "description": "Choisissez un palier de Starter à Enterprise. Les paliers supérieurs débloquent des familles de statistiques plus poussées et des tranches plus fines. Essai gratuit de 7 jours, sans carte bancaire."
+      },
+      "step2": {
+        "title": "Parcourez le catalogue de statistiques",
+        "description": "Ouvrez le tableau de bord et explorez les familles de statistiques pour NQ et ES — gaps, dynamiques d'ouverture, extensions de range, saisonnalité hebdomadaire et plus encore. Filtrez selon votre style."
+      },
+      "step3": {
+        "title": "Tradez avec du contexte",
+        "description": "Lisez l'avantage par rapport à sa référence, vérifiez la taille de l'échantillon, et dimensionnez votre position en conséquence. Revenez après la clôture pour les chiffres actualisés du lendemain."
+      }
+    },
+    "proof": {
+      "eyebrow": "Adopté par des traders sérieux",
+      "heading": "Le desk d'avantages que les traders gardent ouvert toute la journée",
+      "metrics": {
+        "families": "Familles de statistiques distinctes",
+        "dataPoints": "Points de données analysés",
+        "history": "D'historique NQ et ES",
+        "instruments": "Instruments couverts (NQ et ES)"
+      },
+      "testimonial1": {
+        "quote": "J'ai arrêté de deviner si un gap allait se combler. Augur me donne le taux de continuation par taille de gap et jour de la semaine, avec le N juste à côté. C'est la première chose que je consulte avant l'ouverture.",
+        "role": "Trader indépendant de futures NQ"
+      },
+      "testimonial2": {
+        "quote": "Ce qui m'a convaincu, c'est l'honnêteté. Quand une tranche ne compte que 22 échantillons, c'est indiqué et l'avantage est grisé. Aucun autre produit de statistiques ne respecte autant la significativité.",
+        "role": "Analyste quantitatif, desk propriétaire"
+      },
+      "testimonial3": {
+        "quote": "Nous utilisons l'API Enterprise pour alimenter notre checklist pré-marché pour un petit book ES. L'actualisation quotidienne et des références propres nous ont fait économiser des semaines de développement.",
+        "role": "Responsable trading, fonds propriétaire"
+      }
+    },
+    "cta": {
+      "heading": "Recevez un avantage dans votre boîte mail chaque matin",
+      "description": "Le Augur Pre-Market Brief : trois setups statistiquement notables pour NQ et ES, livrés avant l'ouverture. Gratuit, et un avant-goût de la plateforme complète.",
+      "footnote": "Gratuit pendant 7 jours. Sans carte bancaire."
+    },
+    "footer": {
+      "tagline": "Probabilités statistiques de marché pour les traders de futures NQ et ES. Des avantages transparents, des références réelles, actualisés chaque jour.",
+      "productHeading": "Produit",
+      "startTrial": "Essai gratuit",
+      "companyHeading": "Entreprise",
+      "about": "À propos",
+      "methodology": "Méthodologie",
+      "changelog": "Journal des modifications",
+      "contact": "Contact",
+      "legalHeading": "Mentions légales",
+      "terms": "Conditions d'utilisation",
+      "privacy": "Politique de confidentialité",
+      "risk": "Avertissement sur les risques",
+      "cookies": "Paramètres des cookies",
+      "copyright": "© 2026 Augur · Marubozu FR. Tous droits réservés.",
+      "disclaimer": "Augur fournit uniquement des informations statistiques historiques et ne constitue pas un conseil en investissement. Les performances passées ne garantissent pas les résultats futurs. Le trading de futures comporte un risque de perte important."
+    }
+  },
+  "pricing": {
+    "metaTitle": "Augur — Tarifs et offres",
+    "metaDescription": "Chaque offre débloque une tranche plus profonde du catalogue de statistiques Augur. Essai gratuit de 7 jours, sans carte bancaire.",
+    "hero": {
+      "eyebrow": "Tarifs",
+      "heading": "Choisissez le palier adapté à votre stratégie",
+      "subtitle": "Chaque offre débloque une tranche plus profonde du catalogue de statistiques Augur. Essai gratuit de 7 jours, sans carte bancaire — changez d'offre ou annulez quand vous le souhaitez."
+    },
+    "toggle": {
+      "ariaLabel": "Période de facturation",
+      "monthly": "Mensuel",
+      "annual": "Annuel",
+      "saveBadge": "Économisez 20 % — 2 mois offerts par an"
+    },
+    "mostPopular": "Le plus populaire",
+    "perMonth": " / mois",
+    "perMonthTable": " / mois",
+    "perMonthShort": "/mois",
+    "perYearShort": "/ an",
+    "billedAnnually": "Facturé annuellement ·",
+    "billedMonthly": "Facturé mensuellement ·",
+    "annualContract": "Contrat annuel · tarification au volume",
+    "plans": {
+      "starter": {
+        "name": "Starter",
+        "tagline": "Pour le trader discrétionnaire qui teste Augur sur un seul instrument.",
+        "cta": "Essai gratuit",
+        "tierLabel": "Statistiques palier 1",
+        "features": [
+          "18 familles de statistiques palier 1",
+          "Couverture NQ et ES",
+          "Actualisation quotidienne après la clôture",
+          "3 ans d'historique"
+        ]
+      },
+      "pro": {
+        "name": "Pro",
+        "tagline": "Pour le trader actif qui veut toutes les tranches et un conditionnement plus fin.",
+        "cta": "Essai gratuit",
+        "tierLabel": "Statistiques paliers 1 + 2",
+        "features": [
+          "36 familles de statistiques (paliers 1 + 2)",
+          "Toutes les tranches : jour, gap, régime",
+          "10 ans d'historique",
+          "Export CSV et vues enregistrées"
+        ]
+      },
+      "premium": {
+        "name": "Premium",
+        "tagline": "Pour le trader systématique qui a besoin de l'historique complet et de l'accès API.",
+        "cta": "Essai gratuit",
+        "tierLabel": "Statistiques paliers 1 à 3",
+        "features": [
+          "54 familles de statistiques (paliers 1 à 3)",
+          "Accès API REST et webhooks",
+          "Historique complet de 18 ans",
+          "Support email prioritaire"
+        ]
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "tagline": "Pour les desks et fonds ayant besoin de sièges, de SLA et du flux de données complet.",
+        "cta": "Contacter les ventes",
+        "price": "Sur devis",
+        "tierLabel": "Tous paliers + enterprise",
+        "features": [
+          "Tout ce qui est inclus dans Premium",
+          "Sièges d'équipe illimités",
+          "Flux de données brutes et limites de débit plus élevées",
+          "Responsable dédié et SLA 99,9 %"
+        ]
+      }
+    },
+    "compare": {
+      "eyebrow": "Comparer les offres",
+      "heading": "Tout, côte à côte",
+      "subtitle": "Le détail de ce que chaque palier débloque. Les prix affichés sont mensuels.",
+      "caption": "Comparaison des fonctionnalités des quatre offres",
+      "featureColumn": "Fonctionnalité",
+      "included": "Inclus",
+      "notIncluded": "Non inclus",
+      "groups": {
+        "statsAccess": "Accès aux statistiques",
+        "dataDepth": "Données et profondeur",
+        "teamSupport": "Équipe et support"
+      },
+      "rows": {
+        "tier1Stats": "Statistiques palier 1",
+        "tier2Stats": "Statistiques palier 2",
+        "tier3Stats": "Statistiques palier 3",
+        "statFamilies": "Familles de statistiques incluses",
+        "historicalDepth": "Profondeur d'historique",
+        "refreshFrequency": "Fréquence d'actualisation",
+        "conditionalSlices": "Tranches conditionnelles",
+        "csvExport": "Export CSV",
+        "restApiAccess": "Accès API REST",
+        "apiRateLimit": "Limite de débit API",
+        "seatsIncluded": "Sièges inclus",
+        "supportLevel": "Niveau de support",
+        "uptimeSla": "SLA de disponibilité"
+      },
+      "plusCustom": "+ sur mesure",
+      "years": "ans",
+      "daily": "Quotidien",
+      "intraday": "Intrajournalier",
+      "weekdayOnly": "Jour de semaine uniquement",
+      "allSlices": "Toutes les tranches",
+      "allPlusCustom": "Tout + sur mesure",
+      "perDay": "/ jour",
+      "unlimited": "Illimité",
+      "community": "Communauté",
+      "email": "Email",
+      "priorityEmail": "Email prioritaire",
+      "dedicatedManager": "Responsable dédié"
+    },
+    "errors": {
+      "generic": "Une erreur est survenue. Veuillez réessayer.",
+      "network": "Erreur réseau. Veuillez réessayer."
+    },
+    "redirecting": "Redirection…",
+    "faq": {
+      "eyebrow": "FAQ",
+      "heading": "Vos questions, nos réponses",
+      "q1": "Que signifie vraiment un « palier » ?",
+      "a1": "Chaque famille de statistiques Augur est classée du palier 1 à 3 selon sa profondeur et la complexité de son conditionnement. Le palier 1 couvre les avantages phares comme la continuation de gap et la direction de la dynamique d'ouverture. Le palier 2 ajoute des tranches multi-conditions et le filtrage par régime. Le palier 3 couvre les études les plus granulaires et gourmandes en échantillons. Votre offre débloque toutes les statistiques jusqu'à son palier inclus.",
+      "q2": "Y a-t-il un essai gratuit, et faut-il une carte bancaire ?",
+      "a2": "Chaque offre payante commence par un essai gratuit de 7 jours, sans carte bancaire requise pour démarrer. Vous avez accès à l'intégralité du palier de cette offre pendant l'essai. Nous ne demandons vos coordonnées de paiement que si vous décidez de continuer après le 7e jour.",
+      "q3": "Puis-je changer ou annuler mon offre plus tard ?",
+      "a3": "Oui — passez à une offre supérieure, inférieure, ou annulez à tout moment depuis la page de facturation de votre compte. Les montées en gamme prennent effet immédiatement avec une charge au prorata ; les rétrogradations et annulations s'appliquent à la fin de la période de facturation en cours, vous conservez donc l'accès jusque-là.",
+      "q4": "Comment fonctionnent la facturation annuelle et la réduction de 20 % ?",
+      "a4": "Passer à la facturation annuelle vous facture une seule fois pour douze mois avec une réduction de 20 % — soit deux mois offerts. Par exemple, l'offre Pro passe de <mono>79 €</mono> à un tarif effectif de <mono>63 €</mono> par mois (<mono>756 €</mono> facturés annuellement). Vous pouvez basculer entre mensuel et annuel quand vous le souhaitez.",
+      "q5": "Proposez-vous des remboursements ?",
+      "a5": "Comme l'essai gratuit vous permet de tout évaluer avant de payer, nous ne remboursons pas les périodes partielles de façon systématique. Cela dit, en cas de problème — double facturation ou erreur de facturation — contactez le support par email sous 14 jours et nous corrigerons la situation.",
+      "q6": "Quels moyens de paiement acceptez-vous ?",
+      "a6": "Tous les paiements sont traités de façon sécurisée via Stripe. Nous acceptons les principales cartes de crédit et de débit. Les clients Enterprise peuvent être facturés et payer par virement bancaire dans le cadre d'un contrat annuel.",
+      "q7": "Augur constitue-t-il un conseil financier ?",
+      "a7": "Non. Augur fournit uniquement des informations statistiques historiques — ce n'est pas un conseil en investissement ni une recommandation d'achat ou de vente d'un instrument. Chaque avantage décrit le passé ; les performances passées ne garantissent pas les résultats futurs."
+    },
+    "closingCta": {
+      "heading": "Encore hésitant ? Essayez gratuitement pendant 7 jours",
+      "description": "Accès complet au palier choisi, sans carte bancaire. Consultez les avantages face à leurs références avant de payer le moindre centime.",
+      "primaryCta": "Essai gratuit",
+      "secondaryCta": "Parler aux ventes"
+    }
+  },
+  "auth": {
+    "backToHome": "Retour à l'accueil",
+    "form": {
+      "email": "Email",
+      "emailPlaceholder": "vous@example.com",
+      "password": "Mot de passe",
+      "forgotPassword": "Mot de passe oublié ?",
+      "rememberMe": "Rester connecté",
+      "passwordHint": "Utilisez au moins 8 caractères, avec un mélange de lettres, de chiffres et de symboles.",
+      "newPasswordPlaceholder": "Au moins 8 caractères"
+    },
+    "signIn": {
+      "title": "Content de vous revoir",
+      "subtitle": "Connectez-vous pour accéder à votre catalogue de statistiques.",
+      "submit": "Connexion",
+      "noAccount": "Vous n'avez pas de compte ?",
+      "createAccount": "En créer un"
+    },
+    "signUp": {
+      "title": "Démarrez votre essai gratuit",
+      "subtitle": "7 jours d'accès complet. Sans carte bancaire.",
+      "submit": "Créer un compte",
+      "haveAccount": "Vous avez déjà un compte ?",
+      "signIn": "Connexion"
+    },
+    "forgotPassword": {
+      "title": "Réinitialisez votre mot de passe",
+      "subtitle": "Indiquez l'email de votre compte et nous vous enverrons un lien de réinitialisation.",
+      "submit": "Envoyer le lien",
+      "remembered": "Vous vous en souvenez ?",
+      "backToSignIn": "Retour à la connexion",
+      "checkInbox": {
+        "title": "Consultez votre boîte mail",
+        "description": "Si un compte existe pour <strong>{email}</strong>, nous avons envoyé un lien de réinitialisation. Il expire dans 60 minutes.",
+        "resend": "Renvoyer l'email"
+      }
+    },
+    "oauth": {
+      "continueWithGoogle": "Continuer avec Google",
+      "continueWithGithub": "Continuer avec GitHub"
+    }
+  },
+  "dashboard": {
+    "sidebar": {
+      "dashboard": "Tableau de bord",
+      "account": "Compte",
+      "logout": "Déconnexion",
+      "plan": "Offre",
+      "planTooltip": "Votre palier d'abonnement actuel",
+      "tier": "Palier {tier}",
+      "noPlan": "Aucune offre active"
+    },
+    "catalog": {
+      "greeting": "Bonjour",
+      "statCount": "{count, plural, one {<mono>#</mono> famille de statistiques} other {<mono>#</mono> familles de statistiques}}",
+      "couldNotLoad": "Impossible de charger les statistiques",
+      "loadFailed": "Échec du chargement du catalogue de statistiques. Veuillez réessayer plus tard.",
+      "refreshToTry": "Actualisez la page pour réessayer.",
+      "noFamiliesTitle": "Aucune famille de statistiques pour {instrument}",
+      "noFamiliesDescription": "Aucune famille de statistiques n'est disponible pour <mono>{instrument}</mono> actuellement. Essayez de sélectionner un autre instrument."
+    },
+    "statCard": {
+      "tier": "Palier {tier}",
+      "viewStats": "Voir les statistiques",
+      "upgradeToUnlock": "Mettez à niveau pour débloquer",
+      "upgradeDescription": "Cette famille de statistiques nécessite une offre supérieure. Mettez à niveau pour y accéder.",
+      "upgrade": "Mettre à niveau"
+    },
+    "instrumentSelector": {
+      "ariaLabel": "Instrument : {instrument}. Rechercher des instruments",
+      "searchPlaceholder": "Rechercher des instruments…",
+      "noInstrumentsFound": "Aucun instrument trouvé."
+    },
+    "selectInstrument": {
+      "title": "Choisissez votre instrument",
+      "description": "Sélectionnez l'instrument à terme que vous souhaitez suivre. Vous pourrez en changer à tout moment depuis le tableau de bord.",
+      "select": "Sélectionner",
+      "couldNotLoad": "Impossible de charger les instruments",
+      "loadFailed": "Échec du chargement de la liste des instruments. Veuillez réessayer plus tard.",
+      "refreshToTry": "Actualisez la page pour réessayer.",
+      "noInstrumentsAvailable": "Aucun instrument disponible."
+    }
+  },
+  "statDetail": {
+    "breadcrumbAriaLabel": "Fil d'Ariane",
+    "dashboardLink": "Tableau de bord",
+    "tier": "Palier {tier}",
+    "couldNotLoad": "Impossible de charger la statistique",
+    "loadFailed": "Échec du chargement des données. Veuillez réessayer plus tard.",
+    "refreshToTry": "Actualisez la page pour réessayer.",
+    "noDataForInstrument": "Aucune donnée disponible pour l'instrument <mono>{instrument}</mono>.",
+    "noDataForTimeframe": "Aucune donnée disponible pour l'intervalle <mono>{timeframe}</mono>.",
+    "summarisedMagnitudes": "Résumé des amplitudes",
+    "continuation": "continuation",
+    "patternFrequency": "Fréquence des motifs",
+    "probabilityFootnote": "Les probabilités sont des fréquences observées sur la période sélectionnée. La référence est le taux inconditionnel du même résultat ; l'avantage est <mono>probabilité − référence</mono>, en points de pourcentage.",
+    "advanced": "Avancé",
+    "slicedByDimension": "Découpé par dimension",
+    "expandDimensionHint": "développez une dimension pour voir les probabilités groupées",
+    "groupCount": "{count, plural, one {<mono>#</mono> groupe} other {<mono>#</mono> groupes}}",
+    "noDataForSlice": "Aucune donnée disponible pour cette dimension.",
+    "requiresTier": "Cette statistique nécessite le palier {tier}. Votre offre actuelle ne l'inclut pas.",
+    "upgradeToUnlock": "Mettez à niveau pour débloquer",
+    "bullish": "Haussier",
+    "bearish": "Baissier",
+    "nEquals": "N = <mono>{count}</mono>",
+    "vsBaseline": "vs <mono>{value}</mono> de référence",
+    "noBaselineAvailable": "aucune référence disponible",
+    "dataFiltersAriaLabel": "Filtres de données",
+    "timeframe": "Intervalle",
+    "dataRange": "Plage de données",
+    "totalSessions": "Séances totales",
+    "period": "Période",
+    "periods": {
+      "custom": "Plage personnalisée",
+      "all": "Historique complet",
+      "1m": "Dernier mois",
+      "3m": "3 derniers mois",
+      "6m": "6 derniers mois",
+      "ytd": "Depuis le début de l'année",
+      "1yr": "Dernière année",
+      "2yr": "2 dernières années",
+      "3yr": "3 dernières années",
+      "5yr": "5 dernières années",
+      "10yr": "10 dernières années"
+    },
+    "contextSelectorsAriaLabel": "Sélecteurs de contexte",
+    "instrument": "Instrument",
+    "stat": "Statistique",
+    "searchStatFamilies": "Rechercher des familles de statistiques…",
+    "noStatFamiliesFound": "Aucune famille de statistiques trouvée.",
+    "fullHistory": "Historique complet",
+    "all": "Tout",
+    "lookBackPeriod": "Période de rétrospection",
+    "custom": "Personnalisé",
+    "startDate": "Date de début",
+    "endDate": "Date de fin",
+    "cancel": "Annuler",
+    "applyRange": "Appliquer la plage",
+    "table": {
+      "group": "Groupe",
+      "condition": "Condition",
+      "outcome": "Résultat",
+      "probability": "Probabilité",
+      "baseline": "Référence",
+      "n": "N",
+      "edge": "Avantage"
+    }
+  },
+  "account": {
+    "heading": "Compte et facturation",
+    "subheading": "Gérez votre abonnement, vos informations de paiement et votre profil.",
+    "profile": {
+      "title": "Paramètres du profil",
+      "subtitle": "Votre email de connexion et votre mot de passe (Supabase Auth).",
+      "emailAddress": "Adresse email",
+      "change": "Modifier",
+      "save": "Enregistrer",
+      "saving": "Enregistrement…",
+      "cancel": "Annuler",
+      "emailChangeHint": "Nous vous enverrons un lien de confirmation avant que le changement ne prenne effet.",
+      "emailChangeConfirmationSent": "Lien de confirmation envoyé — consultez votre nouvelle boîte mail pour confirmer le changement.",
+      "changePassword": "Changer le mot de passe",
+      "newPassword": "Nouveau mot de passe",
+      "confirmNewPassword": "Confirmer le nouveau mot de passe",
+      "passwordMinLength": "Au moins 12 caractères.",
+      "updating": "Mise à jour…",
+      "updatePassword": "Mettre à jour le mot de passe",
+      "passwordTooShort": "Le nouveau mot de passe doit contenir au moins 12 caractères.",
+      "passwordsDoNotMatch": "Les mots de passe ne correspondent pas.",
+      "passwordUpdated": "Mot de passe mis à jour."
+    },
+    "language": {
+      "label": "Langue",
+      "auto": "Auto (navigateur)",
+      "english": "English",
+      "french": "Français",
+      "hint": "Contrôle la langue d'affichage dans toute l'application."
+    },
+    "danger": {
+      "title": "Annuler l'abonnement",
+      "alreadyCancelling": "Votre abonnement est déjà programmé pour être annulé à la fin de la période en cours.",
+      "keepAccessUntil": "Vous conserverez l'accès jusqu'à la fin de la période de facturation en cours ({date}), puis il sera révoqué.",
+      "keepAccessUntilUnknown": "Vous conserverez l'accès jusqu'à la fin de la période de facturation en cours, puis il sera révoqué.",
+      "cancelInPortal": "Annuler dans le portail Stripe"
+    },
+    "plan": {
+      "title": "Offre actuelle",
+      "noSubscription": "Vous n'avez pas d'abonnement actif.",
+      "noActivePlan": "Aucune offre active",
+      "choosePlan": "Choisir une offre",
+      "activePlan": "Offre active",
+      "unknownPlan": "Offre inconnue",
+      "tier": "Palier {tier}",
+      "annual": "Annuel",
+      "monthly": "Mensuel",
+      "setToCancelAtPeriodEnd": "Votre abonnement est programmé pour être annulé à la fin de cette période.",
+      "activeAndRenews": "Votre abonnement est actif et se renouvelle automatiquement.",
+      "active": "Actif",
+      "statsAccess": "Accès aux statistiques",
+      "billingCycle": "Cycle de facturation",
+      "accessUntil": "Accès jusqu'au",
+      "renewsOn": "Renouvellement le",
+      "upgradePlan": "Mettre à niveau",
+      "compareAllPlans": "Comparez toutes les offres sur la page tarifs."
+    },
+    "billing": {
+      "title": "Détails de facturation",
+      "subtitle": "Le moyen de paiement, les factures et l'annulation sont gérés dans le portail sécurisé Stripe.",
+      "nextPayment": "Prochain paiement",
+      "onDate": "le {date}",
+      "billingEmail": "Email de facturation",
+      "manageSubscription": "Gérer l'abonnement",
+      "stripePortalNote": "Ouvre le portail Stripe — l'historique des factures et les reçus s'y trouvent."
+    }
+  }
+}

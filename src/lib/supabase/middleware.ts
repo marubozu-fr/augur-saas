@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextRequest, NextResponse } from "next/server";
 import { NO_PERSIST_COOKIE } from "@/lib/constants";
 import { selectActiveSubscription } from "@/lib/subscription";
+import { defaultLocale, isLocale, type Locale } from "@/i18n/config";
 
 // Paths that require a valid session. /account is intentionally included so
 // unauthenticated users are sent to sign-in, but it is NOT subscription-gated
@@ -11,6 +12,29 @@ const PROTECTED_PREFIXES = ["/dashboard", "/account", "/stats"];
 // Paths that additionally require an active subscription. /account is excluded
 // so users can manage or create their subscription from the billing page.
 const SUBSCRIPTION_GATED_PREFIXES = ["/dashboard", "/stats"];
+
+// Public marketing pages — the only routes that live under the URL-prefixed
+// `[locale]` segment (src/app/[locale]/(marketing)/...). Every other route in
+// this repo is a private, cookie-locale-driven route (dashboard/account/stats)
+// or an auth/API route.
+const MARKETING_PATHS = ["/", "/pricing"];
+
+// Top-level path segments owned by a real (non-marketing) route. Used to tell
+// a genuinely unknown/invalid locale-looking segment (e.g. "/de/pricing")
+// apart from an existing private route (e.g. "/dashboard") when both reduce
+// to a single first segment.
+const KNOWN_APP_SEGMENTS = new Set([
+  "sign-in",
+  "sign-up",
+  "forgot-password",
+  "dashboard",
+  "account",
+  "stats",
+  "auth",
+  "api",
+]);
+
+const LOCALE_COOKIE = "NEXT_LOCALE";
 
 // Redirects build a brand-new NextResponse, which does not carry the auth
 // cookies accumulated on `response` (e.g. a token refreshed by getUser()).
@@ -23,6 +47,71 @@ function withPropagatedCookies(
     redirectResponse.cookies.set(cookie);
   });
   return redirectResponse;
+}
+
+// Cookie → Accept-Language → default, mirroring src/i18n/request.ts.
+function detectLocale(request: NextRequest): Locale {
+  const cookieLocale = request.cookies.get(LOCALE_COOKIE)?.value;
+  if (cookieLocale && isLocale(cookieLocale)) {
+    return cookieLocale;
+  }
+
+  const acceptLanguage = request.headers.get("accept-language");
+  if (acceptLanguage) {
+    for (const part of acceptLanguage.split(",")) {
+      const candidate = part.split(";")[0]?.trim().slice(0, 2).toLowerCase();
+      if (candidate && isLocale(candidate)) {
+        return candidate;
+      }
+    }
+  }
+
+  return defaultLocale;
+}
+
+// Splits a pathname into its first segment and the remainder (normalised to
+// at least "/"). Used to detect and strip a `[locale]` URL prefix.
+function splitFirstSegment(pathname: string): {
+  first: string | null;
+  rest: string;
+} {
+  const match = pathname.match(/^\/([^/]+)(\/.*)?$/);
+  if (!match) return { first: null, rest: pathname };
+  const rest = match[2] && match[2] !== "" ? match[2] : "/";
+  return { first: match[1], rest };
+}
+
+// Resolves the hybrid locale routing described in the (marketing)-only
+// `[locale]` URL-prefix scheme: returns a redirect target when the request
+// needs one, or null when the request should pass through unchanged (either
+// because it's a valid prefixed marketing path, or a private/no-prefix path
+// that the existing auth/subscription logic below handles as before).
+function resolveLocaleRedirect(request: NextRequest): string | null {
+  const { pathname } = request.nextUrl;
+
+  // Marketing path with no locale prefix at all — add one.
+  if (MARKETING_PATHS.includes(pathname)) {
+    const locale = detectLocale(request);
+    return `/${locale}${pathname === "/" ? "" : pathname}`;
+  }
+
+  const { first, rest } = splitFirstSegment(pathname);
+  if (!first) return null;
+
+  if (isLocale(first)) {
+    // Valid prefix on a marketing path — pass through as-is.
+    if (MARKETING_PATHS.includes(rest)) return null;
+    // Locale prefixes are marketing-only — strip it from any other path.
+    return rest;
+  }
+
+  // First segment isn't a known private route and the remainder is a
+  // marketing path — treat it as a mistyped/unsupported locale prefix.
+  if (!KNOWN_APP_SEGMENTS.has(first) && MARKETING_PATHS.includes(rest)) {
+    return `/${defaultLocale}${rest === "/" ? "" : rest}`;
+  }
+
+  return null;
 }
 
 export async function updateSession(
@@ -67,6 +156,16 @@ export async function updateSession(
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  // Hybrid locale routing (marketing pages only — see resolveLocaleRedirect).
+  // Runs before the protected/subscription gates below: every case handled
+  // here ends in a redirect, so there is nothing left to gate on this request.
+  const localeRedirectPathname = resolveLocaleRedirect(request);
+  if (localeRedirectPathname !== null) {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = localeRedirectPathname;
+    return withPropagatedCookies(NextResponse.redirect(redirectUrl), response);
+  }
 
   const { pathname } = request.nextUrl;
   const isProtected = PROTECTED_PREFIXES.some((prefix) =>

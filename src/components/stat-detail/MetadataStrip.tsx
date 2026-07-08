@@ -5,19 +5,20 @@
 // depends on the period-filtered fetch), with MetadataStripSkeleton as its
 // loading placeholder — see StatDetailSkeleton.
 
+import { useTranslations } from "next-intl";
 import type { PeriodPreset } from "@/lib/period";
 
-const PERIOD_LABELS: Record<PeriodPreset, string> = {
-  all: "All history",
-  "1m": "Last 1 month",
-  "3m": "Last 3 months",
-  "6m": "Last 6 months",
-  ytd: "Year to date",
-  "1yr": "Last 1 year",
-  "2yr": "Last 2 years",
-  "3yr": "Last 3 years",
-  "5yr": "Last 5 years",
-  "10yr": "Last 10 years",
+const PERIOD_LABEL_KEYS: Record<PeriodPreset, string> = {
+  all: "periods.all",
+  "1m": "periods.1m",
+  "3m": "periods.3m",
+  "6m": "periods.6m",
+  ytd: "periods.ytd",
+  "1yr": "periods.1yr",
+  "2yr": "periods.2yr",
+  "3yr": "periods.3yr",
+  "5yr": "periods.5yr",
+  "10yr": "periods.10yr",
 };
 
 interface MetadataStripProps {
@@ -34,15 +35,18 @@ export function MetadataStrip({
   isCustomRange,
   period,
 }: MetadataStripProps) {
+  const t = useTranslations("statDetail");
   const [rangeStart, rangeEnd] = dataRange;
-  const periodLabel = isCustomRange ? "Custom range" : PERIOD_LABELS[period];
+  const periodLabel = isCustomRange
+    ? t("periods.custom")
+    : t(PERIOD_LABEL_KEYS[period]);
 
   return (
     <div className="flex gap-7 flex-wrap p-4 px-5 mb-6 border border-border rounded-lg bg-card">
       {rangeStart && rangeEnd && (
         <div>
           <div className="text-xs tracking-wider uppercase text-subtle">
-            Data range
+            {t("dataRange")}
           </div>
           <div className="text-sm font-semibold font-mono tabular-nums text-foreground mt-0.5">
             {rangeStart} → {rangeEnd}
@@ -51,7 +55,7 @@ export function MetadataStrip({
       )}
       <div>
         <div className="text-xs tracking-wider uppercase text-subtle">
-          Total sessions
+          {t("totalSessions")}
         </div>
         <div className="text-sm font-semibold font-mono tabular-nums text-foreground mt-0.5">
           {totalSamples.toLocaleString("en-US")}
@@ -59,7 +63,7 @@ export function MetadataStrip({
       </div>
       <div>
         <div className="text-xs tracking-wider uppercase text-subtle">
-          Period
+          {t("period")}
         </div>
         <div className="text-sm font-semibold text-foreground mt-0.5">
           {periodLabel}

@@ -10,6 +10,8 @@
 // it even when locked), showing it here too is not a new information leak,
 // but it does mean the title/definition render twice on a locked stat page.
 
+import { useTranslations } from "next-intl";
+
 interface StatHeaderProps {
   title: string;
   definition: string;
@@ -17,6 +19,8 @@ interface StatHeaderProps {
 }
 
 export function StatHeader({ title, definition, tier }: StatHeaderProps) {
+  const t = useTranslations("statDetail");
+
   return (
     <div className="flex items-start gap-5 flex-wrap mb-5">
       <div className="max-w-2xl">
@@ -25,7 +29,7 @@ export function StatHeader({ title, definition, tier }: StatHeaderProps) {
             {title}
           </h1>
           <span className="inline-flex items-center px-3 py-[5px] rounded-full text-xs font-semibold bg-brand-soft text-brand">
-            Tier {tier}
+            {t("tier", { tier })}
           </span>
         </div>
         {definition && (

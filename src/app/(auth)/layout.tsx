@@ -1,15 +1,18 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { AugurLogo } from "@/components/AugurLogo";
 
 // Shared layout for all auth routes: /sign-in, /sign-up, /forgot-password.
 // Renders a centered card on an ambient-glow dark background, matching
 // docs/mockups/auth.html (.auth-page shell + .auth-brand + ambient ::before glow).
-export default function AuthLayout({
+export default async function AuthLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const t = await getTranslations("auth");
+
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center px-5 py-12 overflow-hidden bg-background">
       {/* Ambient sky glow — mirrors .auth-page::before in the mockup */}
@@ -25,7 +28,7 @@ export default function AuthLayout({
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-          Back to home
+          {t("backToHome")}
         </Link>
       </div>
 

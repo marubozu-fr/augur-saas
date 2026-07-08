@@ -3,6 +3,7 @@
 import { useTransition } from "react";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { signIn } from "@/app/(auth)/actions";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -12,6 +13,8 @@ interface SignInFormProps {
 
 export function SignInForm({ error }: SignInFormProps) {
   const [isPending, startTransition] = useTransition();
+  const t = useTranslations("auth");
+  const tForm = useTranslations("auth.form");
 
   function handleSubmit(formData: FormData) {
     startTransition(async () => {
@@ -30,7 +33,7 @@ export function SignInForm({ error }: SignInFormProps) {
             htmlFor="email"
             className="text-sm font-semibold text-foreground"
           >
-            Email
+            {tForm("email")}
           </label>
           <input
             id="email"
@@ -38,7 +41,7 @@ export function SignInForm({ error }: SignInFormProps) {
             type="email"
             required
             autoComplete="email"
-            placeholder="you@example.com"
+            placeholder={tForm("emailPlaceholder")}
             disabled={isPending}
             className="w-full h-11 px-4 text-sm text-foreground bg-background border border-border-strong rounded-md placeholder:text-subtle transition-colors hover:border-neutral focus:outline-none focus:border-brand focus:ring-3 focus:ring-brand-ring disabled:opacity-60 disabled:cursor-not-allowed"
           />
@@ -50,13 +53,13 @@ export function SignInForm({ error }: SignInFormProps) {
               htmlFor="password"
               className="text-sm font-semibold text-foreground"
             >
-              Password
+              {tForm("password")}
             </label>
             <Link
               href="/forgot-password"
               className="text-xs font-semibold text-brand hover:text-brand-hover transition-colors"
             >
-              Forgot password?
+              {tForm("forgotPassword")}
             </Link>
           </div>
           <input
@@ -80,7 +83,7 @@ export function SignInForm({ error }: SignInFormProps) {
             disabled={isPending}
           />
           <label htmlFor="remember" className="cursor-pointer select-none">
-            Keep me signed in
+            {tForm("rememberMe")}
           </label>
         </div>
 
@@ -89,7 +92,11 @@ export function SignInForm({ error }: SignInFormProps) {
           disabled={isPending}
           className="inline-flex items-center justify-center w-full h-11 rounded-md bg-brand text-on-brand text-sm font-semibold hover:bg-brand-hover active:bg-brand-hover transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign in"}
+          {isPending ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            t("signIn.submit")
+          )}
         </button>
       </form>
     </>

@@ -1,9 +1,11 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { createStripeClient } from "@/lib/stripe";
 import { getActiveSubscription } from "@/lib/subscription.server";
+import type { Locale } from "@/i18n/config";
 
 // ---------------------------------------------------------------------------
 // Billing portal — Stripe Customer Portal redirect.
@@ -114,6 +116,51 @@ export async function changePassword(
 
   if (error) {
     return { error: error.message };
+  }
+
+  return { error: null };
+}
+
+// ---------------------------------------------------------------------------
+// Update locale preference — persists profiles.preferred_locale and mirrors
+// the choice into the NEXT_LOCALE cookie so the change is visible immediately
+// (the cookie is what src/i18n/request.ts reads for private routes). Passing
+// `null` clears the preference (auto-detect via cookie / Accept-Language).
+// ---------------------------------------------------------------------------
+
+const LOCALE_COOKIE = "NEXT_LOCALE";
+const ONE_YEAR_SECONDS = 60 * 60 * 24 * 365;
+
+export async function updateLocalePreference(
+  locale: Locale | null,
+): Promise<{ error: string | null }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Not authenticated." };
+  }
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({ preferred_locale: locale })
+    .eq("id", user.id);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  const cookieStore = await cookies();
+  if (locale) {
+    cookieStore.set(LOCALE_COOKIE, locale, {
+      path: "/",
+      sameSite: "lax",
+      maxAge: ONE_YEAR_SECONDS,
+    });
+  } else {
+    cookieStore.delete(LOCALE_COOKIE);
   }
 
   return { error: null };

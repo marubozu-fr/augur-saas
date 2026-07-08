@@ -8,12 +8,14 @@
 
 import { redirect } from "next/navigation";
 import { AlertTriangle } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { normalizeInstrument } from "@/lib/instruments";
 import { getStatCatalog, AugurApiError } from "@/services/augur";
 import { setDefaultInstrument } from "./actions";
 
 export default async function DashboardPage() {
+  const t = await getTranslations("dashboard.selectInstrument");
   const supabase = await createClient();
   const {
     data: { user },
@@ -54,9 +56,7 @@ export default async function DashboardPage() {
     instruments = Array.from(instrumentSet).sort();
   } catch (err) {
     const message =
-      err instanceof AugurApiError
-        ? err.message
-        : "Failed to load the instrument list. Please try again later.";
+      err instanceof AugurApiError ? err.message : t("loadFailed");
     catalogError = message;
     instruments = [];
   }
@@ -70,28 +70,25 @@ export default async function DashboardPage() {
               <AlertTriangle size={26} aria-hidden="true" />
             </span>
             <h2 className="text-lg font-semibold text-foreground">
-              Could not load instruments
+              {t("couldNotLoad")}
             </h2>
             <p className="text-sm text-muted-foreground max-w-[26rem]">
               {catalogError}
             </p>
-            <p className="text-xs text-subtle">
-              Refresh the page to try again.
-            </p>
+            <p className="text-xs text-subtle">{t("refreshToTry")}</p>
           </div>
         ) : instruments.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center">
-            No instruments available.
+            {t("noInstrumentsAvailable")}
           </p>
         ) : (
           <>
             <div className="mb-8 text-center">
               <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                Choose your instrument
+                {t("title")}
               </h1>
               <p className="mt-2 text-sm text-muted-foreground">
-                Select the futures instrument you want to track. You can switch
-                at any time from the dashboard.
+                {t("description")}
               </p>
             </div>
 
@@ -107,7 +104,7 @@ export default async function DashboardPage() {
                       {code}
                     </span>
                     <span className="mt-2 inline-flex items-center justify-center h-8 px-4 rounded-md bg-brand text-xs font-semibold text-on-brand group-hover:bg-brand-hover transition-colors">
-                      Select
+                      {t("select")}
                     </span>
                   </button>
                 </form>

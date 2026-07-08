@@ -1,0 +1,489 @@
+{
+  "common": {},
+  "nav": {
+    "features": "Features",
+    "howItWorks": "How it works",
+    "pricing": "Pricing",
+    "customers": "Customers",
+    "signIn": "Sign in",
+    "getStarted": "Get started",
+    "changeLanguage": "Change language, current: {language}"
+  },
+  "landing": {
+    "metaTitle": "Augur — Statistical Market Probabilities for Futures Traders",
+    "metaDescription": "Augur turns 18 years of NQ and ES futures data into clean, conditional probabilities. Every edge is shown against its baseline, with the sample size in plain sight.",
+    "hero": {
+      "badge": "New — overnight gap continuation stats now live",
+      "headline": "Trade the <hl>probabilities</hl>,<br></br>not the predictions.",
+      "subtitle": "Augur turns 18 years of NQ and ES futures data into clean, conditional probabilities. Every edge is shown against its baseline, with the sample size in plain sight — so you know exactly how strong a setup really is.",
+      "ctaPrimary": "Start free 7-day trial",
+      "ctaSecondary": "See the data",
+      "checklist": {
+        "noCard": "No card required",
+        "cancelAnytime": "Cancel anytime",
+        "updatedDaily": "Updated daily after the close"
+      },
+      "preview": {
+        "ariaLabel": "Sample statistic preview",
+        "title": "Gap-up continuation — NQ",
+        "subtitle": "P(close above open | gap > 0.30%) · RTH session",
+        "tier": "Tier 1",
+        "edge": "+9.8 pts edge",
+        "baselineLabel": "Baseline (all sessions):",
+        "row1Label": "Monday open",
+        "row2Label": "Gap > 0.75%",
+        "row3Label": "Friday open",
+        "row4Label": "FOMC day"
+      }
+    },
+    "trustStrip": {
+      "heading": "Coverage across the instruments you actually trade",
+      "ariaLabel": "Covered instruments",
+      "sessions": "RTH & ETH sessions",
+      "history": "2007 – present",
+      "timeframes": "1m · 5m · daily"
+    },
+    "features": {
+      "eyebrow": "Why Augur",
+      "heading": "Edges you can actually trust",
+      "subtitle": "No black boxes, no curve-fit signals. Just transparent conditional statistics with the context you need to size a trade with confidence.",
+      "baseline": {
+        "title": "Baseline-relative edges",
+        "description": "Every probability is shown next to its unconditional baseline. A 56% hit rate means nothing until you know the base rate — we put both side by side, always."
+      },
+      "sliced": {
+        "title": "Sliced every way",
+        "description": "Drill into any stat by weekday, gap size, prior-day range, session, or volatility regime. Each slice carries its own sample size so thin buckets never mislead you."
+      },
+      "refreshed": {
+        "title": "Refreshed daily",
+        "description": "Stats recompute automatically after each cash close, rolling in the latest session so your edges reflect this week's market — not a backtest frozen in 2019."
+      },
+      "significance": {
+        "title": "Significance built in",
+        "description": "Confidence intervals and minimum-N thresholds keep noise out of the headline number. We grey out edges that aren't statistically meaningful instead of overselling them."
+      }
+    },
+    "howItWorks": {
+      "eyebrow": "How it works",
+      "heading": "From signup to your first edge in minutes",
+      "step1": {
+        "title": "Pick your plan",
+        "description": "Choose a tier from Starter to Enterprise. Higher tiers unlock deeper stat families and finer slices. Start free for 7 days, no card required."
+      },
+      "step2": {
+        "title": "Browse the stat catalog",
+        "description": "Open the dashboard and explore stat families for NQ and ES — gaps, opening drives, range extensions, weekday seasonality and more. Filter to what fits your style."
+      },
+      "step3": {
+        "title": "Trade with context",
+        "description": "Read the edge against its baseline, check the sample size, and size your position accordingly. Come back after the close for the next day's refreshed numbers."
+      }
+    },
+    "proof": {
+      "eyebrow": "Loved by serious traders",
+      "heading": "The edge desk traders keep open all day",
+      "metrics": {
+        "families": "Distinct stat families",
+        "dataPoints": "Data points analyzed",
+        "history": "Of NQ & ES history",
+        "instruments": "Covered instruments (NQ & ES)"
+      },
+      "testimonial1": {
+        "quote": "I stopped guessing whether a gap would fill. Augur tells me the continuation rate by gap size and weekday, with the N right there. It's the first thing I check before the open.",
+        "role": "Independent NQ futures trader"
+      },
+      "testimonial2": {
+        "quote": "What sold me was the honesty. When a slice has 22 samples it says so and greys out the edge. No other stats product respects significance like this.",
+        "role": "Quant analyst, prop desk"
+      },
+      "testimonial3": {
+        "quote": "We use the Enterprise API to feed our pre-market checklist for a small ES book. Daily refresh and clean baselines saved us weeks of building this ourselves.",
+        "role": "Head of trading, proprietary fund"
+      }
+    },
+    "cta": {
+      "heading": "Get an edge in your inbox every morning",
+      "description": "The Augur Pre-Market Brief: three statistically notable setups for NQ and ES, delivered before the open. Free, and a taste of the full platform.",
+      "footnote": "Free for 7 days. No card required."
+    },
+    "footer": {
+      "tagline": "Statistical market probabilities for NQ and ES futures traders. Transparent edges, real baselines, refreshed daily.",
+      "productHeading": "Product",
+      "startTrial": "Start free trial",
+      "companyHeading": "Company",
+      "about": "About",
+      "methodology": "Methodology",
+      "changelog": "Changelog",
+      "contact": "Contact",
+      "legalHeading": "Legal",
+      "terms": "Terms of service",
+      "privacy": "Privacy policy",
+      "risk": "Risk disclosure",
+      "cookies": "Cookie settings",
+      "copyright": "© 2026 Augur · Marubozu FR. All rights reserved.",
+      "disclaimer": "Augur provides historical statistical information only and is not investment advice. Past performance does not guarantee future results. Trading futures carries substantial risk of loss."
+    }
+  },
+  "pricing": {
+    "metaTitle": "Augur — Pricing & Plans",
+    "metaDescription": "Every plan unlocks a deeper slice of the Augur stat catalog. Start free for 7 days, no card required.",
+    "hero": {
+      "eyebrow": "Pricing",
+      "heading": "Pick the tier your strategy needs",
+      "subtitle": "Every plan unlocks a deeper slice of the Augur stat catalog. Start free for 7 days, no card required — upgrade, downgrade, or cancel whenever you like."
+    },
+    "toggle": {
+      "ariaLabel": "Billing period",
+      "monthly": "Monthly",
+      "annual": "Annual",
+      "saveBadge": "Save 20% — 2 months free annually"
+    },
+    "mostPopular": "Most popular",
+    "perMonth": " / month",
+    "perMonthTable": " / mo",
+    "perMonthShort": "/mo",
+    "perYearShort": "/ yr",
+    "billedAnnually": "Billed annually ·",
+    "billedMonthly": "Billed monthly ·",
+    "annualContract": "Annual contract · volume pricing",
+    "plans": {
+      "starter": {
+        "name": "Starter",
+        "tagline": "For the discretionary trader testing Augur on a single instrument.",
+        "cta": "Start free trial",
+        "tierLabel": "Tier 1 stats",
+        "features": [
+          "18 Tier 1 stat families",
+          "NQ & ES coverage",
+          "Daily refresh after the close",
+          "3-year historical depth"
+        ]
+      },
+      "pro": {
+        "name": "Pro",
+        "tagline": "For the active trader who wants every slice and finer conditioning.",
+        "cta": "Start free trial",
+        "tierLabel": "Tier 1 + 2 stats",
+        "features": [
+          "36 stat families (Tier 1 + 2)",
+          "All slices: weekday, gap, regime",
+          "10-year historical depth",
+          "CSV export & saved views"
+        ]
+      },
+      "premium": {
+        "name": "Premium",
+        "tagline": "For the systematic trader who needs full history and API access.",
+        "cta": "Start free trial",
+        "tierLabel": "Tier 1–3 stats",
+        "features": [
+          "54 stat families (Tier 1–3)",
+          "REST API access & webhooks",
+          "Full 18-year history",
+          "Priority email support"
+        ]
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "tagline": "For desks and funds needing seats, SLAs, and the full data feed.",
+        "cta": "Contact sales",
+        "price": "Custom",
+        "tierLabel": "All tiers + enterprise",
+        "features": [
+          "Everything in Premium",
+          "Unlimited team seats",
+          "Raw data feed & higher rate limits",
+          "Dedicated manager & 99.9% SLA"
+        ]
+      }
+    },
+    "compare": {
+      "eyebrow": "Compare plans",
+      "heading": "Everything, side by side",
+      "subtitle": "The detailed breakdown of what each tier unlocks. Prices shown are monthly.",
+      "caption": "Feature comparison across all four plans",
+      "featureColumn": "Feature",
+      "included": "Included",
+      "notIncluded": "Not included",
+      "groups": {
+        "statsAccess": "Stats access",
+        "dataDepth": "Data & depth",
+        "teamSupport": "Team & support"
+      },
+      "rows": {
+        "tier1Stats": "Tier 1 stats",
+        "tier2Stats": "Tier 2 stats",
+        "tier3Stats": "Tier 3 stats",
+        "statFamilies": "Stat families included",
+        "historicalDepth": "Historical depth",
+        "refreshFrequency": "Refresh frequency",
+        "conditionalSlices": "Conditional slices",
+        "csvExport": "CSV export",
+        "restApiAccess": "REST API access",
+        "apiRateLimit": "API rate limit",
+        "seatsIncluded": "Seats included",
+        "supportLevel": "Support level",
+        "uptimeSla": "Uptime SLA"
+      },
+      "plusCustom": "+ custom",
+      "years": "yrs",
+      "daily": "Daily",
+      "intraday": "Intraday",
+      "weekdayOnly": "Weekday only",
+      "allSlices": "All slices",
+      "allPlusCustom": "All + custom",
+      "perDay": "/ day",
+      "unlimited": "Unlimited",
+      "community": "Community",
+      "email": "Email",
+      "priorityEmail": "Priority email",
+      "dedicatedManager": "Dedicated manager"
+    },
+    "errors": {
+      "generic": "Something went wrong. Please try again.",
+      "network": "Network error. Please try again."
+    },
+    "redirecting": "Redirecting…",
+    "faq": {
+      "eyebrow": "FAQ",
+      "heading": "Questions, answered",
+      "q1": "What does a \"tier\" actually mean?",
+      "a1": "Each Augur stat family is graded Tier 1 to 3 by depth and conditioning complexity. Tier 1 covers headline edges like gap continuation and opening-drive direction. Tier 2 adds multi-condition slices and regime filtering. Tier 3 covers the most granular, sample-intensive studies. Your plan unlocks every stat up to and including its tier.",
+      "q2": "Is there a free trial, and do I need a card?",
+      "a2": "Every paid plan starts with a 7-day free trial, and no card is required to begin. You get full access to that plan's tier during the trial. We only ask for payment details if you decide to continue after day 7.",
+      "q3": "Can I change or cancel my plan later?",
+      "a3": "Yes — upgrade, downgrade, or cancel anytime from your account billing page. Upgrades take effect immediately with a prorated charge; downgrades and cancellations apply at the end of your current billing period, so you keep access until then.",
+      "q4": "How does annual billing and the 20% discount work?",
+      "a4": "Switching to annual billing charges you once for twelve months at a 20% discount — effectively two months free. For example, Pro drops from <mono>€79</mono> to an effective <mono>€63</mono> per month (<mono>€756</mono> billed yearly). You can switch between monthly and annual whenever you like.",
+      "q5": "Do you offer refunds?",
+      "a5": "Because the free trial lets you evaluate everything before paying, we don't routinely refund partial periods. That said, if something went wrong — a double charge or a billing error — email support within 14 days and we'll make it right.",
+      "q6": "Which payment methods do you accept?",
+      "a6": "All payments are handled securely through Stripe. We accept major credit and debit cards. Enterprise customers can be invoiced and pay by bank transfer under an annual contract.",
+      "q7": "Is Augur financial advice?",
+      "a7": "No. Augur provides historical statistical information only — it is not investment advice and not a recommendation to buy or sell any instrument. Every edge is descriptive of the past; past performance does not guarantee future results."
+    },
+    "closingCta": {
+      "heading": "Still deciding? Try it free for 7 days",
+      "description": "Full access to your chosen tier, no card required. See the edges against their baselines before you pay a cent.",
+      "primaryCta": "Start free trial",
+      "secondaryCta": "Talk to sales"
+    }
+  },
+  "auth": {
+    "backToHome": "Back to home",
+    "form": {
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "password": "Password",
+      "forgotPassword": "Forgot password?",
+      "rememberMe": "Keep me signed in",
+      "passwordHint": "Use 8+ characters with a mix of letters, numbers & symbols.",
+      "newPasswordPlaceholder": "At least 8 characters"
+    },
+    "signIn": {
+      "title": "Welcome back",
+      "subtitle": "Sign in to access your stat catalog.",
+      "submit": "Sign in",
+      "noAccount": "Don't have an account?",
+      "createAccount": "Create one"
+    },
+    "signUp": {
+      "title": "Start your free trial",
+      "subtitle": "7 days of full access. No card required.",
+      "submit": "Create account",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign in"
+    },
+    "forgotPassword": {
+      "title": "Reset your password",
+      "subtitle": "Enter your account email and we'll send you a reset link.",
+      "submit": "Send reset link",
+      "remembered": "Remembered it?",
+      "backToSignIn": "Back to sign in",
+      "checkInbox": {
+        "title": "Check your inbox",
+        "description": "If an account exists for <strong>{email}</strong>, we've sent a password reset link. It expires in 60 minutes.",
+        "resend": "Resend email"
+      }
+    },
+    "oauth": {
+      "continueWithGoogle": "Continue with Google",
+      "continueWithGithub": "Continue with GitHub"
+    }
+  },
+  "dashboard": {
+    "sidebar": {
+      "dashboard": "Dashboard",
+      "account": "Account",
+      "logout": "Logout",
+      "plan": "Plan",
+      "planTooltip": "Your current subscription tier",
+      "tier": "Tier {tier}",
+      "noPlan": "No active plan"
+    },
+    "catalog": {
+      "greeting": "Good morning",
+      "statCount": "{count, plural, one {<mono>#</mono> stat family} other {<mono>#</mono> stat families}}",
+      "couldNotLoad": "Could not load stats",
+      "loadFailed": "Failed to load the stat catalog. Please try again later.",
+      "refreshToTry": "Refresh the page to try again.",
+      "noFamiliesTitle": "No stat families for {instrument}",
+      "noFamiliesDescription": "There are no stat families available for <mono>{instrument}</mono> at this time. Try selecting a different instrument."
+    },
+    "statCard": {
+      "tier": "Tier {tier}",
+      "viewStats": "View stats",
+      "upgradeToUnlock": "Upgrade to unlock",
+      "upgradeDescription": "This stat family requires a higher plan. Upgrade to access it.",
+      "upgrade": "Upgrade"
+    },
+    "instrumentSelector": {
+      "ariaLabel": "Instrument: {instrument}. Search instruments",
+      "searchPlaceholder": "Search instruments…",
+      "noInstrumentsFound": "No instruments found."
+    },
+    "selectInstrument": {
+      "title": "Choose your instrument",
+      "description": "Select the futures instrument you want to track. You can switch at any time from the dashboard.",
+      "select": "Select",
+      "couldNotLoad": "Could not load instruments",
+      "loadFailed": "Failed to load the instrument list. Please try again later.",
+      "refreshToTry": "Refresh the page to try again.",
+      "noInstrumentsAvailable": "No instruments available."
+    }
+  },
+  "statDetail": {
+    "breadcrumbAriaLabel": "Breadcrumb",
+    "dashboardLink": "Dashboard",
+    "tier": "Tier {tier}",
+    "couldNotLoad": "Could not load stat",
+    "loadFailed": "Failed to load stat data. Please try again later.",
+    "refreshToTry": "Refresh the page to try again.",
+    "noDataForInstrument": "No data available for instrument <mono>{instrument}</mono>.",
+    "noDataForTimeframe": "No data available for timeframe <mono>{timeframe}</mono>.",
+    "summarisedMagnitudes": "Summarised magnitudes",
+    "continuation": "continuation",
+    "patternFrequency": "Pattern frequency",
+    "probabilityFootnote": "Probabilities are observed frequencies over the selected period. The baseline is the same outcome's unconditional rate; edge is <mono>probability − baseline</mono>, in percentage points.",
+    "advanced": "Advanced",
+    "slicedByDimension": "Sliced by dimension",
+    "expandDimensionHint": "expand a dimension to see grouped probabilities",
+    "groupCount": "{count, plural, one {<mono>#</mono> group} other {<mono>#</mono> groups}}",
+    "noDataForSlice": "No data available for this slice dimension.",
+    "requiresTier": "This stat requires Tier {tier}. Your current plan does not include it.",
+    "upgradeToUnlock": "Upgrade to unlock",
+    "bullish": "Bullish",
+    "bearish": "Bearish",
+    "nEquals": "N = <mono>{count}</mono>",
+    "vsBaseline": "vs <mono>{value}</mono> baseline",
+    "noBaselineAvailable": "no baseline available",
+    "dataFiltersAriaLabel": "Data filters",
+    "timeframe": "Timeframe",
+    "dataRange": "Data range",
+    "totalSessions": "Total sessions",
+    "period": "Period",
+    "periods": {
+      "custom": "Custom range",
+      "all": "All history",
+      "1m": "Last 1 month",
+      "3m": "Last 3 months",
+      "6m": "Last 6 months",
+      "ytd": "Year to date",
+      "1yr": "Last 1 year",
+      "2yr": "Last 2 years",
+      "3yr": "Last 3 years",
+      "5yr": "Last 5 years",
+      "10yr": "Last 10 years"
+    },
+    "contextSelectorsAriaLabel": "Context selectors",
+    "instrument": "Instrument",
+    "stat": "Stat",
+    "searchStatFamilies": "Search stat families…",
+    "noStatFamiliesFound": "No stat families found.",
+    "fullHistory": "Full history",
+    "all": "All",
+    "lookBackPeriod": "Look-back period",
+    "custom": "Custom",
+    "startDate": "Start date",
+    "endDate": "End date",
+    "cancel": "Cancel",
+    "applyRange": "Apply range",
+    "table": {
+      "group": "Group",
+      "condition": "Condition",
+      "outcome": "Outcome",
+      "probability": "Probability",
+      "baseline": "Baseline",
+      "n": "N",
+      "edge": "Edge"
+    }
+  },
+  "account": {
+    "heading": "Account & billing",
+    "subheading": "Manage your subscription, payment details, and profile.",
+    "profile": {
+      "title": "Profile settings",
+      "subtitle": "Your sign-in email and account password (Supabase Auth).",
+      "emailAddress": "Email address",
+      "change": "Change",
+      "save": "Save",
+      "saving": "Saving…",
+      "cancel": "Cancel",
+      "emailChangeHint": "We'll email a confirmation link before any change takes effect.",
+      "emailChangeConfirmationSent": "Confirmation link sent — check your new inbox to confirm the change.",
+      "changePassword": "Change password",
+      "newPassword": "New password",
+      "confirmNewPassword": "Confirm new password",
+      "passwordMinLength": "At least 12 characters.",
+      "updating": "Updating…",
+      "updatePassword": "Update password",
+      "passwordTooShort": "New password must be at least 12 characters.",
+      "passwordsDoNotMatch": "Passwords do not match.",
+      "passwordUpdated": "Password updated."
+    },
+    "language": {
+      "label": "Language",
+      "auto": "Auto (browser)",
+      "english": "English",
+      "french": "Français",
+      "hint": "Controls the display language across the app."
+    },
+    "danger": {
+      "title": "Cancel subscription",
+      "alreadyCancelling": "Your subscription is already set to cancel at the end of the current period.",
+      "keepAccessUntil": "You'll keep access until the end of the current billing period ({date}), then revert to no access.",
+      "keepAccessUntilUnknown": "You'll keep access until the end of the current billing period, then revert to no access.",
+      "cancelInPortal": "Cancel in Stripe portal"
+    },
+    "plan": {
+      "title": "Current plan",
+      "noSubscription": "You don't have an active subscription.",
+      "noActivePlan": "No active plan",
+      "choosePlan": "Choose a plan",
+      "activePlan": "Active plan",
+      "unknownPlan": "Unknown plan",
+      "tier": "Tier {tier}",
+      "annual": "Annual",
+      "monthly": "Monthly",
+      "setToCancelAtPeriodEnd": "Your subscription is set to cancel at the end of this period.",
+      "activeAndRenews": "Your subscription is active and renews automatically.",
+      "active": "Active",
+      "statsAccess": "Stats access",
+      "billingCycle": "Billing cycle",
+      "accessUntil": "Access until",
+      "renewsOn": "Renews on",
+      "upgradePlan": "Upgrade plan",
+      "compareAllPlans": "Compare all plans on the pricing page."
+    },
+    "billing": {
+      "title": "Billing details",
+      "subtitle": "Payment method, invoices, and cancellation are managed in the secure Stripe portal.",
+      "nextPayment": "Next payment",
+      "onDate": "on {date}",
+      "billingEmail": "Billing email",
+      "manageSubscription": "Manage subscription",
+      "stripePortalNote": "Opens the Stripe portal — invoice history & receipts live there."
+    }
+  }
+}

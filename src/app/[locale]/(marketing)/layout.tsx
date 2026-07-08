@@ -1,21 +1,34 @@
-import Link from "next/link";
+import NextLink from "next/link";
 import type { ReactNode } from "react";
+import { getTranslations } from "next-intl/server";
 import { AugurLogo } from "@/components/AugurLogo";
+import { Link } from "@/i18n/navigation";
 import { MarketingNavLink } from "./MarketingNavLink";
+import {
+  LanguageSwitcherDesktop,
+  LanguageSwitcherMobile,
+} from "./LanguageSwitcher";
 
 // Shared container class — matches .container in styles.css (max-w 1180px)
 const container = "mx-auto w-full max-w-[1180px] px-6";
 
-// Primary nav links. Section links point at landing-page anchors so they work
-// from any marketing page; "/pricing" is a real route and lights up when active.
-const NAV_LINKS = [
-  { href: "/#features", label: "Features" },
-  { href: "/#how", label: "How it works" },
-  { href: "/pricing", label: "Pricing" },
-  { href: "/#proof", label: "Customers" },
-];
+export default async function MarketingLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  const t = await getTranslations("nav");
+  const tFooter = await getTranslations("landing.footer");
 
-export default function MarketingLayout({ children }: { children: ReactNode }) {
+  // Primary nav links. Section links point at landing-page anchors so they work
+  // from any marketing page; "/pricing" is a real route and lights up when active.
+  const NAV_LINKS = [
+    { href: "/#features", label: t("features") },
+    { href: "/#how", label: t("howItWorks") },
+    { href: "/pricing", label: t("pricing") },
+    { href: "/#proof", label: t("customers") },
+  ];
+
   return (
     <>
       {/* =====================================================================
@@ -40,36 +53,40 @@ export default function MarketingLayout({ children }: { children: ReactNode }) {
               ))}
             </ul>
 
+            {/* Secondary — language switcher, between nav links and CTAs */}
+            <LanguageSwitcherDesktop />
+
             <div className="flex items-center gap-3">
-              <Link
+              <NextLink
                 href="/sign-in"
                 className="inline-flex items-center justify-center h-10 px-4 rounded-md text-sm font-semibold text-muted-foreground hover:bg-card hover:text-foreground transition-colors"
               >
-                Sign in
-              </Link>
-              <Link
+                {t("signIn")}
+              </NextLink>
+              <NextLink
                 href="/sign-up"
                 className="inline-flex items-center justify-center h-10 px-4 rounded-md bg-brand text-sm font-semibold text-on-brand hover:bg-brand-hover transition-colors"
               >
-                Get started
-              </Link>
+                {t("getStarted")}
+              </NextLink>
             </div>
           </nav>
 
-          {/* Mobile: Sign in + primary CTA */}
-          <div className="flex md:hidden items-center gap-3">
-            <Link
+          {/* Mobile: language toggle + Sign in + primary CTA */}
+          <div className="flex md:hidden items-center gap-2">
+            <LanguageSwitcherMobile />
+            <NextLink
               href="/sign-in"
               className="inline-flex items-center justify-center h-10 px-4 rounded-md text-sm font-semibold text-muted-foreground hover:bg-card hover:text-foreground transition-colors"
             >
-              Sign in
-            </Link>
-            <Link
+              {t("signIn")}
+            </NextLink>
+            <NextLink
               href="/sign-up"
               className="inline-flex items-center justify-center h-10 px-4 rounded-md bg-brand text-sm font-semibold text-on-brand hover:bg-brand-hover transition-colors"
             >
-              Get started
-            </Link>
+              {t("getStarted")}
+            </NextLink>
           </div>
         </div>
       </header>
@@ -86,15 +103,14 @@ export default function MarketingLayout({ children }: { children: ReactNode }) {
             <div className="col-span-2 md:col-span-1">
               <AugurLogo />
               <p className="mt-4 text-sm text-muted-foreground max-w-[22rem] leading-[1.55]">
-                Statistical market probabilities for NQ and ES futures traders.
-                Transparent edges, real baselines, refreshed daily.
+                {tFooter("tagline")}
               </p>
             </div>
 
             {/* Product column */}
             <div>
               <h4 className="text-xs font-semibold tracking-[0.06em] uppercase text-subtle mb-4">
-                Product
+                {tFooter("productHeading")}
               </h4>
               <ul className="grid gap-3 list-none">
                 <li>
@@ -102,7 +118,7 @@ export default function MarketingLayout({ children }: { children: ReactNode }) {
                     href="/#features"
                     className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    Features
+                    {t("features")}
                   </Link>
                 </li>
                 <li>
@@ -110,7 +126,7 @@ export default function MarketingLayout({ children }: { children: ReactNode }) {
                     href="/pricing"
                     className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    Pricing
+                    {t("pricing")}
                   </Link>
                 </li>
                 <li>
@@ -118,16 +134,16 @@ export default function MarketingLayout({ children }: { children: ReactNode }) {
                     href="/#how"
                     className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    How it works
+                    {t("howItWorks")}
                   </Link>
                 </li>
                 <li>
-                  <Link
+                  <NextLink
                     href="/sign-up"
                     className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    Start free trial
-                  </Link>
+                    {tFooter("startTrial")}
+                  </NextLink>
                 </li>
               </ul>
             </div>
@@ -135,7 +151,7 @@ export default function MarketingLayout({ children }: { children: ReactNode }) {
             {/* Company column */}
             <div>
               <h4 className="text-xs font-semibold tracking-[0.06em] uppercase text-subtle mb-4">
-                Company
+                {tFooter("companyHeading")}
               </h4>
               <ul className="grid gap-3 list-none">
                 <li>
@@ -143,7 +159,7 @@ export default function MarketingLayout({ children }: { children: ReactNode }) {
                     href="#"
                     className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    About
+                    {tFooter("about")}
                   </a>
                 </li>
                 <li>
@@ -151,7 +167,7 @@ export default function MarketingLayout({ children }: { children: ReactNode }) {
                     href="#"
                     className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    Methodology
+                    {tFooter("methodology")}
                   </a>
                 </li>
                 <li>
@@ -159,7 +175,7 @@ export default function MarketingLayout({ children }: { children: ReactNode }) {
                     href="#"
                     className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    Changelog
+                    {tFooter("changelog")}
                   </a>
                 </li>
                 <li>
@@ -167,7 +183,7 @@ export default function MarketingLayout({ children }: { children: ReactNode }) {
                     href="#"
                     className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    Contact
+                    {tFooter("contact")}
                   </a>
                 </li>
               </ul>
@@ -176,7 +192,7 @@ export default function MarketingLayout({ children }: { children: ReactNode }) {
             {/* Legal column */}
             <div>
               <h4 className="text-xs font-semibold tracking-[0.06em] uppercase text-subtle mb-4">
-                Legal
+                {tFooter("legalHeading")}
               </h4>
               <ul className="grid gap-3 list-none">
                 <li>
@@ -184,7 +200,7 @@ export default function MarketingLayout({ children }: { children: ReactNode }) {
                     href="#"
                     className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    Terms of service
+                    {tFooter("terms")}
                   </a>
                 </li>
                 <li>
@@ -192,7 +208,7 @@ export default function MarketingLayout({ children }: { children: ReactNode }) {
                     href="#"
                     className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    Privacy policy
+                    {tFooter("privacy")}
                   </a>
                 </li>
                 <li>
@@ -200,7 +216,7 @@ export default function MarketingLayout({ children }: { children: ReactNode }) {
                     href="#"
                     className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    Risk disclosure
+                    {tFooter("risk")}
                   </a>
                 </li>
                 <li>
@@ -208,7 +224,7 @@ export default function MarketingLayout({ children }: { children: ReactNode }) {
                     href="#"
                     className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    Cookie settings
+                    {tFooter("cookies")}
                   </a>
                 </li>
               </ul>
@@ -216,11 +232,9 @@ export default function MarketingLayout({ children }: { children: ReactNode }) {
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-4 mt-12 pt-5 border-t border-border text-xs text-subtle">
-            <span>© 2026 Augur · Marubozu FR. All rights reserved.</span>
+            <span>{tFooter("copyright")}</span>
             <span className="max-w-[52rem] leading-[1.55]">
-              Augur provides historical statistical information only and is not
-              investment advice. Past performance does not guarantee future
-              results. Trading futures carries substantial risk of loss.
+              {tFooter("disclaimer")}
             </span>
           </div>
         </div>

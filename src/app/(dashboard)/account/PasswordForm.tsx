@@ -5,9 +5,11 @@
 // and server-action submission. Surfaces success / error feedback inline.
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { changePassword } from "./actions";
 
 export function PasswordForm() {
+  const t = useTranslations("account.profile");
   const [feedback, setFeedback] = useState<{
     type: "success" | "error";
     message: string;
@@ -26,13 +28,13 @@ export function PasswordForm() {
     if (newPassword.length < 12) {
       setFeedback({
         type: "error",
-        message: "New password must be at least 12 characters.",
+        message: t("passwordTooShort"),
       });
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setFeedback({ type: "error", message: "Passwords do not match." });
+      setFeedback({ type: "error", message: t("passwordsDoNotMatch") });
       return;
     }
 
@@ -41,7 +43,7 @@ export function PasswordForm() {
       if (result.error) {
         setFeedback({ type: "error", message: result.error });
       } else {
-        setFeedback({ type: "success", message: "Password updated." });
+        setFeedback({ type: "success", message: t("passwordUpdated") });
         (event.target as HTMLFormElement).reset();
       }
     });
@@ -50,14 +52,14 @@ export function PasswordForm() {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-2 mt-5">
       <label htmlFor="new-pw" className="text-sm font-semibold text-foreground">
-        Change password
+        {t("changePassword")}
       </label>
 
       {/* New + confirm — side by side on wider screens */}
       <div className="grid sm:grid-cols-2 gap-4">
         <div className="flex flex-col gap-2">
           <label htmlFor="new-pw" className="sr-only">
-            New password
+            {t("newPassword")}
           </label>
           <input
             id="new-pw"
@@ -65,13 +67,13 @@ export function PasswordForm() {
             type="password"
             required
             autoComplete="new-password"
-            placeholder="New password"
+            placeholder={t("newPassword")}
             className="w-full h-10 px-4 text-sm text-foreground bg-surface-2 border border-border rounded-md placeholder:text-subtle transition-colors hover:border-border-strong focus:outline-none focus:border-brand focus:ring-3 focus:ring-brand-ring"
           />
         </div>
         <div className="flex flex-col gap-2">
           <label htmlFor="confirm-pw" className="sr-only">
-            Confirm new password
+            {t("confirmNewPassword")}
           </label>
           <input
             id="confirm-pw"
@@ -79,13 +81,13 @@ export function PasswordForm() {
             type="password"
             required
             autoComplete="new-password"
-            placeholder="Confirm new password"
+            placeholder={t("confirmNewPassword")}
             className="w-full h-10 px-4 text-sm text-foreground bg-surface-2 border border-border rounded-md placeholder:text-subtle transition-colors hover:border-border-strong focus:outline-none focus:border-brand focus:ring-3 focus:ring-brand-ring"
           />
         </div>
       </div>
 
-      <p className="text-xs text-subtle">At least 12 characters.</p>
+      <p className="text-xs text-subtle">{t("passwordMinLength")}</p>
 
       {feedback && (
         <p
@@ -103,7 +105,7 @@ export function PasswordForm() {
           disabled={isPending}
           className="inline-flex items-center justify-center h-10 px-5 rounded-md bg-brand text-sm font-semibold text-on-brand hover:bg-brand-hover transition-colors disabled:opacity-60"
         >
-          {isPending ? "Updating…" : "Update password"}
+          {isPending ? t("updating") : t("updatePassword")}
         </button>
       </div>
     </form>

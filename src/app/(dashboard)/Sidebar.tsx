@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { LayoutDashboard, User, LogOut } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { signOut } from "@/app/(auth)/actions";
 import { NavLink } from "@/app/(dashboard)/NavLink";
 
@@ -10,7 +11,9 @@ interface SidebarProps {
 }
 
 export function Sidebar({ userTier }: SidebarProps) {
-  const tierLabel = userTier !== null ? `Tier ${userTier}` : "No active plan";
+  const t = useTranslations("dashboard.sidebar");
+  const tierLabel =
+    userTier !== null ? t("tier", { tier: userTier }) : t("noPlan");
 
   return (
     <aside className="hidden md:flex sticky top-0 self-start h-screen flex-col gap-2 px-4 py-5 bg-muted border-r border-border">
@@ -42,8 +45,12 @@ export function Sidebar({ userTier }: SidebarProps) {
 
       {/* Primary navigation */}
       <nav aria-label="Primary">
-        <NavLink href="/dashboard" icon={LayoutDashboard} label="Dashboard" />
-        <NavLink href="/account" icon={User} label="Account" />
+        <NavLink
+          href="/dashboard"
+          icon={LayoutDashboard}
+          label={t("dashboard")}
+        />
+        <NavLink href="/account" icon={User} label={t("account")} />
       </nav>
 
       {/* Spacer pushes tier badge + logout to bottom */}
@@ -53,13 +60,13 @@ export function Sidebar({ userTier }: SidebarProps) {
           Matches mockup .tier-pill--sidebar: flex w-full, tier value pushed right. */}
       <span
         className="flex w-full items-center gap-2 px-3 py-3 rounded-lg border border-border bg-card text-xs font-semibold"
-        title="Your current subscription tier"
+        title={t("planTooltip")}
       >
         <span
           className="w-2 h-2 rounded-full bg-brand shadow-[0_0_0_3px_rgba(14,165,233,0.14)] flex-shrink-0"
           aria-hidden="true"
         />
-        <span className="text-muted-foreground">Plan</span>
+        <span className="text-muted-foreground">{t("plan")}</span>
         <span className="ml-auto text-foreground">{tierLabel}</span>
       </span>
 
@@ -71,7 +78,7 @@ export function Sidebar({ userTier }: SidebarProps) {
             className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:text-down hover:bg-card transition-colors"
           >
             <LogOut size={18} aria-hidden="true" />
-            Logout
+            {t("logout")}
           </button>
         </form>
       </nav>

@@ -15,6 +15,8 @@
 
 import Link from "next/link";
 import { Zap, ExternalLink } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { createStripeClient } from "@/lib/stripe";
 import { redirectToBillingPortal } from "./actions";
 import type { Subscription } from "@/lib/subscription";
@@ -32,6 +34,7 @@ interface StripePlanData {
 
 async function fetchPlanData(
   subscription: Subscription,
+  unknownPlanLabel: string,
 ): Promise<StripePlanData | null> {
   if (!subscription.priceId) return null;
 
@@ -46,7 +49,7 @@ async function fetchPlanData(
         ? (price.product as Stripe.Product)
         : null;
 
-    const planName = product?.name ?? "Unknown plan";
+    const planName = product?.name ?? unknownPlanLabel;
 
     const unitAmount = price.unit_amount ?? 0;
     const euros = Math.floor(unitAmount / 100);
@@ -87,6 +90,8 @@ function formatDate(isoString: string): string {
 // ---------------------------------------------------------------------------
 
 function NoPlanCard() {
+  const t = useTranslations("account.plan");
+
   return (
     <section
       className="rounded-xl border border-border bg-card p-6"
@@ -95,16 +100,16 @@ function NoPlanCard() {
       <div className="flex items-start justify-between gap-4 mb-5">
         <div>
           <h2 className="text-lg font-semibold text-foreground" id="plan-title">
-            Current plan
+            {t("title")}
           </h2>
           <p className="mt-1 text-sm text-muted-foreground max-w-[38ch]">
-            You don&apos;t have an active subscription.
+            {t("noSubscription")}
           </p>
         </div>
       </div>
 
       <p className="text-2xl font-bold tracking-tight text-foreground">
-        No active plan
+        {t("noActivePlan")}
       </p>
 
       <div className="flex items-center gap-3 mt-5 pt-5 border-t border-border">
@@ -113,7 +118,7 @@ function NoPlanCard() {
           className="inline-flex items-center gap-2 h-10 px-5 rounded-md bg-brand text-sm font-semibold text-on-brand hover:bg-brand-hover transition-colors"
         >
           <Zap size={15} aria-hidden="true" />
-          Choose a plan
+          {t("choosePlan")}
         </Link>
       </div>
     </section>
@@ -130,13 +135,16 @@ interface PlanCardProps {
 }
 
 function PlanCard({ subscription, planData }: PlanCardProps) {
-  const planName = planData?.planName ?? "Active plan";
+  const t = useTranslations("account.plan");
+  const planName = planData?.planName ?? t("activePlan");
   const tierNum = subscription.tier ? parseInt(subscription.tier, 10) : null;
   const tierLabel =
     tierNum !== null
       ? tierNum === 1
-        ? "Tier 1"
-        : Array.from({ length: tierNum }, (_, i) => `Tier ${i + 1}`).join(" + ")
+        ? t("tier", { tier: 1 })
+        : Array.from({ length: tierNum }, (_, i) =>
+            t("tier", { tier: i + 1 }),
+          ).join(" + ")
       : null;
 
   const renewalDate = subscription.currentPeriodEnd
@@ -144,7 +152,7 @@ function PlanCard({ subscription, planData }: PlanCardProps) {
     : null;
 
   const billingCycle =
-    planData?.intervalLabel === "/ year" ? "Annual" : "Monthly";
+    planData?.intervalLabel === "/ year" ? t("annual") : t("monthly");
 
   return (
     <section
@@ -155,16 +163,16 @@ function PlanCard({ subscription, planData }: PlanCardProps) {
       <div className="flex items-start justify-between gap-4 mb-5">
         <div>
           <h2 className="text-lg font-semibold text-foreground" id="plan-title">
-            Current plan
+            {t("title")}
           </h2>
           <p className="mt-1 text-sm text-muted-foreground max-w-[38ch]">
             {subscription.cancelAtPeriodEnd
-              ? "Your subscription is set to cancel at the end of this period."
-              : "Your subscription is active and renews automatically."}
+              ? t("setToCancelAtPeriodEnd")
+              : t("activeAndRenews")}
           </p>
         </div>
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-up/30 bg-up-soft text-up text-xs font-semibold flex-shrink-0">
-          Active
+          {t("active")}
         </span>
       </div>
 
@@ -187,16 +195,18 @@ function PlanCard({ subscription, planData }: PlanCardProps) {
       <dl className="grid grid-cols-[max-content_1fr] gap-y-3 gap-x-5 mt-5 pt-5 border-t border-border text-sm">
         {tierLabel && (
           <>
-            <dt className="text-subtle">Stats access</dt>
+            <dt className="text-subtle">{t("statsAccess")}</dt>
             <dd className="text-foreground text-right">{tierLabel}</dd>
           </>
         )}
-        <dt className="text-subtle">Billing cycle</dt>
+        <dt className="text-subtle">{t("billingCycle")}</dt>
         <dd className="text-foreground text-right">{billingCycle}</dd>
         {renewalDate && (
           <>
             <dt className="text-subtle">
-              {subscription.cancelAtPeriodEnd ? "Access until" : "Renews on"}
+              {subscription.cancelAtPeriodEnd
+                ? t("accessUntil")
+                : t("renewsOn")}
             </dt>
             <dd className="text-foreground font-mono text-right">
               {renewalDate}
@@ -212,11 +222,9 @@ function PlanCard({ subscription, planData }: PlanCardProps) {
           className="inline-flex items-center gap-2 h-10 px-5 rounded-md bg-brand text-sm font-semibold text-on-brand hover:bg-brand-hover transition-colors"
         >
           <Zap size={15} aria-hidden="true" />
-          Upgrade plan
+          {t("upgradePlan")}
         </Link>
-        <span className="text-xs text-subtle">
-          Compare all plans on the pricing page.
-        </span>
+        <span className="text-xs text-subtle">{t("compareAllPlans")}</span>
       </div>
     </section>
   );
@@ -237,6 +245,7 @@ function BillingCard({
   billingEmail,
   planData,
 }: BillingCardProps) {
+  const t = useTranslations("account.billing");
   const renewalDate = subscription.currentPeriodEnd
     ? formatDate(subscription.currentPeriodEnd)
     : null;
@@ -252,11 +261,10 @@ function BillingCard({
           className="text-lg font-semibold text-foreground"
           id="billing-title"
         >
-          Billing details
+          {t("title")}
         </h2>
         <p className="mt-1 text-sm text-muted-foreground max-w-[38ch]">
-          Payment method, invoices, and cancellation are managed in the secure
-          Stripe portal.
+          {t("subtitle")}
         </p>
       </div>
 
@@ -264,14 +272,16 @@ function BillingCard({
       <dl className="grid grid-cols-[max-content_1fr] gap-y-3 gap-x-5 text-sm">
         {planData && renewalDate && (
           <>
-            <dt className="text-subtle">Next payment</dt>
+            <dt className="text-subtle">{t("nextPayment")}</dt>
             <dd className="text-foreground font-mono text-right">
               {planData.amountFormatted}{" "}
-              <span className="text-subtle font-sans">on {renewalDate}</span>
+              <span className="text-subtle font-sans">
+                {t("onDate", { date: renewalDate })}
+              </span>
             </dd>
           </>
         )}
-        <dt className="text-subtle">Billing email</dt>
+        <dt className="text-subtle">{t("billingEmail")}</dt>
         <dd className="text-foreground font-mono text-right truncate">
           {billingEmail}
         </dd>
@@ -284,13 +294,11 @@ function BillingCard({
             type="submit"
             className="inline-flex items-center gap-2 h-10 px-5 rounded-md bg-brand text-sm font-semibold text-on-brand hover:bg-brand-hover transition-colors"
           >
-            Manage subscription
+            {t("manageSubscription")}
             <ExternalLink size={14} aria-hidden="true" />
           </button>
         </form>
-        <span className="text-xs text-subtle">
-          Opens the Stripe portal — invoice history &amp; receipts live there.
-        </span>
+        <span className="text-xs text-subtle">{t("stripePortalNote")}</span>
       </div>
     </section>
   );
@@ -313,7 +321,8 @@ export async function PlanAndBillingCards({
     return <NoPlanCard />;
   }
 
-  const planData = await fetchPlanData(subscription);
+  const t = await getTranslations("account.plan");
+  const planData = await fetchPlanData(subscription, t("unknownPlan"));
 
   return (
     <>

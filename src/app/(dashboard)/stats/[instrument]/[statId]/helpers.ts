@@ -3,6 +3,8 @@
 
 import type { Labels } from "@/types/stats";
 import type { StatResultRow } from "@/types/stats";
+import { pickLocale } from "@/lib/i18n/pick";
+import type { Locale } from "@/i18n/config";
 
 // ---------------------------------------------------------------------------
 // Edge calculation
@@ -63,14 +65,24 @@ export interface LabelResolver {
 }
 
 /**
- * Builds a resolver that translates raw API codes to human-readable English
- * strings using the `labels` dictionary from the stat result.
+ * Builds a resolver that translates raw API codes to human-readable,
+ * active-locale strings using the `labels` dictionary from the stat result.
  * Falls back to the raw code when no label is found so nothing renders blank.
  */
-export function makeLabelResolver(labels: Labels): LabelResolver {
+export function makeLabelResolver(
+  labels: Labels,
+  locale: Locale,
+): LabelResolver {
   return {
-    condition: (code) => labels.conditions[code]?.en ?? code,
-    outcome: (code) => labels.outcomes[code]?.en ?? code,
-    dimension: (code) => labels.dimensions[code]?.en ?? code,
+    condition: (code) =>
+      labels.conditions[code]
+        ? pickLocale(labels.conditions[code], locale)
+        : code,
+    outcome: (code) =>
+      labels.outcomes[code] ? pickLocale(labels.outcomes[code], locale) : code,
+    dimension: (code) =>
+      labels.dimensions[code]
+        ? pickLocale(labels.dimensions[code], locale)
+        : code,
   };
 }

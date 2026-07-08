@@ -29,6 +29,7 @@ import { StatDetailSkeleton } from "@/app/(dashboard)/stats/[instrument]/[statId
 import type { StatSliceResult } from "@/app/(dashboard)/stats/[instrument]/[statId]/load-stat-slice";
 import type { PeriodPreset } from "@/lib/period";
 import type { StatFamilyMeta } from "@/types/stats";
+import type { Locale } from "@/i18n/config";
 
 interface StatDetailClientProps {
   statId: string;
@@ -36,6 +37,10 @@ interface StatDetailClientProps {
   // Resolved, uppercase — from the path.
   activeInstrument: string;
   defaultTimeframe: string;
+  // Active locale, resolved server-side in page.tsx — threaded down so the
+  // client-side refetch path (fetchStatSlice → StatDetailContent) can pick
+  // the right I18nString field on the freshly fetched stat data.
+  locale: Locale;
   header: ReactNode;
   // Initial server-rendered data section, for the default slice.
   children: ReactNode;
@@ -46,6 +51,7 @@ export function StatDetailClient({
   catalog,
   activeInstrument,
   defaultTimeframe,
+  locale,
   header,
   children,
 }: StatDetailClientProps) {
@@ -125,6 +131,7 @@ export function StatDetailClient({
         isCustomRange={isCustomRange}
         customStart={customStart}
         customEnd={customEnd}
+        locale={locale}
         onInstrumentChange={handleInstrumentChange}
         onPeriodChange={handlePeriodChange}
         onCustomRangeApply={handleCustomRangeApply}
@@ -142,7 +149,7 @@ export function StatDetailClient({
       {isPending ? (
         <StatDetailSkeleton />
       ) : slice ? (
-        <StatDetailContent result={slice} />
+        <StatDetailContent result={slice} locale={locale} />
       ) : (
         children
       )}

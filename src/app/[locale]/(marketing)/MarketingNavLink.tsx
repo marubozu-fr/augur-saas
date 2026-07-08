@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
+import { Link, usePathname } from "@/i18n/navigation";
 
 interface MarketingNavLinkProps {
   href: string;

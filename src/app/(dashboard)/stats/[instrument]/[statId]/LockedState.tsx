@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Lock } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface LockedStateProps {
   title: string;
@@ -8,6 +9,8 @@ interface LockedStateProps {
 }
 
 export function LockedState({ title, definition, statTier }: LockedStateProps) {
+  const t = useTranslations("statDetail");
+
   return (
     <div className="relative rounded-xl border border-dashed border-border-strong overflow-hidden">
       {/* Blurred content preview */}
@@ -36,14 +39,13 @@ export function LockedState({ title, definition, statTier }: LockedStateProps) {
           </p>
         </div>
         <p className="text-xs text-subtle">
-          This stat requires Tier {statTier}. Your current plan does not include
-          it.
+          {t("requiresTier", { tier: statTier })}
         </p>
         <Link
           href="/pricing"
           className="inline-flex items-center justify-center h-9 px-5 rounded-md bg-brand text-xs font-semibold text-on-brand hover:bg-brand-hover transition-colors"
         >
-          Upgrade to unlock
+          {t("upgradeToUnlock")}
         </Link>
       </div>
     </div>

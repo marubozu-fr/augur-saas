@@ -19,6 +19,7 @@
     "date-fns": "^4.4.0",
     "lucide-react": "^0.525.0",
     "next": "16.2.9",
+    "next-intl": "^4.13.1",
     "radix-ui": "^1.6.0",
     "react": "19.2.4",
     "react-day-picker": "^10.0.1",

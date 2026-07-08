@@ -24,6 +24,8 @@ import {
   resolveActiveTimeframe,
 } from "@/lib/stat-context";
 import { getStatTier } from "@/lib/stat-tiers";
+import { pickLocale } from "@/lib/i18n/pick";
+import { getActiveLocale } from "@/lib/i18n/get-locale";
 import { StatDetailClient } from "@/components/stat-detail/StatDetailClient";
 import { StatBreadcrumb } from "./StatBreadcrumb";
 import { StatHeader } from "./StatHeader";
@@ -37,6 +39,7 @@ interface StatDetailPageProps {
 
 export default async function StatDetailPage({ params }: StatDetailPageProps) {
   const { instrument: instrumentSlug, statId } = await params;
+  const locale = await getActiveLocale();
 
   // -------------------------------------------------------------------------
   // Catalog — powers the context zone / data filter zone controls and the
@@ -71,22 +74,23 @@ export default async function StatDetailPage({ params }: StatDetailPageProps) {
     null,
   );
 
+  const title = family ? pickLocale(family.title, locale) : statId;
+  const definition = family ? pickLocale(family.definition, locale) : "";
+
   return (
     <main className="p-6">
-      <StatBreadcrumb
-        title={family?.title.en ?? statId}
-        instrument={activeInstrument}
-      />
+      <StatBreadcrumb title={title} instrument={activeInstrument} />
 
       <StatDetailClient
         statId={statId}
         catalog={catalog}
         activeInstrument={activeInstrument}
         defaultTimeframe={activeTimeframe}
+        locale={locale}
         header={
           <StatHeader
-            title={family?.title.en ?? statId}
-            definition={family?.definition.en ?? ""}
+            title={title}
+            definition={definition}
             tier={getStatTier(statId)}
           />
         }

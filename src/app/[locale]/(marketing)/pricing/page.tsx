@@ -1,19 +1,48 @@
 import type { Metadata } from "next";
-import type { ReactNode } from "react";
-import Link from "next/link";
+import NextLink from "next/link";
 import { ChevronDown } from "lucide-react";
+import { getTranslations } from "next-intl/server";
+import { isLocale } from "@/i18n/config";
+import { buildLanguageAlternates } from "@/i18n/metadata";
 import { PricingSection } from "./PricingSection";
-
-export const metadata: Metadata = {
-  title: "Augur — Pricing & Plans",
-  description:
-    "Every plan unlocks a deeper slice of the Augur stat catalog. Start free for 7 days, no card required.",
-};
 
 // Shared container class — matches .container in styles.css (max-w 1180px)
 const container = "mx-auto w-full max-w-[1180px] px-6";
 
-export default function PricingPage() {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale: rawLocale } = await params;
+  const locale = isLocale(rawLocale) ? rawLocale : "en";
+  const t = await getTranslations({ locale, namespace: "pricing" });
+
+  return {
+    title: t("metaTitle"),
+    description: t("metaDescription"),
+    alternates: { languages: buildLanguageAlternates("/pricing") },
+  };
+}
+
+export default async function PricingPage() {
+  const t = await getTranslations("pricing");
+
+  const FAQ_ITEMS = [
+    { question: t("faq.q1"), answer: t("faq.a1") },
+    { question: t("faq.q2"), answer: t("faq.a2") },
+    { question: t("faq.q3"), answer: t("faq.a3") },
+    {
+      question: t("faq.q4"),
+      answer: t.rich("faq.a4", {
+        mono: (chunks) => <span className="font-mono">{chunks}</span>,
+      }),
+    },
+    { question: t("faq.q5"), answer: t("faq.a5") },
+    { question: t("faq.q6"), answer: t("faq.a6") },
+    { question: t("faq.q7"), answer: t("faq.a7") },
+  ];
+
   return (
     <>
       <main>
@@ -29,10 +58,10 @@ export default function PricingPage() {
           <div className={container}>
             <div className="max-w-[640px] mx-auto mb-12 text-center">
               <span className="inline-block text-sm font-semibold tracking-[0.06em] uppercase text-brand mb-3">
-                FAQ
+                {t("faq.eyebrow")}
               </span>
               <h2 className="text-[2.25rem] font-bold tracking-tight text-foreground">
-                Questions, answered
+                {t("faq.heading")}
               </h2>
             </div>
 
@@ -66,24 +95,23 @@ export default function PricingPage() {
           <div className={container}>
             <div className="relative overflow-hidden rounded-2xl border border-border bg-[radial-gradient(80%_120%_at_50%_0%,rgba(14,165,233,0.18),transparent_60%),var(--card)] px-[3rem] py-[4rem] text-center">
               <h2 className="text-[2.25rem] font-bold tracking-tight text-foreground">
-                Still deciding? Try it free for 7 days
+                {t("closingCta.heading")}
               </h2>
               <p className="mt-4 mx-auto max-w-[32rem] text-muted-foreground leading-[1.55]">
-                Full access to your chosen tier, no card required. See the edges
-                against their baselines before you pay a cent.
+                {t("closingCta.description")}
               </p>
               <div className="flex flex-wrap justify-center gap-3 mt-6">
-                <Link
+                <NextLink
                   href="/sign-up"
                   className="inline-flex items-center justify-center h-12 px-6 rounded-md bg-brand text-base font-semibold text-on-brand hover:bg-brand-hover transition-colors"
                 >
-                  Start free trial
-                </Link>
+                  {t("closingCta.primaryCta")}
+                </NextLink>
                 <a
                   href="mailto:sales@example.com"
                   className="inline-flex items-center justify-center h-12 px-6 rounded-md border border-border-strong text-base font-semibold text-foreground hover:bg-card transition-colors"
                 >
-                  Talk to sales
+                  {t("closingCta.secondaryCta")}
                 </a>
               </div>
             </div>
@@ -93,55 +121,3 @@ export default function PricingPage() {
     </>
   );
 }
-
-interface FaqItem {
-  question: string;
-  answer: ReactNode;
-}
-
-// FAQ content — static, defined server-side.
-const FAQ_ITEMS: FaqItem[] = [
-  {
-    question: 'What does a "tier" actually mean?',
-    answer:
-      "Each Augur stat family is graded Tier 1 to 3 by depth and conditioning complexity. Tier 1 covers headline edges like gap continuation and opening-drive direction. Tier 2 adds multi-condition slices and regime filtering. Tier 3 covers the most granular, sample-intensive studies. Your plan unlocks every stat up to and including its tier.",
-  },
-  {
-    question: "Is there a free trial, and do I need a card?",
-    answer:
-      "Every paid plan starts with a 7-day free trial, and no card is required to begin. You get full access to that plan's tier during the trial. We only ask for payment details if you decide to continue after day 7.",
-  },
-  {
-    question: "Can I change or cancel my plan later?",
-    answer:
-      "Yes — upgrade, downgrade, or cancel anytime from your account billing page. Upgrades take effect immediately with a prorated charge; downgrades and cancellations apply at the end of your current billing period, so you keep access until then.",
-  },
-  {
-    question: "How does annual billing and the 20% discount work?",
-    answer: (
-      <>
-        Switching to annual billing charges you once for twelve months at a 20%
-        discount — effectively two months free. For example, Pro drops from{" "}
-        <span className="font-mono">€79</span> to an effective{" "}
-        <span className="font-mono">€63</span> per month (
-        <span className="font-mono">€756</span> billed yearly). You can switch
-        between monthly and annual whenever you like.
-      </>
-    ),
-  },
-  {
-    question: "Do you offer refunds?",
-    answer:
-      "Because the free trial lets you evaluate everything before paying, we don't routinely refund partial periods. That said, if something went wrong — a double charge or a billing error — email support within 14 days and we'll make it right.",
-  },
-  {
-    question: "Which payment methods do you accept?",
-    answer:
-      "All payments are handled securely through Stripe. We accept major credit and debit cards. Enterprise customers can be invoiced and pay by bank transfer under an annual contract.",
-  },
-  {
-    question: "Is Augur financial advice?",
-    answer:
-      "No. Augur provides historical statistical information only — it is not investment advice and not a recommendation to buy or sell any instrument. Every edge is descriptive of the past; past performance does not guarantee future results.",
-  },
-];

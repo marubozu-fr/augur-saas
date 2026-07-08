@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Check, Zap } from "lucide-react";
 
 // Valid lookup keys — mirrors stripe-fixtures.json. Server-side validation
@@ -33,87 +34,70 @@ interface Plan {
   features: string[];
 }
 
-const PLANS: Plan[] = [
-  {
-    id: "starter",
-    name: "Starter",
-    tagline:
-      "For the discretionary trader testing Augur on a single instrument.",
-    monthlyLookupKey: "starter_monthly",
-    annualLookupKey: "starter_annual",
-    monthlyPrice: "€29",
-    annualEffectivePrice: "€23",
-    annualTotal: "€276",
-    cta: "Start free trial",
-    featured: false,
-    tierLabel: "Tier 1 stats",
-    features: [
-      "18 Tier 1 stat families",
-      "NQ & ES coverage",
-      "Daily refresh after the close",
-      "3-year historical depth",
-    ],
-  },
-  {
-    id: "pro",
-    name: "Pro",
-    tagline:
-      "For the active trader who wants every slice and finer conditioning.",
-    monthlyLookupKey: "pro_monthly",
-    annualLookupKey: "pro_annual",
-    monthlyPrice: "€79",
-    annualEffectivePrice: "€63",
-    annualTotal: "€756",
-    cta: "Start free trial",
-    featured: true,
-    tierLabel: "Tier 1 + 2 stats",
-    features: [
-      "36 stat families (Tier 1 + 2)",
-      "All slices: weekday, gap, regime",
-      "10-year historical depth",
-      "CSV export & saved views",
-    ],
-  },
-  {
-    id: "premium",
-    name: "Premium",
-    tagline: "For the systematic trader who needs full history and API access.",
-    monthlyLookupKey: "premium_monthly",
-    annualLookupKey: "premium_annual",
-    monthlyPrice: "€149",
-    annualEffectivePrice: "€119",
-    annualTotal: "€1,428",
-    cta: "Start free trial",
-    featured: false,
-    tierLabel: "Tier 1–3 stats",
-    features: [
-      "54 stat families (Tier 1–3)",
-      "REST API access & webhooks",
-      "Full 18-year history",
-      "Priority email support",
-    ],
-  },
-  {
-    id: "enterprise",
-    name: "Enterprise",
-    tagline: "For desks and funds needing seats, SLAs, and the full data feed.",
-    monthlyLookupKey: null,
-    annualLookupKey: null,
-    monthlyPrice: "Custom",
-    annualEffectivePrice: "",
-    annualTotal: "",
-    cta: "Contact sales",
-    ctaHref: "mailto:sales@example.com",
-    featured: false,
-    tierLabel: "All tiers + enterprise",
-    features: [
-      "Everything in Premium",
-      "Unlimited team seats",
-      "Raw data feed & higher rate limits",
-      "Dedicated manager & 99.9% SLA",
-    ],
-  },
-];
+// Prices are currency amounts, not language content — identical across
+// locales. Only the surrounding copy (name, tagline, features, CTA) is
+// translated, via the `pricing.plans.*` messages.
+function usePlans(t: ReturnType<typeof useTranslations>): Plan[] {
+  return [
+    {
+      id: "starter",
+      name: t("plans.starter.name"),
+      tagline: t("plans.starter.tagline"),
+      monthlyLookupKey: "starter_monthly",
+      annualLookupKey: "starter_annual",
+      monthlyPrice: "€29",
+      annualEffectivePrice: "€23",
+      annualTotal: "€276",
+      cta: t("plans.starter.cta"),
+      featured: false,
+      tierLabel: t("plans.starter.tierLabel"),
+      features: t.raw("plans.starter.features") as string[],
+    },
+    {
+      id: "pro",
+      name: t("plans.pro.name"),
+      tagline: t("plans.pro.tagline"),
+      monthlyLookupKey: "pro_monthly",
+      annualLookupKey: "pro_annual",
+      monthlyPrice: "€79",
+      annualEffectivePrice: "€63",
+      annualTotal: "€756",
+      cta: t("plans.pro.cta"),
+      featured: true,
+      tierLabel: t("plans.pro.tierLabel"),
+      features: t.raw("plans.pro.features") as string[],
+    },
+    {
+      id: "premium",
+      name: t("plans.premium.name"),
+      tagline: t("plans.premium.tagline"),
+      monthlyLookupKey: "premium_monthly",
+      annualLookupKey: "premium_annual",
+      monthlyPrice: "€149",
+      annualEffectivePrice: "€119",
+      annualTotal: "€1,428",
+      cta: t("plans.premium.cta"),
+      featured: false,
+      tierLabel: t("plans.premium.tierLabel"),
+      features: t.raw("plans.premium.features") as string[],
+    },
+    {
+      id: "enterprise",
+      name: t("plans.enterprise.name"),
+      tagline: t("plans.enterprise.tagline"),
+      monthlyLookupKey: null,
+      annualLookupKey: null,
+      monthlyPrice: t("plans.enterprise.price"),
+      annualEffectivePrice: "",
+      annualTotal: "",
+      cta: t("plans.enterprise.cta"),
+      ctaHref: "mailto:sales@example.com",
+      featured: false,
+      tierLabel: t("plans.enterprise.tierLabel"),
+      features: t.raw("plans.enterprise.features") as string[],
+    },
+  ];
+}
 
 type ButtonVariant = "primary" | "outline" | "secondary";
 
@@ -133,6 +117,7 @@ function SubscribeButton({
   block = false,
 }: SubscribeButtonProps) {
   const router = useRouter();
+  const t = useTranslations("pricing");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -183,7 +168,7 @@ function SubscribeButton({
           router.push(data.redirectTo);
           return;
         }
-        setError(data.error ?? "Something went wrong. Please try again.");
+        setError(data.error ?? t("errors.generic"));
         return;
       }
 
@@ -191,7 +176,7 @@ function SubscribeButton({
         window.location.href = data.url;
       }
     } catch {
-      setError("Network error. Please try again.");
+      setError(t("errors.network"));
     } finally {
       setLoading(false);
     }
@@ -205,7 +190,7 @@ function SubscribeButton({
         disabled={loading}
         className={`inline-flex items-center justify-center gap-2 font-semibold rounded-md transition-colors ${sizeClass} ${blockClass} ${variantClass}`}
       >
-        {loading ? "Redirecting…" : plan.cta}
+        {loading ? t("redirecting") : plan.cta}
       </button>
       {error && <p className="text-xs text-down text-center">{error}</p>}
     </div>
@@ -213,11 +198,11 @@ function SubscribeButton({
 }
 
 // Check icon cell for comparison table
-function CellYes() {
+function CellYes({ label }: { label: string }) {
   return (
     <span
       className="inline-grid place-items-center text-brand"
-      aria-label="Included"
+      aria-label={label}
     >
       <Check size={16} aria-hidden="true" />
     </span>
@@ -225,9 +210,9 @@ function CellYes() {
 }
 
 // Dash cell for comparison table
-function CellNo() {
+function CellNo({ label }: { label: string }) {
   return (
-    <span className="text-subtle" aria-label="Not included">
+    <span className="text-subtle" aria-label={label}>
       —
     </span>
   );
@@ -235,6 +220,10 @@ function CellNo() {
 
 export function PricingSection() {
   const [isAnnual, setIsAnnual] = useState(false);
+  const t = useTranslations("pricing");
+  const PLANS = usePlans(t);
+  const included = t("compare.included");
+  const notIncluded = t("compare.notIncluded");
 
   return (
     <>
@@ -250,15 +239,13 @@ export function PricingSection() {
 
         <div className="relative mx-auto w-full max-w-[640px] px-6">
           <span className="inline-block text-sm font-semibold tracking-[0.06em] uppercase text-brand mb-3">
-            Pricing
+            {t("hero.eyebrow")}
           </span>
           <h1 className="text-[3rem] font-bold tracking-tight text-foreground mt-3">
-            Pick the tier your strategy needs
+            {t("hero.heading")}
           </h1>
           <p className="mt-4 text-lg text-muted-foreground leading-[1.55]">
-            Every plan unlocks a deeper slice of the Augur stat catalog. Start
-            free for 7 days, no card required — upgrade, downgrade, or cancel
-            whenever you like.
+            {t("hero.subtitle")}
           </p>
 
           {/* Monthly / annual segmented toggle */}
@@ -266,7 +253,7 @@ export function PricingSection() {
             <div
               className="inline-flex p-1 bg-card border border-border rounded-full"
               role="group"
-              aria-label="Billing period"
+              aria-label={t("toggle.ariaLabel")}
             >
               <button
                 type="button"
@@ -278,7 +265,7 @@ export function PricingSection() {
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                Monthly
+                {t("toggle.monthly")}
               </button>
               <button
                 type="button"
@@ -290,13 +277,13 @@ export function PricingSection() {
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                Annual
+                {t("toggle.annual")}
               </button>
             </div>
 
             <span className="inline-flex items-center gap-1 px-3 py-[5px] rounded-full text-xs font-semibold bg-brand-soft text-brand border border-transparent whitespace-nowrap">
               <Zap size={13} aria-hidden="true" />
-              Save 20% — 2 months free annually
+              {t("toggle.saveBadge")}
             </span>
           </div>
         </div>
@@ -320,7 +307,7 @@ export function PricingSection() {
                 {/* "Most popular" badge — positioned above card top border */}
                 {plan.featured && (
                   <span className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 inline-flex items-center gap-1 px-3 py-[5px] rounded-full text-xs font-semibold bg-brand-soft text-brand border border-transparent whitespace-nowrap">
-                    Most popular
+                    {t("mostPopular")}
                   </span>
                 )}
 
@@ -349,7 +336,7 @@ export function PricingSection() {
                       : plan.monthlyPrice}
                   </span>
                   {plan.monthlyLookupKey !== null && (
-                    <span className="text-sm text-subtle">/ month</span>
+                    <span className="text-sm text-subtle">{t("perMonth")}</span>
                   )}
                 </div>
 
@@ -358,23 +345,23 @@ export function PricingSection() {
                   {plan.monthlyLookupKey !== null ? (
                     isAnnual ? (
                       <>
-                        Billed annually ·{" "}
+                        {t("billedAnnually")}{" "}
                         <span className="font-mono tabular-nums">
                           {plan.annualTotal}
                         </span>{" "}
-                        / yr
+                        {t("perYearShort")}
                       </>
                     ) : (
                       <>
-                        Billed monthly ·{" "}
+                        {t("billedMonthly")}{" "}
                         <span className="font-mono tabular-nums">
                           {plan.monthlyPrice}
                         </span>
-                        /mo
+                        {t("perMonthShort")}
                       </>
                     )
                   ) : (
-                    "Annual contract · volume pricing"
+                    t("annualContract")
                   )}
                 </p>
 
@@ -431,30 +418,27 @@ export function PricingSection() {
         <div className="mx-auto w-full max-w-[1180px] px-6">
           <div className="max-w-[640px] mx-auto mb-12 text-center">
             <span className="inline-block text-sm font-semibold tracking-[0.06em] uppercase text-brand mb-3">
-              Compare plans
+              {t("compare.eyebrow")}
             </span>
             <h2 className="text-[2.25rem] font-bold tracking-tight text-foreground">
-              Everything, side by side
+              {t("compare.heading")}
             </h2>
             <p className="mt-4 text-lg text-muted-foreground leading-[1.55]">
-              The detailed breakdown of what each tier unlocks. Prices shown are
-              monthly.
+              {t("compare.subtitle")}
             </p>
           </div>
 
           {/* Horizontal scroll on mobile */}
           <div className="overflow-x-auto -webkit-overflow-scrolling-touch border border-border rounded-xl bg-card">
             <table className="w-full min-w-[720px] border-collapse text-sm">
-              <caption className="sr-only">
-                Feature comparison across all four plans
-              </caption>
+              <caption className="sr-only">{t("compare.caption")}</caption>
               <thead>
                 <tr>
                   <th
                     scope="col"
                     className="sticky top-0 bg-surface-2 text-left text-sm font-bold text-foreground px-5 py-4 border-b border-border"
                   >
-                    Feature
+                    {t("compare.featureColumn")}
                   </th>
                   {PLANS.map((plan) => (
                     <th
@@ -471,7 +455,7 @@ export function PricingSection() {
                         }`}
                       >
                         {plan.monthlyPrice}
-                        {plan.monthlyLookupKey ? " / mo" : ""}
+                        {plan.monthlyLookupKey ? t("perMonthTable") : ""}
                       </span>
                     </th>
                   ))}
@@ -484,7 +468,7 @@ export function PricingSection() {
                     colSpan={5}
                     className="text-left text-xs font-bold tracking-[0.06em] uppercase text-subtle px-5 py-3 border-b border-border bg-muted"
                   >
-                    Stats access
+                    {t("compare.groups.statsAccess")}
                   </th>
                 </tr>
                 <tr>
@@ -492,19 +476,19 @@ export function PricingSection() {
                     scope="row"
                     className="text-left font-medium text-foreground px-5 py-3 border-b border-border whitespace-nowrap"
                   >
-                    Tier 1 stats
+                    {t("compare.rows.tier1Stats")}
                   </th>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
-                    <CellYes />
+                    <CellYes label={included} />
                   </td>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border bg-brand-soft">
-                    <CellYes />
+                    <CellYes label={included} />
                   </td>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
-                    <CellYes />
+                    <CellYes label={included} />
                   </td>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
-                    <CellYes />
+                    <CellYes label={included} />
                   </td>
                 </tr>
                 <tr>
@@ -512,19 +496,19 @@ export function PricingSection() {
                     scope="row"
                     className="text-left font-medium text-foreground px-5 py-3 border-b border-border whitespace-nowrap"
                   >
-                    Tier 2 stats
+                    {t("compare.rows.tier2Stats")}
                   </th>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
-                    <CellNo />
+                    <CellNo label={notIncluded} />
                   </td>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border bg-brand-soft">
-                    <CellYes />
+                    <CellYes label={included} />
                   </td>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
-                    <CellYes />
+                    <CellYes label={included} />
                   </td>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
-                    <CellYes />
+                    <CellYes label={included} />
                   </td>
                 </tr>
                 <tr>
@@ -532,19 +516,19 @@ export function PricingSection() {
                     scope="row"
                     className="text-left font-medium text-foreground px-5 py-3 border-b border-border whitespace-nowrap"
                   >
-                    Tier 3 stats
+                    {t("compare.rows.tier3Stats")}
                   </th>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
-                    <CellNo />
+                    <CellNo label={notIncluded} />
                   </td>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border bg-brand-soft">
-                    <CellNo />
+                    <CellNo label={notIncluded} />
                   </td>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
-                    <CellYes />
+                    <CellYes label={included} />
                   </td>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
-                    <CellYes />
+                    <CellYes label={included} />
                   </td>
                 </tr>
                 <tr>
@@ -552,7 +536,7 @@ export function PricingSection() {
                     scope="row"
                     className="text-left font-medium text-foreground px-5 py-3 border-b border-border whitespace-nowrap"
                   >
-                    Stat families included
+                    {t("compare.rows.statFamilies")}
                   </th>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
                     <span className="font-mono tabular-nums">18</span>
@@ -564,7 +548,8 @@ export function PricingSection() {
                     <span className="font-mono tabular-nums">54</span>
                   </td>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
-                    <span className="font-mono tabular-nums">54</span> + custom
+                    <span className="font-mono tabular-nums">54</span>{" "}
+                    {t("compare.plusCustom")}
                   </td>
                 </tr>
 
@@ -574,7 +559,7 @@ export function PricingSection() {
                     colSpan={5}
                     className="text-left text-xs font-bold tracking-[0.06em] uppercase text-subtle px-5 py-3 border-b border-border bg-muted"
                   >
-                    Data &amp; depth
+                    {t("compare.groups.dataDepth")}
                   </th>
                 </tr>
                 <tr>
@@ -582,19 +567,23 @@ export function PricingSection() {
                     scope="row"
                     className="text-left font-medium text-foreground px-5 py-3 border-b border-border whitespace-nowrap"
                   >
-                    Historical depth
+                    {t("compare.rows.historicalDepth")}
                   </th>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
-                    <span className="font-mono tabular-nums">3</span> yrs
+                    <span className="font-mono tabular-nums">3</span>{" "}
+                    {t("compare.years")}
                   </td>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border bg-brand-soft">
-                    <span className="font-mono tabular-nums">10</span> yrs
+                    <span className="font-mono tabular-nums">10</span>{" "}
+                    {t("compare.years")}
                   </td>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
-                    <span className="font-mono tabular-nums">18</span> yrs
+                    <span className="font-mono tabular-nums">18</span>{" "}
+                    {t("compare.years")}
                   </td>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
-                    <span className="font-mono tabular-nums">18</span> yrs
+                    <span className="font-mono tabular-nums">18</span>{" "}
+                    {t("compare.years")}
                   </td>
                 </tr>
                 <tr>
@@ -602,19 +591,19 @@ export function PricingSection() {
                     scope="row"
                     className="text-left font-medium text-foreground px-5 py-3 border-b border-border whitespace-nowrap"
                   >
-                    Refresh frequency
+                    {t("compare.rows.refreshFrequency")}
                   </th>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
-                    Daily
+                    {t("compare.daily")}
                   </td>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border bg-brand-soft">
-                    Daily
+                    {t("compare.daily")}
                   </td>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
-                    Daily
+                    {t("compare.daily")}
                   </td>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
-                    Intraday
+                    {t("compare.intraday")}
                   </td>
                 </tr>
                 <tr>
@@ -622,19 +611,19 @@ export function PricingSection() {
                     scope="row"
                     className="text-left font-medium text-foreground px-5 py-3 border-b border-border whitespace-nowrap"
                   >
-                    Conditional slices
+                    {t("compare.rows.conditionalSlices")}
                   </th>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
-                    Weekday only
+                    {t("compare.weekdayOnly")}
                   </td>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border bg-brand-soft">
-                    All slices
+                    {t("compare.allSlices")}
                   </td>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
-                    All slices
+                    {t("compare.allSlices")}
                   </td>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
-                    All + custom
+                    {t("compare.allPlusCustom")}
                   </td>
                 </tr>
                 <tr>
@@ -642,19 +631,19 @@ export function PricingSection() {
                     scope="row"
                     className="text-left font-medium text-foreground px-5 py-3 border-b border-border whitespace-nowrap"
                   >
-                    CSV export
+                    {t("compare.rows.csvExport")}
                   </th>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
-                    <CellNo />
+                    <CellNo label={notIncluded} />
                   </td>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border bg-brand-soft">
-                    <CellYes />
+                    <CellYes label={included} />
                   </td>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
-                    <CellYes />
+                    <CellYes label={included} />
                   </td>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
-                    <CellYes />
+                    <CellYes label={included} />
                   </td>
                 </tr>
                 <tr>
@@ -662,19 +651,19 @@ export function PricingSection() {
                     scope="row"
                     className="text-left font-medium text-foreground px-5 py-3 border-b border-border whitespace-nowrap"
                   >
-                    REST API access
+                    {t("compare.rows.restApiAccess")}
                   </th>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
-                    <CellNo />
+                    <CellNo label={notIncluded} />
                   </td>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border bg-brand-soft">
-                    <CellNo />
+                    <CellNo label={notIncluded} />
                   </td>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
-                    <CellYes />
+                    <CellYes label={included} />
                   </td>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
-                    <CellYes />
+                    <CellYes label={included} />
                   </td>
                 </tr>
                 <tr>
@@ -682,19 +671,21 @@ export function PricingSection() {
                     scope="row"
                     className="text-left font-medium text-foreground px-5 py-3 border-b border-border whitespace-nowrap"
                   >
-                    API rate limit
+                    {t("compare.rows.apiRateLimit")}
                   </th>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
-                    <CellNo />
+                    <CellNo label={notIncluded} />
                   </td>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border bg-brand-soft">
-                    <CellNo />
+                    <CellNo label={notIncluded} />
                   </td>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
-                    <span className="font-mono tabular-nums">5k</span> / day
+                    <span className="font-mono tabular-nums">5k</span>{" "}
+                    {t("compare.perDay")}
                   </td>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
-                    <span className="font-mono tabular-nums">100k</span> / day
+                    <span className="font-mono tabular-nums">100k</span>{" "}
+                    {t("compare.perDay")}
                   </td>
                 </tr>
 
@@ -704,7 +695,7 @@ export function PricingSection() {
                     colSpan={5}
                     className="text-left text-xs font-bold tracking-[0.06em] uppercase text-subtle px-5 py-3 border-b border-border bg-muted"
                   >
-                    Team &amp; support
+                    {t("compare.groups.teamSupport")}
                   </th>
                 </tr>
                 <tr>
@@ -712,7 +703,7 @@ export function PricingSection() {
                     scope="row"
                     className="text-left font-medium text-foreground px-5 py-3 border-b border-border whitespace-nowrap"
                   >
-                    Seats included
+                    {t("compare.rows.seatsIncluded")}
                   </th>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
                     <span className="font-mono tabular-nums">1</span>
@@ -724,7 +715,7 @@ export function PricingSection() {
                     <span className="font-mono tabular-nums">3</span>
                   </td>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
-                    Unlimited
+                    {t("compare.unlimited")}
                   </td>
                 </tr>
                 <tr>
@@ -732,19 +723,19 @@ export function PricingSection() {
                     scope="row"
                     className="text-left font-medium text-foreground px-5 py-3 border-b border-border whitespace-nowrap"
                   >
-                    Support level
+                    {t("compare.rows.supportLevel")}
                   </th>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
-                    Community
+                    {t("compare.community")}
                   </td>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border bg-brand-soft">
-                    Email
+                    {t("compare.email")}
                   </td>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
-                    Priority email
+                    {t("compare.priorityEmail")}
                   </td>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
-                    Dedicated manager
+                    {t("compare.dedicatedManager")}
                   </td>
                 </tr>
                 <tr>
@@ -752,16 +743,16 @@ export function PricingSection() {
                     scope="row"
                     className="text-left font-medium text-foreground px-5 py-3 border-b border-border whitespace-nowrap"
                   >
-                    Uptime SLA
+                    {t("compare.rows.uptimeSla")}
                   </th>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
-                    <CellNo />
+                    <CellNo label={notIncluded} />
                   </td>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border bg-brand-soft">
-                    <CellNo />
+                    <CellNo label={notIncluded} />
                   </td>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
-                    <CellNo />
+                    <CellNo label={notIncluded} />
                   </td>
                   <td className="text-center text-muted-foreground px-3 py-3 border-b border-border border-l border-l-border">
                     <span className="font-mono tabular-nums">99.9%</span>

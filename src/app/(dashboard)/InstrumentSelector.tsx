@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ChevronDownIcon, CheckIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import {
   Popover,
   PopoverTrigger,
@@ -37,6 +38,7 @@ export function InstrumentSelector({
   const router = useRouter();
   const searchParams = useSearchParams();
   const [open, setOpen] = useState(false);
+  const t = useTranslations("dashboard.instrumentSelector");
 
   function handleValueChange(value: string) {
     const url = hrefTemplate.replace("{instrument}", value.toLowerCase());
@@ -49,7 +51,7 @@ export function InstrumentSelector({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button
-          aria-label={`Instrument: ${activeInstrument}. Search instruments`}
+          aria-label={t("ariaLabel", { instrument: activeInstrument })}
           aria-haspopup="listbox"
           aria-expanded={open}
           className="inline-flex items-center justify-between gap-3 h-10 min-w-40 px-3 rounded-md border border-border bg-card font-mono text-sm font-semibold text-foreground hover:border-border-strong focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:border-brand transition-colors cursor-pointer"
@@ -63,9 +65,9 @@ export function InstrumentSelector({
       </PopoverTrigger>
       <PopoverContent className="min-w-56 p-2">
         <Command>
-          <CommandInput placeholder="Search instruments…" />
+          <CommandInput placeholder={t("searchPlaceholder")} />
           <CommandList>
-            <CommandEmpty>No instruments found.</CommandEmpty>
+            <CommandEmpty>{t("noInstrumentsFound")}</CommandEmpty>
             {instruments.map((code) => (
               <CommandItem
                 key={code}

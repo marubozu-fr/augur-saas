@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import NextLink from "next/link";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import {
   Zap,
   ArrowRight,
@@ -12,12 +13,13 @@ import {
   ChevronUp,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { buildLanguageAlternates } from "@/i18n/metadata";
 
-export const metadata: Metadata = {
-  title: "Augur — Statistical Market Probabilities for Futures Traders",
-  description:
-    "Augur turns 18 years of NQ and ES futures data into clean, conditional probabilities. Every edge is shown against its baseline, with the sample size in plain sight.",
-};
+// Title/description are inherited from the [locale] layout; this page adds its
+// own hreflang alternates for the marketing root.
+export function generateMetadata(): Metadata {
+  return { alternates: { languages: buildLanguageAlternates("") } };
+}
 
 // Shared container class — matches .container in styles.css (max-w 1180px)
 const container = "mx-auto w-full max-w-[1180px] px-6";
@@ -30,6 +32,8 @@ export default async function LandingPage() {
   if (user) {
     redirect("/dashboard");
   }
+
+  const t = await getTranslations("landing");
 
   return (
     <>
@@ -52,38 +56,37 @@ export default async function LandingPage() {
               {/* Accent pill badge */}
               <span className="inline-flex items-center gap-2 mb-6 px-3 py-[5px] rounded-full text-xs font-semibold bg-brand-soft text-brand border border-transparent">
                 <Zap size={13} aria-hidden="true" />
-                New — overnight gap continuation stats now live
+                {t("hero.badge")}
               </span>
 
               <h1 className="text-[3rem] md:text-[3.75rem] leading-[1.05] font-bold tracking-tight text-foreground">
-                Trade the{" "}
-                <span className="bg-gradient-to-r from-[#38bdf8] to-[#22c55e] bg-clip-text text-transparent">
-                  probabilities
-                </span>
-                ,<br />
-                not the predictions.
+                {t.rich("hero.headline", {
+                  hl: (chunks) => (
+                    <span className="bg-gradient-to-r from-[#38bdf8] to-[#22c55e] bg-clip-text text-transparent">
+                      {chunks}
+                    </span>
+                  ),
+                  br: () => <br />,
+                })}
               </h1>
 
               <p className="mt-6 text-lg text-muted-foreground max-w-[34rem] leading-[1.55]">
-                Augur turns 18 years of NQ and ES futures data into clean,
-                conditional probabilities. Every edge is shown against its
-                baseline, with the sample size in plain sight — so you know
-                exactly how strong a setup really is.
+                {t("hero.subtitle")}
               </p>
 
               {/* CTAs */}
               <div className="flex flex-wrap gap-3 mt-6">
-                <Link
+                <NextLink
                   href="/sign-up"
                   className="inline-flex items-center justify-center h-12 px-6 rounded-md bg-brand text-base font-semibold text-on-brand hover:bg-brand-hover transition-colors"
                 >
-                  Start free 7-day trial
-                </Link>
+                  {t("hero.ctaPrimary")}
+                </NextLink>
                 <a
                   href="#proof"
                   className="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-md border border-border-strong text-base font-semibold text-foreground hover:bg-card transition-colors"
                 >
-                  See the data
+                  {t("hero.ctaSecondary")}
                   <ArrowRight size={16} aria-hidden="true" />
                 </a>
               </div>
@@ -92,15 +95,15 @@ export default async function LandingPage() {
               <div className="flex flex-wrap gap-5 mt-6 text-sm text-subtle">
                 <span className="inline-flex items-center gap-2">
                   <Check size={15} className="text-up" aria-hidden="true" />
-                  No card required
+                  {t("hero.checklist.noCard")}
                 </span>
                 <span className="inline-flex items-center gap-2">
                   <Check size={15} className="text-up" aria-hidden="true" />
-                  Cancel anytime
+                  {t("hero.checklist.cancelAnytime")}
                 </span>
                 <span className="inline-flex items-center gap-2">
                   <Check size={15} className="text-up" aria-hidden="true" />
-                  Updated daily after the close
+                  {t("hero.checklist.updatedDaily")}
                 </span>
               </div>
             </div>
@@ -108,21 +111,21 @@ export default async function LandingPage() {
             {/* Right: sample stat preview card */}
             <div
               className="rounded-xl border border-border bg-card p-6 shadow-[0_16px_48px_rgba(0,0,0,0.55)]"
-              aria-label="Sample statistic preview"
+              aria-label={t("hero.preview.ariaLabel")}
             >
               {/* Card top */}
               <div className="flex items-start justify-between gap-4 mb-5">
                 <div>
                   <div className="text-base font-semibold text-foreground">
-                    Gap-up continuation — NQ
+                    {t("hero.preview.title")}
                   </div>
                   <div className="text-xs text-subtle mt-[2px]">
-                    P(close above open | gap &gt; 0.30%) · RTH session
+                    {t("hero.preview.subtitle")}
                   </div>
                 </div>
                 {/* Tier badge — outline style */}
                 <span className="inline-flex items-center gap-1 px-3 py-[5px] rounded-full text-xs font-semibold border border-border bg-surface-2 text-muted-foreground flex-shrink-0">
-                  Tier 1
+                  {t("hero.preview.tier")}
                 </span>
               </div>
 
@@ -133,13 +136,13 @@ export default async function LandingPage() {
                 </span>
                 <span className="inline-flex items-center gap-1 px-3 py-[5px] rounded-full text-xs font-semibold bg-up-soft text-up border border-transparent">
                   <ChevronUp size={12} aria-hidden="true" />
-                  +9.8 pts edge
+                  {t("hero.preview.edge")}
                 </span>
               </div>
 
               {/* Baseline */}
               <div className="text-sm text-muted-foreground">
-                Baseline (all sessions):{" "}
+                {t("hero.preview.baselineLabel")}{" "}
                 <span className="font-mono tabular-nums">53.6%</span>
                 {" · "}
                 <span className="font-mono tabular-nums">N = 1,284</span>
@@ -149,7 +152,9 @@ export default async function LandingPage() {
               <div className="mt-5 border-t border-border">
                 {/* Row 1 */}
                 <div className="grid grid-cols-[1fr_auto_auto] gap-4 items-center py-3 border-b border-border text-sm">
-                  <span className="text-muted-foreground">Monday open</span>
+                  <span className="text-muted-foreground">
+                    {t("hero.preview.row1Label")}
+                  </span>
                   <span className="font-semibold font-mono tabular-nums text-up">
                     67.1%
                   </span>
@@ -159,7 +164,9 @@ export default async function LandingPage() {
                 </div>
                 {/* Row 2 */}
                 <div className="grid grid-cols-[1fr_auto_auto] gap-4 items-center py-3 border-b border-border text-sm">
-                  <span className="text-muted-foreground">Gap &gt; 0.75%</span>
+                  <span className="text-muted-foreground">
+                    {t("hero.preview.row2Label")}
+                  </span>
                   <span className="font-semibold font-mono tabular-nums text-up">
                     71.5%
                   </span>
@@ -169,7 +176,9 @@ export default async function LandingPage() {
                 </div>
                 {/* Row 3 */}
                 <div className="grid grid-cols-[1fr_auto_auto] gap-4 items-center py-3 border-b border-border text-sm">
-                  <span className="text-muted-foreground">Friday open</span>
+                  <span className="text-muted-foreground">
+                    {t("hero.preview.row3Label")}
+                  </span>
                   <span className="font-semibold font-mono tabular-nums text-down">
                     48.9%
                   </span>
@@ -179,7 +188,9 @@ export default async function LandingPage() {
                 </div>
                 {/* Row 4 */}
                 <div className="grid grid-cols-[1fr_auto_auto] gap-4 items-center py-3 border-b border-border text-sm">
-                  <span className="text-muted-foreground">FOMC day</span>
+                  <span className="text-muted-foreground">
+                    {t("hero.preview.row4Label")}
+                  </span>
                   <span className="font-semibold font-mono tabular-nums text-neutral">
                     54.0%
                   </span>
@@ -198,17 +209,17 @@ export default async function LandingPage() {
         <section className="py-6 border-y border-border">
           <div className={container}>
             <p className="text-center text-xs font-semibold tracking-[0.06em] uppercase text-subtle mb-4">
-              Coverage across the instruments you actually trade
+              {t("trustStrip.heading")}
             </p>
             <div
               className="flex flex-wrap justify-center gap-12 text-subtle font-semibold text-lg"
-              aria-label="Covered instruments"
+              aria-label={t("trustStrip.ariaLabel")}
             >
               <span className="opacity-70">NQ · Nasdaq-100</span>
               <span className="opacity-70">ES · S&amp;P 500</span>
-              <span className="opacity-70">RTH &amp; ETH sessions</span>
-              <span className="opacity-70">2007 – present</span>
-              <span className="opacity-70">1m · 5m · daily</span>
+              <span className="opacity-70">{t("trustStrip.sessions")}</span>
+              <span className="opacity-70">{t("trustStrip.history")}</span>
+              <span className="opacity-70">{t("trustStrip.timeframes")}</span>
             </div>
           </div>
         </section>
@@ -221,15 +232,13 @@ export default async function LandingPage() {
             {/* Section head */}
             <div className="max-w-[640px] mx-auto mb-12 text-center">
               <span className="inline-block text-sm font-semibold tracking-[0.06em] uppercase text-brand mb-3">
-                Why Augur
+                {t("features.eyebrow")}
               </span>
               <h2 className="text-[2.25rem] font-bold tracking-tight text-foreground">
-                Edges you can actually trust
+                {t("features.heading")}
               </h2>
               <p className="mt-4 text-lg text-muted-foreground leading-[1.55]">
-                No black boxes, no curve-fit signals. Just transparent
-                conditional statistics with the context you need to size a trade
-                with confidence.
+                {t("features.subtitle")}
               </p>
             </div>
 
@@ -244,12 +253,10 @@ export default async function LandingPage() {
                   <TrendingUp size={22} />
                 </span>
                 <h3 className="text-lg font-bold tracking-tight text-foreground mb-2">
-                  Baseline-relative edges
+                  {t("features.baseline.title")}
                 </h3>
                 <p className="text-sm text-muted-foreground leading-[1.55]">
-                  Every probability is shown next to its unconditional baseline.
-                  A 56% hit rate means nothing until you know the base rate — we
-                  put both side by side, always.
+                  {t("features.baseline.description")}
                 </p>
               </article>
 
@@ -262,12 +269,10 @@ export default async function LandingPage() {
                   <Table2 size={22} />
                 </span>
                 <h3 className="text-lg font-bold tracking-tight text-foreground mb-2">
-                  Sliced every way
+                  {t("features.sliced.title")}
                 </h3>
                 <p className="text-sm text-muted-foreground leading-[1.55]">
-                  Drill into any stat by weekday, gap size, prior-day range,
-                  session, or volatility regime. Each slice carries its own
-                  sample size so thin buckets never mislead you.
+                  {t("features.sliced.description")}
                 </p>
               </article>
 
@@ -280,12 +285,10 @@ export default async function LandingPage() {
                   <Clock size={22} />
                 </span>
                 <h3 className="text-lg font-bold tracking-tight text-foreground mb-2">
-                  Refreshed daily
+                  {t("features.refreshed.title")}
                 </h3>
                 <p className="text-sm text-muted-foreground leading-[1.55]">
-                  Stats recompute automatically after each cash close, rolling
-                  in the latest session so your edges reflect this week&apos;s
-                  market — not a backtest frozen in 2019.
+                  {t("features.refreshed.description")}
                 </p>
               </article>
 
@@ -298,12 +301,10 @@ export default async function LandingPage() {
                   <ShieldCheck size={22} />
                 </span>
                 <h3 className="text-lg font-bold tracking-tight text-foreground mb-2">
-                  Significance built in
+                  {t("features.significance.title")}
                 </h3>
                 <p className="text-sm text-muted-foreground leading-[1.55]">
-                  Confidence intervals and minimum-N thresholds keep noise out
-                  of the headline number. We grey out edges that aren&apos;t
-                  statistically meaningful instead of overselling them.
+                  {t("features.significance.description")}
                 </p>
               </article>
             </div>
@@ -318,10 +319,10 @@ export default async function LandingPage() {
             {/* Section head */}
             <div className="max-w-[640px] mx-auto mb-12 text-center">
               <span className="inline-block text-sm font-semibold tracking-[0.06em] uppercase text-brand mb-3">
-                How it works
+                {t("howItWorks.eyebrow")}
               </span>
               <h2 className="text-[2.25rem] font-bold tracking-tight text-foreground">
-                From signup to your first edge in minutes
+                {t("howItWorks.heading")}
               </h2>
             </div>
 
@@ -336,12 +337,10 @@ export default async function LandingPage() {
                   1
                 </span>
                 <h3 className="text-lg font-bold tracking-tight text-foreground mt-6 mb-2">
-                  Pick your plan
+                  {t("howItWorks.step1.title")}
                 </h3>
                 <p className="text-sm text-muted-foreground leading-[1.55]">
-                  Choose a tier from Starter to Enterprise. Higher tiers unlock
-                  deeper stat families and finer slices. Start free for 7 days,
-                  no card required.
+                  {t("howItWorks.step1.description")}
                 </p>
               </li>
 
@@ -354,12 +353,10 @@ export default async function LandingPage() {
                   2
                 </span>
                 <h3 className="text-lg font-bold tracking-tight text-foreground mt-6 mb-2">
-                  Browse the stat catalog
+                  {t("howItWorks.step2.title")}
                 </h3>
                 <p className="text-sm text-muted-foreground leading-[1.55]">
-                  Open the dashboard and explore stat families for NQ and ES —
-                  gaps, opening drives, range extensions, weekday seasonality
-                  and more. Filter to what fits your style.
+                  {t("howItWorks.step2.description")}
                 </p>
               </li>
 
@@ -372,12 +369,10 @@ export default async function LandingPage() {
                   3
                 </span>
                 <h3 className="text-lg font-bold tracking-tight text-foreground mt-6 mb-2">
-                  Trade with context
+                  {t("howItWorks.step3.title")}
                 </h3>
                 <p className="text-sm text-muted-foreground leading-[1.55]">
-                  Read the edge against its baseline, check the sample size, and
-                  size your position accordingly. Come back after the close for
-                  the next day&apos;s refreshed numbers.
+                  {t("howItWorks.step3.description")}
                 </p>
               </li>
             </ol>
@@ -396,7 +391,7 @@ export default async function LandingPage() {
                   54+
                 </div>
                 <div className="mt-2 text-sm text-muted-foreground">
-                  Distinct stat families
+                  {t("proof.metrics.families")}
                 </div>
               </div>
               <div>
@@ -404,7 +399,7 @@ export default async function LandingPage() {
                   1.2M
                 </div>
                 <div className="mt-2 text-sm text-muted-foreground">
-                  Data points analyzed
+                  {t("proof.metrics.dataPoints")}
                 </div>
               </div>
               <div>
@@ -412,7 +407,7 @@ export default async function LandingPage() {
                   18 yrs
                 </div>
                 <div className="mt-2 text-sm text-muted-foreground">
-                  Of NQ &amp; ES history
+                  {t("proof.metrics.history")}
                 </div>
               </div>
               <div>
@@ -420,7 +415,7 @@ export default async function LandingPage() {
                   2
                 </div>
                 <div className="mt-2 text-sm text-muted-foreground">
-                  Covered instruments (NQ &amp; ES)
+                  {t("proof.metrics.instruments")}
                 </div>
               </div>
             </div>
@@ -428,10 +423,10 @@ export default async function LandingPage() {
             {/* Section head */}
             <div className="max-w-[640px] mx-auto mt-24 mb-12 text-center">
               <span className="inline-block text-sm font-semibold tracking-[0.06em] uppercase text-brand mb-3">
-                Loved by serious traders
+                {t("proof.eyebrow")}
               </span>
               <h2 className="text-[2.25rem] font-bold tracking-tight text-foreground">
-                The edge desk traders keep open all day
+                {t("proof.heading")}
               </h2>
             </div>
 
@@ -440,10 +435,7 @@ export default async function LandingPage() {
               {/* Testimonial 1 */}
               <figure className="rounded-xl border border-border bg-card p-6">
                 <blockquote className="text-base text-foreground leading-[1.55]">
-                  &ldquo;I stopped guessing whether a gap would fill. Augur
-                  tells me the continuation rate by gap size and weekday, with
-                  the N right there. It&apos;s the first thing I check before
-                  the open.&rdquo;
+                  &ldquo;{t("proof.testimonial1.quote")}&rdquo;
                 </blockquote>
                 <figcaption className="flex items-center gap-3 mt-5">
                   <span
@@ -457,7 +449,7 @@ export default async function LandingPage() {
                       Marcus Kellner
                     </span>
                     <span className="text-xs text-subtle">
-                      Independent NQ futures trader
+                      {t("proof.testimonial1.role")}
                     </span>
                   </span>
                 </figcaption>
@@ -466,9 +458,7 @@ export default async function LandingPage() {
               {/* Testimonial 2 */}
               <figure className="rounded-xl border border-border bg-card p-6">
                 <blockquote className="text-base text-foreground leading-[1.55]">
-                  &ldquo;What sold me was the honesty. When a slice has 22
-                  samples it says so and greys out the edge. No other stats
-                  product respects significance like this.&rdquo;
+                  &ldquo;{t("proof.testimonial2.quote")}&rdquo;
                 </blockquote>
                 <figcaption className="flex items-center gap-3 mt-5">
                   <span
@@ -482,7 +472,7 @@ export default async function LandingPage() {
                       Priya Desai
                     </span>
                     <span className="text-xs text-subtle">
-                      Quant analyst, prop desk
+                      {t("proof.testimonial2.role")}
                     </span>
                   </span>
                 </figcaption>
@@ -491,9 +481,7 @@ export default async function LandingPage() {
               {/* Testimonial 3 */}
               <figure className="rounded-xl border border-border bg-card p-6">
                 <blockquote className="text-base text-foreground leading-[1.55]">
-                  &ldquo;We use the Enterprise API to feed our pre-market
-                  checklist for a small ES book. Daily refresh and clean
-                  baselines saved us weeks of building this ourselves.&rdquo;
+                  &ldquo;{t("proof.testimonial3.quote")}&rdquo;
                 </blockquote>
                 <figcaption className="flex items-center gap-3 mt-5">
                   <span
@@ -507,7 +495,7 @@ export default async function LandingPage() {
                       Jonas Reuter
                     </span>
                     <span className="text-xs text-subtle">
-                      Head of trading, proprietary fund
+                      {t("proof.testimonial3.role")}
                     </span>
                   </span>
                 </figcaption>
@@ -523,27 +511,23 @@ export default async function LandingPage() {
           <div className={container}>
             <div className="relative overflow-hidden rounded-2xl border border-border bg-[radial-gradient(80%_120%_at_50%_0%,rgba(14,165,233,0.18),transparent_60%),var(--card)] px-[3rem] py-[4rem] text-center">
               <h2 className="text-[2.25rem] font-bold tracking-tight text-foreground">
-                Get an edge in your inbox every morning
+                {t("cta.heading")}
               </h2>
               <p className="mt-4 mx-auto max-w-[32rem] text-muted-foreground leading-[1.55]">
-                The Augur Pre-Market Brief: three statistically notable setups
-                for NQ and ES, delivered before the open. Free, and a taste of
-                the full platform.
+                {t("cta.description")}
               </p>
 
               {/* Single sign-up CTA — newsletter backend not built yet */}
               <div className="mt-6 flex justify-center">
-                <Link
+                <NextLink
                   href="/sign-up"
                   className="inline-flex items-center justify-center h-12 px-6 rounded-md bg-brand text-base font-semibold text-on-brand hover:bg-brand-hover transition-colors"
                 >
-                  Start free 7-day trial
-                </Link>
+                  {t("hero.ctaPrimary")}
+                </NextLink>
               </div>
 
-              <p className="mt-4 text-xs text-subtle">
-                Free for 7 days. No card required.
-              </p>
+              <p className="mt-4 text-xs text-subtle">{t("cta.footnote")}</p>
             </div>
           </div>
         </section>

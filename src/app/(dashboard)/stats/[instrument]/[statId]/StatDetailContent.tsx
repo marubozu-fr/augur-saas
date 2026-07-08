@@ -5,6 +5,7 @@
 // (StatDetailClient.tsx, after a Server Action refetch on filter change).
 
 import { AlertTriangle } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { makeLabelResolver } from "./helpers";
 import { LockedState } from "./LockedState";
 import { MagnitudeCards } from "./MagnitudeCards";
@@ -14,12 +15,16 @@ import { SliceAccordion } from "./SliceAccordion";
 import { MetadataStrip } from "@/components/stat-detail/MetadataStrip";
 import type { StatSliceResult } from "./load-stat-slice";
 import type { StatResultRow } from "@/types/stats";
+import type { Locale } from "@/i18n/config";
 
 interface StatDetailContentProps {
   result: StatSliceResult;
+  locale: Locale;
 }
 
-export function StatDetailContent({ result }: StatDetailContentProps) {
+export function StatDetailContent({ result, locale }: StatDetailContentProps) {
+  const t = useTranslations("statDetail");
+
   switch (result.kind) {
     case "locked":
       return (
@@ -38,30 +43,32 @@ export function StatDetailContent({ result }: StatDetailContentProps) {
             <AlertTriangle size={26} aria-hidden="true" />
           </span>
           <h2 className="text-lg font-semibold text-foreground">
-            Could not load stat
+            {t("couldNotLoad")}
           </h2>
           <p className="text-sm text-muted-foreground max-w-[26rem]">
-            {result.kind === "error"
-              ? result.message
-              : "Failed to load stat data. Please try again later."}
+            {result.kind === "error" ? result.message : t("loadFailed")}
           </p>
-          <p className="text-xs text-subtle">Refresh the page to try again.</p>
+          <p className="text-xs text-subtle">{t("refreshToTry")}</p>
         </div>
       );
 
     case "no-instrument":
       return (
         <p className="text-sm text-muted-foreground">
-          No data available for instrument{" "}
-          <span className="font-mono">{result.instrument}</span>.
+          {t.rich("noDataForInstrument", {
+            instrument: result.instrument,
+            mono: (chunks) => <span className="font-mono">{chunks}</span>,
+          })}
         </p>
       );
 
     case "no-timeframe":
       return (
         <p className="text-sm text-muted-foreground">
-          No data available for timeframe{" "}
-          <span className="font-mono">{result.timeframe}</span>.
+          {t.rich("noDataForTimeframe", {
+            timeframe: result.timeframe,
+            mono: (chunks) => <span className="font-mono">{chunks}</span>,
+          })}
         </p>
       );
 
@@ -81,7 +88,7 @@ export function StatDetailContent({ result }: StatDetailContentProps) {
       } = result;
 
       // Build the label resolver once; pass it down to all rendering components.
-      const resolver = makeLabelResolver(labels);
+      const resolver = makeLabelResolver(labels, locale);
 
       // Group probability rows by condition to decide whether the new visual
       // display (one ConditionCard per condition) applies: it requires EVERY
@@ -118,9 +125,9 @@ export function StatDetailContent({ result }: StatDetailContentProps) {
           {magnitudeRows.length > 0 && (
             <>
               <h2 className="flex items-center gap-3 text-lg font-bold tracking-tight text-foreground mt-6 mb-4">
-                Summarised magnitudes
+                {t("summarisedMagnitudes")}
                 <span className="text-xs font-medium text-subtle ml-auto">
-                  continuation · {instrument} {timeframe}
+                  {t("continuation")} · {instrument} {timeframe}
                 </span>
               </h2>
               <MagnitudeCards rows={magnitudeRows} resolver={resolver} />
@@ -131,7 +138,7 @@ export function StatDetailContent({ result }: StatDetailContentProps) {
           {probRows.length > 0 && (
             <>
               <h2 className="flex items-center gap-3 text-lg font-bold tracking-tight text-foreground mt-6 mb-4">
-                Pattern frequency
+                {t("patternFrequency")}
               </h2>
 
               {isVisualShape ? (
@@ -157,10 +164,9 @@ export function StatDetailContent({ result }: StatDetailContentProps) {
               )}
 
               <p className="mt-5 text-xs text-subtle leading-normal">
-                Probabilities are observed frequencies over the selected period.
-                The baseline is the same outcome&apos;s unconditional rate; edge
-                is <span className="font-mono">probability − baseline</span>, in
-                percentage points.
+                {t.rich("probabilityFootnote", {
+                  mono: (chunks) => <span className="font-mono">{chunks}</span>,
+                })}
               </p>
 
               {/* Shared Advanced panel — the visual cards are the at-a-glance
@@ -187,7 +193,7 @@ export function StatDetailContent({ result }: StatDetailContentProps) {
                     >
                       <path d="M9 6l6 6-6 6" />
                     </svg>
-                    Advanced
+                    {t("advanced")}
                   </summary>
 
                   <div className="pt-4">
@@ -214,15 +220,20 @@ export function StatDetailContent({ result }: StatDetailContentProps) {
           {slices.length > 0 && (
             <>
               <h2 className="flex items-center gap-3 text-lg font-bold tracking-tight text-foreground mt-6 mb-4">
-                Sliced by dimension
+                {t("slicedByDimension")}
                 <span className="text-xs font-medium text-subtle ml-auto">
-                  expand a dimension to see grouped probabilities
+                  {t("expandDimensionHint")}
                 </span>
               </h2>
 
               <div className="flex flex-col gap-3">
                 {slices.map(([key, slice]) => (
-                  <SliceAccordion key={key} slice={slice} resolver={resolver} />
+                  <SliceAccordion
+                    key={key}
+                    slice={slice}
+                    resolver={resolver}
+                    locale={locale}
+                  />
                 ))}
               </div>
             </>

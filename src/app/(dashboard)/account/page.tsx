@@ -5,16 +5,21 @@
 
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveSubscription } from "@/lib/subscription.server";
 import type { Subscription } from "@/lib/subscription";
+import { isLocale } from "@/i18n/config";
+import type { Locale } from "@/i18n/config";
 import { PlanAndBillingCards } from "./PlanAndBillingCards";
 import { AccountSkeleton } from "./AccountSkeleton";
 import { EmailField } from "./EmailField";
 import { PasswordForm } from "./PasswordForm";
+import { LanguageSelect } from "./LanguageSelect";
 import { redirectToBillingPortal } from "./actions";
 
 export default async function AccountPage() {
+  const t = await getTranslations("account");
   const supabase = await createClient();
   const {
     data: { user },
@@ -25,6 +30,21 @@ export default async function AccountPage() {
   }
 
   const userEmail = user.email ?? "";
+
+  // Current language preference (null = auto-detect). Read alongside the
+  // subscription below; failure here degrades to "Auto" rather than blocking
+  // the page.
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("preferred_locale")
+    .eq("id", user.id)
+    .single();
+
+  const rawPreferredLocale = profile?.preferred_locale;
+  const preferredLocale: Locale | null =
+    typeof rawPreferredLocale === "string" && isLocale(rawPreferredLocale)
+      ? rawPreferredLocale
+      : null;
 
   // Fetch the subscription once here (Supabase only, no Stripe call) and pass it
   // down to PlanAndBillingCards — getActiveSubscription() does not use fetch(),
@@ -59,10 +79,10 @@ export default async function AccountPage() {
         {/* Page heading */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            Account &amp; billing
+            {t("heading")}
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Manage your subscription, payment details, and profile.
+            {t("subheading")}
           </p>
         </div>
 
@@ -89,10 +109,10 @@ export default async function AccountPage() {
                 className="text-lg font-semibold text-foreground"
                 id="profile-title"
               >
-                Profile settings
+                {t("profile.title")}
               </h2>
               <p className="mt-1 text-sm text-muted-foreground max-w-[38ch]">
-                Your sign-in email and account password (Supabase Auth).
+                {t("profile.subtitle")}
               </p>
             </div>
 
@@ -101,6 +121,9 @@ export default async function AccountPage() {
 
             {/* Password form — client component for feedback */}
             <PasswordForm />
+
+            {/* Language preference — immediate save on change */}
+            <LanguageSelect preferredLocale={preferredLocale} />
           </section>
 
           {/* ============================================================
@@ -116,14 +139,14 @@ export default async function AccountPage() {
                   className="text-lg font-semibold text-down"
                   id="danger-title"
                 >
-                  Cancel subscription
+                  {t("danger.title")}
                 </h2>
                 <p className="mt-1 text-sm text-muted-foreground max-w-[38ch]">
                   {cancelAtPeriodEnd
-                    ? "Your subscription is already set to cancel at the end of the current period."
+                    ? t("danger.alreadyCancelling")
                     : renewalDateLabel
-                      ? `You'll keep access until the end of the current billing period (${renewalDateLabel}), then revert to no access.`
-                      : "You'll keep access until the end of the current billing period, then revert to no access."}
+                      ? t("danger.keepAccessUntil", { date: renewalDateLabel })
+                      : t("danger.keepAccessUntilUnknown")}
                 </p>
               </div>
 
@@ -133,7 +156,7 @@ export default async function AccountPage() {
                   type="submit"
                   className="inline-flex items-center justify-center h-10 px-5 rounded-md border border-border-strong text-sm font-semibold text-foreground hover:bg-surface-2 transition-colors"
                 >
-                  Cancel in Stripe portal
+                  {t("danger.cancelInPortal")}
                 </button>
               </form>
             </section>

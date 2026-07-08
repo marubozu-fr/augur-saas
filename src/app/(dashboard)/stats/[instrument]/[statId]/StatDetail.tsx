@@ -7,6 +7,7 @@
 // /stats/{instrument}/{statId} path.
 
 import { notFound } from "next/navigation";
+import { getActiveLocale } from "@/lib/i18n/get-locale";
 import { loadStatSlice } from "./load-stat-slice";
 import { StatDetailContent } from "./StatDetailContent";
 import type { PeriodPreset } from "@/lib/period";
@@ -44,5 +45,7 @@ export async function StatDetail({
 
   if (result.kind === "not-found") notFound();
 
-  return <StatDetailContent result={result} />;
+  const locale = await getActiveLocale();
+
+  return <StatDetailContent result={result} locale={locale} />;
 }

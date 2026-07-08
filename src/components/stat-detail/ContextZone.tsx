@@ -18,7 +18,10 @@ import {
   ChevronsUpDownIcon,
 } from "lucide-react";
 import { format } from "date-fns";
+import { useTranslations } from "next-intl";
 import type { DateRange as CalendarRange } from "react-day-picker";
+import { pickLocale } from "@/lib/i18n/pick";
+import type { Locale } from "@/i18n/config";
 import {
   Select,
   SelectContent,
@@ -69,6 +72,7 @@ interface ContextZoneProps {
   isCustomRange: boolean;
   customStart: string | null;
   customEnd: string | null;
+  locale: Locale;
   onInstrumentChange: (instrument: string) => void;
   onPeriodChange: (period: PeriodPreset) => void;
   onCustomRangeApply: (start: string, end: string) => void;
@@ -84,11 +88,13 @@ export function ContextZone({
   isCustomRange,
   customStart,
   customEnd,
+  locale,
   onInstrumentChange,
   onPeriodChange,
   onCustomRangeApply,
   onNavigateStat,
 }: ContextZoneProps) {
+  const t = useTranslations("statDetail");
   const [statOpen, setStatOpen] = useState(false);
   const [customOpen, setCustomOpen] = useState(false);
   const [pendingRange, setPendingRange] = useState<CalendarRange | undefined>(
@@ -127,7 +133,7 @@ export function ContextZone({
 
   return (
     <section
-      aria-label="Context selectors"
+      aria-label={t("contextSelectorsAriaLabel")}
       className="flex flex-col gap-4 p-5 mb-6 border border-border-strong rounded-xl bg-card shadow-md [background:radial-gradient(130%_160%_at_0%_0%,var(--brand-soft),transparent_55%),var(--card)]"
     >
       {/* Row 1 — instrument + stat */}
@@ -137,7 +143,7 @@ export function ContextZone({
             id="lbl-instrument"
             className="text-xs font-semibold tracking-wider uppercase text-subtle"
           >
-            Instrument
+            {t("instrument")}
           </span>
           <Select value={activeInstrument} onValueChange={onInstrumentChange}>
             <SelectTrigger
@@ -166,7 +172,7 @@ export function ContextZone({
             id="lbl-stat"
             className="text-xs font-semibold tracking-wider uppercase text-subtle"
           >
-            Stat
+            {t("stat")}
           </span>
           <Popover open={statOpen} onOpenChange={setStatOpen}>
             <PopoverTrigger asChild>
@@ -178,7 +184,9 @@ export function ContextZone({
                 className="flex w-full items-center justify-between gap-3 h-10 px-3 rounded-md border border-border bg-card font-semibold text-sm text-foreground hover:border-border-strong focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:border-brand transition-colors cursor-pointer"
               >
                 <span className="truncate">
-                  {activeFamily?.title.en ?? statId}
+                  {activeFamily
+                    ? pickLocale(activeFamily.title, locale)
+                    : statId}
                 </span>
                 <ChevronsUpDownIcon
                   className="size-4 text-subtle shrink-0"
@@ -188,20 +196,20 @@ export function ContextZone({
             </PopoverTrigger>
             <PopoverContent className="w-[22rem] p-2" align="start">
               <Command>
-                <CommandInput placeholder="Search stat families…" />
+                <CommandInput placeholder={t("searchStatFamilies")} />
                 <CommandList className="max-h-64 overflow-y-auto">
-                  <CommandEmpty>No stat families found.</CommandEmpty>
+                  <CommandEmpty>{t("noStatFamiliesFound")}</CommandEmpty>
                   {catalog.map((family) => (
                     <CommandItem
                       key={family.family}
-                      value={family.title.en}
+                      value={pickLocale(family.title, locale)}
                       onSelect={() => {
                         onNavigateStat(family.family);
                         setStatOpen(false);
                       }}
                     >
                       <span className="text-sm font-semibold text-foreground">
-                        {family.title.en}
+                        {pickLocale(family.title, locale)}
                       </span>
                       {family.family === statId && (
                         <CheckIcon
@@ -224,18 +232,18 @@ export function ContextZone({
           id="lbl-period"
           className="text-xs font-semibold tracking-wider uppercase text-subtle"
         >
-          Period
+          {t("period")}
         </span>
         <div className="flex items-center gap-3 flex-nowrap md:flex-wrap overflow-x-auto md:overflow-visible pb-1 md:pb-0">
           <ToggleGroup
             type="single"
             value={!isCustomRange && period === "all" ? "all" : ""}
             onValueChange={(value) => value && onPeriodChange("all")}
-            aria-label="Full history"
+            aria-label={t("fullHistory")}
             className="p-[3px] gap-[2px] rounded-md border border-border bg-card shrink-0"
           >
             <ToggleGroupItem value="all" className={TOGGLE_ITEM_CLASS}>
-              All
+              {t("all")}
             </ToggleGroupItem>
           </ToggleGroup>
 
@@ -247,7 +255,7 @@ export function ContextZone({
             onValueChange={(value) =>
               value && onPeriodChange(value as PeriodPreset)
             }
-            aria-label="Look-back period"
+            aria-label={t("lookBackPeriod")}
             className="p-[3px] gap-[2px] rounded-md border border-border bg-card shrink-0"
           >
             {PERIOD_PRESET_ITEMS.map((item) => (
@@ -277,7 +285,7 @@ export function ContextZone({
                 ].join(" ")}
               >
                 <CalendarIcon className="size-3.5" aria-hidden="true" />
-                Custom
+                {t("custom")}
                 <ChevronDownIcon className="size-3.5" aria-hidden="true" />
               </button>
             </PopoverTrigger>
@@ -285,7 +293,7 @@ export function ContextZone({
               <div className="grid grid-cols-2 gap-3 mb-4">
                 <label className="flex flex-col gap-2">
                   <span className="text-xs font-semibold text-subtle">
-                    Start date
+                    {t("startDate")}
                   </span>
                   <input
                     type="text"
@@ -298,7 +306,7 @@ export function ContextZone({
                 </label>
                 <label className="flex flex-col gap-2">
                   <span className="text-xs font-semibold text-subtle">
-                    End date
+                    {t("endDate")}
                   </span>
                   <input
                     type="text"
@@ -326,7 +334,7 @@ export function ContextZone({
                   size="sm"
                   onClick={() => setCustomOpen(false)}
                 >
-                  Cancel
+                  {t("cancel")}
                 </Button>
                 <Button
                   type="button"
@@ -334,7 +342,7 @@ export function ContextZone({
                   disabled={!isIsoDate(startInput) || !isIsoDate(endInput)}
                   onClick={handleApply}
                 >
-                  Apply range
+                  {t("applyRange")}
                 </Button>
               </div>
             </PopoverContent>

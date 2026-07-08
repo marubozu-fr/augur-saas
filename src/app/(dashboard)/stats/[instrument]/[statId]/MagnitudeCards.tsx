@@ -1,4 +1,5 @@
 import { TrendingUp, TrendingDown } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { StatResultRow } from "@/types/stats";
 import type { LabelResolver } from "./helpers";
 import { fmtValue, fmtNum } from "./helpers";
@@ -9,6 +10,7 @@ interface MagnitudeCardsProps {
 }
 
 export function MagnitudeCards({ rows, resolver }: MagnitudeCardsProps) {
+  const t = useTranslations("statDetail");
   // Only rows that carry a numeric value (the magnitude sentinel pattern)
   const magnitudeRows = rows.filter(
     (r) => r.probability === 0 && r.value != null,
@@ -49,7 +51,7 @@ export function MagnitudeCards({ rows, resolver }: MagnitudeCardsProps) {
                   ].join(" ")}
                 >
                   <BadgeIcon size={12} aria-hidden="true" />
-                  {isUp ? "Bullish" : "Bearish"}
+                  {isUp ? t("bullish") : t("bearish")}
                 </span>
               )}
             </div>
@@ -63,21 +65,24 @@ export function MagnitudeCards({ rows, resolver }: MagnitudeCardsProps) {
             </div>
             <div className="flex items-center gap-3 text-xs text-subtle pt-3 border-t border-border">
               <span>
-                N ={" "}
-                <span className="font-mono tabular-nums">
-                  {fmtNum(row.count)}
-                </span>
+                {t.rich("nEquals", {
+                  mono: (chunks) => (
+                    <span className="font-mono tabular-nums">{chunks}</span>
+                  ),
+                  count: fmtNum(row.count),
+                })}
               </span>
               {hasBaseline ? (
                 <span>
-                  vs{" "}
-                  <span className="font-mono tabular-nums">
-                    {fmtValue(row.valueBaseline!)}%
-                  </span>{" "}
-                  baseline
+                  {t.rich("vsBaseline", {
+                    mono: (chunks) => (
+                      <span className="font-mono tabular-nums">{chunks}</span>
+                    ),
+                    value: `${fmtValue(row.valueBaseline!)}%`,
+                  })}
                 </span>
               ) : (
-                <span className="text-subtle">no baseline available</span>
+                <span className="text-subtle">{t("noBaselineAvailable")}</span>
               )}
             </div>
           </article>

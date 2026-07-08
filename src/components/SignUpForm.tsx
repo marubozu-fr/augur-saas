@@ -2,6 +2,7 @@
 
 import { useTransition } from "react";
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { signUp } from "@/app/(auth)/actions";
 
 interface SignUpFormProps {
@@ -10,6 +11,8 @@ interface SignUpFormProps {
 
 export function SignUpForm({ error }: SignUpFormProps) {
   const [isPending, startTransition] = useTransition();
+  const t = useTranslations("auth");
+  const tForm = useTranslations("auth.form");
 
   function handleSubmit(formData: FormData) {
     startTransition(async () => {
@@ -28,7 +31,7 @@ export function SignUpForm({ error }: SignUpFormProps) {
             htmlFor="email"
             className="text-sm font-semibold text-foreground"
           >
-            Email
+            {tForm("email")}
           </label>
           <input
             id="email"
@@ -36,7 +39,7 @@ export function SignUpForm({ error }: SignUpFormProps) {
             type="email"
             required
             autoComplete="email"
-            placeholder="you@example.com"
+            placeholder={tForm("emailPlaceholder")}
             disabled={isPending}
             className="w-full h-11 px-4 text-sm text-foreground bg-background border border-border-strong rounded-md placeholder:text-subtle transition-colors hover:border-neutral focus:outline-none focus:border-brand focus:ring-3 focus:ring-brand-ring disabled:opacity-60 disabled:cursor-not-allowed"
           />
@@ -47,7 +50,7 @@ export function SignUpForm({ error }: SignUpFormProps) {
             htmlFor="password"
             className="text-sm font-semibold text-foreground"
           >
-            Password
+            {tForm("password")}
           </label>
           <input
             id="password"
@@ -55,14 +58,12 @@ export function SignUpForm({ error }: SignUpFormProps) {
             type="password"
             required
             autoComplete="new-password"
-            placeholder="At least 8 characters"
+            placeholder={tForm("newPasswordPlaceholder")}
             disabled={isPending}
             className="w-full h-11 px-4 text-sm text-foreground bg-background border border-border-strong rounded-md placeholder:text-subtle transition-colors hover:border-neutral focus:outline-none focus:border-brand focus:ring-3 focus:ring-brand-ring disabled:opacity-60 disabled:cursor-not-allowed"
           />
           {/* .field__hint — password strength guidance */}
-          <p className="text-xs text-subtle">
-            Use 8+ characters with a mix of letters, numbers &amp; symbols.
-          </p>
+          <p className="text-xs text-subtle">{tForm("passwordHint")}</p>
         </div>
 
         <button
@@ -73,7 +74,7 @@ export function SignUpForm({ error }: SignUpFormProps) {
           {isPending ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
-            "Create account"
+            t("signUp.submit")
           )}
         </button>
       </form>

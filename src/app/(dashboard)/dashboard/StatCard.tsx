@@ -1,5 +1,8 @@
 import Link from "next/link";
 import { BarChart3, ArrowRight, Lock } from "lucide-react";
+import { getTranslations } from "next-intl/server";
+import { getActiveLocale } from "@/lib/i18n/get-locale";
+import { pickLocale } from "@/lib/i18n/pick";
 import type { StatFamilyMeta, TimeframeMeta } from "@/types/stats";
 
 interface StatCardProps {
@@ -12,13 +15,20 @@ interface StatCardProps {
   locked: boolean;
 }
 
-export function StatCard({ family, timeframes, tier, locked }: StatCardProps) {
+export async function StatCard({
+  family,
+  timeframes,
+  tier,
+  locked,
+}: StatCardProps) {
   // timeframes is guaranteed non-empty (StatCatalog skips families with no
   // matching timeframe), so [0] is safe for the shared instrument code.
   const instrument = timeframes[0].instrument;
-  const timeframeLabel = timeframes.map((t) => t.timeframe).join(" · ");
-  const totalSamples = timeframes.reduce((sum, t) => sum + t.totalSamples, 0);
+  const timeframeLabel = timeframes.map((tf) => tf.timeframe).join(" · ");
+  const totalSamples = timeframes.reduce((sum, tf) => sum + tf.totalSamples, 0);
   const n = totalSamples.toLocaleString("en-US");
+  const locale = await getActiveLocale();
+  const t = await getTranslations("dashboard.statCard");
 
   return (
     // The whole card is the click target — a single destination (stat detail for
@@ -54,14 +64,14 @@ export function StatCard({ family, timeframes, tier, locked }: StatCardProps) {
             <BarChart3 size={20} />
           </span>
           <span className="inline-flex items-center px-3 py-[5px] rounded-full text-xs font-semibold border border-border bg-surface-2 text-muted-foreground flex-shrink-0">
-            Tier {tier}
+            {t("tier", { tier })}
           </span>
         </div>
 
         {/* Title + instrument · timeframe */}
         <div className="mb-3">
           <h3 className="text-base font-semibold text-foreground leading-snug">
-            {family.title.en}
+            {pickLocale(family.title, locale)}
           </h3>
           <p className="text-xs text-subtle font-mono mt-0.5">
             {instrument} · {timeframeLabel}
@@ -70,7 +80,7 @@ export function StatCard({ family, timeframes, tier, locked }: StatCardProps) {
 
         {/* Definition */}
         <p className="text-sm text-muted-foreground leading-normal line-clamp-3">
-          {family.definition.en}
+          {pickLocale(family.definition, locale)}
         </p>
 
         {/* Footer: sample size + CTA */}
@@ -80,7 +90,7 @@ export function StatCard({ family, timeframes, tier, locked }: StatCardProps) {
           </span>
           {!locked && (
             <span className="inline-flex items-center gap-1 text-xs font-semibold text-brand transition-all duration-[180ms] group-hover:gap-2">
-              View stats
+              {t("viewStats")}
               <ArrowRight size={14} aria-hidden="true" />
             </span>
           )}
@@ -94,13 +104,13 @@ export function StatCard({ family, timeframes, tier, locked }: StatCardProps) {
             <Lock size={20} aria-hidden="true" />
           </span>
           <span className="text-sm font-semibold text-foreground">
-            Upgrade to unlock
+            {t("upgradeToUnlock")}
           </span>
           <span className="text-xs text-muted-foreground max-w-[16rem]">
-            This stat family requires a higher plan. Upgrade to access it.
+            {t("upgradeDescription")}
           </span>
           <span className="inline-flex items-center justify-center h-8 px-4 rounded-md bg-brand text-xs font-semibold text-on-brand transition-colors group-hover:bg-brand-hover">
-            Upgrade
+            {t("upgrade")}
           </span>
         </div>
       )}

@@ -2,6 +2,7 @@
 // content area (page head, instrument selector, grid / empty / error states).
 
 import { AlertTriangle, SearchX } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { getStatCatalog, AugurApiError } from "@/services/augur";
 import { getCurrentUserTier } from "@/lib/subscription.server";
 import { canAccessStat } from "@/lib/subscription";
@@ -15,6 +16,8 @@ interface StatCatalogProps {
 }
 
 export async function StatCatalog({ instrument }: StatCatalogProps) {
+  const t = await getTranslations("dashboard.catalog");
+
   // -------------------------------------------------------------------------
   // Fetch catalog + tier (both inside try/catch — errors render inline)
   // -------------------------------------------------------------------------
@@ -29,9 +32,7 @@ export async function StatCatalog({ instrument }: StatCatalogProps) {
   } catch (err) {
     console.error("[StatCatalog] fetch failed", { instrument }, err);
     const message =
-      err instanceof AugurApiError
-        ? err.message
-        : "Failed to load the stat catalog. Please try again later.";
+      err instanceof AugurApiError ? err.message : t("loadFailed");
 
     return (
       <div className="flex flex-col items-center gap-4 py-16 px-5 text-center rounded-xl border border-dashed border-border-strong bg-muted">
@@ -39,10 +40,10 @@ export async function StatCatalog({ instrument }: StatCatalogProps) {
           <AlertTriangle size={26} aria-hidden="true" />
         </span>
         <h2 className="text-lg font-semibold text-foreground">
-          Could not load stats
+          {t("couldNotLoad")}
         </h2>
         <p className="text-sm text-muted-foreground max-w-[26rem]">{message}</p>
-        <p className="text-xs text-subtle">Refresh the page to try again.</p>
+        <p className="text-xs text-subtle">{t("refreshToTry")}</p>
       </div>
     );
   }
@@ -75,7 +76,7 @@ export async function StatCatalog({ instrument }: StatCatalogProps) {
   const filtered: FamilyEntry[] = [];
   for (const family of families) {
     const tfs = family.timeframes.filter(
-      (t) => t.instrument === activeInstrument,
+      (tf) => tf.instrument === activeInstrument,
     );
     if (tfs.length === 0) continue;
     const statTier = getStatTier(family.family);
@@ -93,12 +94,16 @@ export async function StatCatalog({ instrument }: StatCatalogProps) {
       <div className="flex items-end justify-between flex-wrap gap-4 mb-5">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            Good morning
+            {t("greeting")}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            <span className="font-mono tabular-nums">{filtered.length}</span>{" "}
-            stat {filtered.length === 1 ? "family" : "families"} ·{" "}
-            <span className="font-mono tabular-nums">{activeInstrument}</span>
+            {t.rich("statCount", {
+              count: filtered.length,
+              mono: (chunks) => (
+                <span className="font-mono tabular-nums">{chunks}</span>
+              ),
+            })}{" "}
+            · <span className="font-mono tabular-nums">{activeInstrument}</span>
           </p>
         </div>
 
@@ -138,19 +143,22 @@ export async function StatCatalog({ instrument }: StatCatalogProps) {
 // Empty state
 // ---------------------------------------------------------------------------
 
-function EmptyState({ instrument }: { instrument: string }) {
+async function EmptyState({ instrument }: { instrument: string }) {
+  const t = await getTranslations("dashboard.catalog");
+
   return (
     <div className="flex flex-col items-center text-center gap-4 py-16 px-5 border border-dashed border-border-strong rounded-xl bg-muted">
       <span className="inline-grid place-items-center w-14 h-14 rounded-full bg-surface-2 text-subtle">
         <SearchX size={26} aria-hidden="true" />
       </span>
       <h2 className="text-lg font-semibold text-foreground">
-        No stat families for {instrument}
+        {t("noFamiliesTitle", { instrument })}
       </h2>
       <p className="text-sm text-muted-foreground max-w-[26rem]">
-        There are no stat families available for{" "}
-        <span className="font-mono">{instrument}</span> at this time. Try
-        selecting a different instrument.
+        {t.rich("noFamiliesDescription", {
+          instrument,
+          mono: (chunks) => <span className="font-mono">{chunks}</span>,
+        })}
       </p>
     </div>
   );

@@ -3,17 +3,26 @@
 // The chevron rotation on open is handled by the .accordion-chev CSS rule
 // in globals.css (details[open] > summary .accordion-chev).
 
+import { useTranslations } from "next-intl";
 import type { SliceResult } from "@/types/stats";
 import type { LabelResolver } from "./helpers";
 import { ProbabilityTable } from "./ProbabilityTable";
 import type { TableRow } from "./ProbabilityTable";
+import { pickLocale } from "@/lib/i18n/pick";
+import type { Locale } from "@/i18n/config";
 
 interface SliceAccordionProps {
   slice: SliceResult;
   resolver: LabelResolver;
+  locale: Locale;
 }
 
-export function SliceAccordion({ slice, resolver }: SliceAccordionProps) {
+export function SliceAccordion({
+  slice,
+  resolver,
+  locale,
+}: SliceAccordionProps) {
+  const t = useTranslations("statDetail");
   const groups = Object.entries(slice.groups);
   const groupCount = groups.length;
 
@@ -24,7 +33,7 @@ export function SliceAccordion({ slice, resolver }: SliceAccordionProps) {
   for (const [, group] of groups) {
     for (const row of group.results) {
       if (row.probability === 0 && row.value != null) continue;
-      rows.push({ row, group: group.label.en });
+      rows.push({ row, group: pickLocale(group.label, locale) });
     }
   }
 
@@ -36,8 +45,10 @@ export function SliceAccordion({ slice, resolver }: SliceAccordionProps) {
   const lastGroup = groups[groups.length - 1]?.[1];
   const summaryRange =
     firstGroup && lastGroup && groupCount > 1
-      ? `${firstGroup.label.en} – ${lastGroup.label.en}`
-      : (firstGroup?.label.en ?? "");
+      ? `${pickLocale(firstGroup.label, locale)} – ${pickLocale(lastGroup.label, locale)}`
+      : firstGroup
+        ? pickLocale(firstGroup.label, locale)
+        : "";
 
   return (
     <details className="accordion-item border border-border rounded-xl bg-card overflow-hidden">
@@ -59,8 +70,12 @@ export function SliceAccordion({ slice, resolver }: SliceAccordionProps) {
         </svg>
         {dimensionLabel}
         <span className="ml-auto flex items-center gap-3 font-medium text-subtle text-xs">
-          <span className="font-mono tabular-nums">{groupCount}</span>
-          {" groups"}
+          {t.rich("groupCount", {
+            count: groupCount,
+            mono: (chunks) => (
+              <span className="font-mono tabular-nums">{chunks}</span>
+            ),
+          })}
           {summaryRange && (
             <>
               <span aria-hidden="true">·</span>
@@ -88,7 +103,7 @@ export function SliceAccordion({ slice, resolver }: SliceAccordionProps) {
               <rect x="4" y="11" width="16" height="9" rx="2" />
               <path d="M8 11V7a4 4 0 0 1 8 0v4" />
             </svg>
-            No data available for this slice dimension.
+            {t("noDataForSlice")}
           </div>
         ) : (
           <ProbabilityTable
