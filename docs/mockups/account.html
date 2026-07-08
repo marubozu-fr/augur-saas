@@ -392,6 +392,88 @@
         font-size: var(--text-xs);
         color: var(--color-text-subtle);
       }
+
+      /* ---- Language Select. shadcn/ui: Select (SelectTrigger + SelectValue +
+         SelectContent + SelectItem). Trigger styled to match .input, with a
+         chevron on the right. Immediate save on change — no submit button
+         (mirrors the inline email-change affordance in the same card). The
+         static open menu is a mockup-only visual via .select--open. ---- */
+      .select {
+        position: relative;
+        max-width: 20rem;
+      }
+      .select__trigger {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-3);
+        width: 100%;
+        height: 2.5rem;
+        padding: 0 var(--space-3) 0 var(--space-4);
+        appearance: none;
+        cursor: pointer;
+        text-align: left;
+        font-family: var(--font-sans);
+        font-size: var(--text-sm);
+        color: var(--color-text);
+        background-color: var(--color-surface-2);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-md);
+        transition: border-color var(--transition), box-shadow var(--transition);
+      }
+      .select__trigger:hover {
+        border-color: var(--color-border-strong);
+      }
+      .select__trigger:focus-visible,
+      .select__trigger[aria-expanded="true"] {
+        outline: none;
+        border-color: var(--color-accent);
+        box-shadow: 0 0 0 3px var(--color-accent-ring);
+      }
+      .select__chev {
+        flex-shrink: 0;
+        color: var(--color-text-subtle);
+      }
+      .select__menu {
+        position: absolute;
+        top: calc(100% + var(--space-2));
+        left: 0;
+        right: 0;
+        z-index: 30;
+        padding: var(--space-2);
+        list-style: none;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--color-border-strong);
+        background-color: var(--color-surface-2);
+        box-shadow: var(--shadow-lg);
+      }
+      .select:not(.select--open) .select__menu {
+        display: none;
+      }
+      .select__opt {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-3);
+        padding: var(--space-2);
+        border-radius: var(--radius-sm);
+        font-size: var(--text-sm);
+        color: var(--color-text-muted);
+        cursor: pointer;
+        transition: background-color var(--transition), color var(--transition);
+      }
+      .select__opt:hover {
+        background-color: var(--color-surface);
+        color: var(--color-text);
+      }
+      .select__opt--active {
+        color: var(--color-text);
+        background-color: var(--color-accent-soft);
+      }
+      .select__opt .check {
+        flex-shrink: 0;
+        color: var(--color-accent);
+      }
       /* Two-up grid for new / confirm password on wider screens. */
       .field-grid {
         display: grid;
@@ -799,6 +881,34 @@
                     </button>
                   </div>
                 </form>
+
+                <!-- Language preference — immediate save on change, NO submit
+                     button (mirrors the inline email-change UX above; the value
+                     persists the moment an option is picked). Options:
+                     "Auto (browser)" clears the stored preference and falls back
+                     to Accept-Language detection; "English" / "Français" pin a
+                     locale. Saved to the Supabase profile, then the app
+                     re-renders in the chosen locale. FR + open states are in the
+                     mockup-only block below.
+                     shadcn/ui: Select (SelectTrigger + SelectValue +
+                     SelectContent + SelectItem). -->
+                <div class="field" style="margin-top: var(--space-5);">
+                  <label class="field__label" for="lang-pref">Language</label>
+                  <div class="select">
+                    <button class="select__trigger" id="lang-pref" type="button"
+                      aria-haspopup="listbox" aria-expanded="false">
+                      <span class="select__value">English</span>
+                      <svg class="select__chev" width="16" height="16" viewBox="0 0 24 24"
+                      fill="none" stroke="currentColor" stroke-width="2"
+                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="m7 9 5 5 5-5" />
+                    </svg>
+                    </button>
+                  </div>
+                  <p class="field__hint">
+                    Controls the display language across the app.
+                  </p>
+                </div>
               </section>
 
               <!-- ===========================================================
@@ -830,6 +940,95 @@
                  state stacked here so this file is a complete visual contract.
                  In production only ONE of {loading | populated} renders.
                  ============================================================ -->
+            <!-- ===============================================================
+                 MOCKUP-ONLY: LANGUAGE FIELD VARIANTS
+                 Not additional page content. The Language field from the
+                 Profile settings card, shown in its FR locale and in the
+                 Select-open state so the frontend-dev sees both locales and the
+                 full option list. In production only ONE locale renders.
+                 ============================================================ -->
+            <div class="mockup-divider">Language setting &middot; FR locale &amp; open menu</div>
+            <div class="stack">
+              <!-- FR — closed, "Français" selected. shadcn/ui: Select. -->
+              <section class="card">
+                <div class="acct-card__head">
+                  <div>
+                    <h2 class="acct-card__title">Paramètres du profil</h2>
+                    <p class="acct-card__hint">
+                      Variante française du champ Langue.
+                    </p>
+                  </div>
+                </div>
+                <div class="field">
+                  <label class="field__label" for="lang-pref-fr">Langue</label>
+                  <div class="select">
+                    <button class="select__trigger" id="lang-pref-fr" type="button"
+                      aria-haspopup="listbox" aria-expanded="false">
+                      <span class="select__value">Français</span>
+                      <svg class="select__chev" width="16" height="16" viewBox="0 0 24 24"
+                      fill="none" stroke="currentColor" stroke-width="2"
+                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="m7 9 5 5 5-5" />
+                    </svg>
+                    </button>
+                  </div>
+                  <p class="field__hint">
+                    Détermine la langue d'affichage dans toute l'application.
+                  </p>
+                </div>
+              </section>
+
+              <!-- EN — menu OPEN (static). shadcn/ui: SelectContent + SelectItem.
+                   Extra bottom padding gives the absolutely-positioned menu room
+                   inside the card for this static preview. -->
+              <section class="card" style="padding-bottom: var(--space-10);">
+                <div class="acct-card__head">
+                  <div>
+                    <h2 class="acct-card__title">Profile settings</h2>
+                    <p class="acct-card__hint">
+                      Language field with the Select menu open.
+                    </p>
+                  </div>
+                </div>
+                <div class="field">
+                  <label class="field__label" for="lang-pref-open">Language</label>
+                  <div class="select select--open">
+                    <button class="select__trigger" id="lang-pref-open" type="button"
+                      aria-haspopup="listbox" aria-expanded="true">
+                      <span class="select__value">English</span>
+                      <svg class="select__chev" width="16" height="16" viewBox="0 0 24 24"
+                      fill="none" stroke="currentColor" stroke-width="2"
+                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="m7 9 5 5 5-5" />
+                    </svg>
+                    </button>
+                    <ul class="select__menu" role="listbox"
+                      aria-label="Display language">
+                      <li class="select__opt" role="option" aria-selected="false">
+                        <span>Auto (browser)</span>
+                      </li>
+                      <li class="select__opt select__opt--active" role="option"
+                        aria-selected="true">
+                        <span>English</span>
+                        <svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.4"
+                        stroke-linecap="round" stroke-linejoin="round"
+                        aria-hidden="true">
+                        <path d="M20 6 9 17l-5-5" />
+                      </svg>
+                      </li>
+                      <li class="select__opt" role="option" aria-selected="false">
+                        <span>Français</span>
+                      </li>
+                    </ul>
+                  </div>
+                  <p class="field__hint">
+                    Controls the display language across the app.
+                  </p>
+                </div>
+              </section>
+            </div>
+
             <div class="mockup-divider">State · Loading (skeleton)</div>
             <div class="stack" aria-hidden="true">
               <!-- Current-plan card skeleton -->

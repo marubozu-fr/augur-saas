@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<!--
+  Augur SaaS — Language switcher specimen (GitHub issue #114)
+  Implemented later as a client component rendered inside the marketing header
+  (src/app/(marketing)/...) and, in block form, inside the mobile Sheet drawer.
+
+  This is a SPECIMEN / fragment page — not a routable page. It exists so the
+  frontend-dev can see every state of the locale switcher in one place:
+    - Desktop header, CLOSED, EN active  +  CLOSED, FR active
+    - Desktop header, OPEN,   EN active  +  OPEN,   FR active
+    - Mobile Sheet drawer language block, EN active + FR active
+
+  The switcher is a NAVIGATION control, not a form control: each option links to
+  the equivalent page in the other locale (e.g. /en/pricing <-> /fr/pricing).
+  Shows the current locale CODE only (EN / FR) — no flag icons. It is SECONDARY
+  in the header hierarchy; "Sign in" / "Get started" stay primary.
+
+  shadcn/ui mapping:
+    - Desktop switcher : DropdownMenu (DropdownMenuTrigger + DropdownMenuContent
+                         + DropdownMenuRadioGroup / DropdownMenuItem asChild -> Link)
+    - Mobile block     : plain list of next/link rows inside the Sheet body
+                         (the drawer is a Sheet on <=680px)
+
+  The reusable .lang-switch component lives in styles.css. The scaffolding on
+  this page (mini header bar, mobile phone frame) is page-scoped demo chrome and
+  references design tokens only — no new color or spacing values.
+-->
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Augur — Language switcher (specimen)</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      /* ---- Specimen page layout (demo chrome only) ---------------------- */
+      .specimen {
+        max-width: var(--container-max);
+        margin-inline: auto;
+        padding: var(--space-8) var(--container-pad);
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-7);
+      }
+      .specimen__intro h1 {
+        font-size: var(--text-2xl);
+      }
+      .specimen__intro p {
+        margin-top: var(--space-3);
+        max-width: 60ch;
+        color: var(--color-text-muted);
+        font-size: var(--text-sm);
+      }
+      .demo-block {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-4);
+      }
+      .demo-block__label {
+        font-size: var(--text-xs);
+        font-weight: 600;
+        letter-spacing: var(--tracking-wide);
+        text-transform: uppercase;
+        color: var(--color-text-subtle);
+      }
+
+      /* Mini replica of the marketing sticky header (visual context only). The
+         canonical header markup + CSS live in landing.html; this is a trimmed
+         copy so the switcher can be shown in situ. */
+      .demo-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-5);
+        height: var(--header-height);
+        padding-inline: var(--space-5);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-lg);
+        background-color: color-mix(in srgb, var(--color-bg) 80%, transparent);
+      }
+      /* extra head room so the open menu is fully visible within the demo card */
+      .demo-header--open {
+        margin-bottom: 9rem;
+      }
+      .demo-header__brand {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-3);
+        font-weight: 700;
+        font-size: var(--text-lg);
+        letter-spacing: var(--tracking-tight);
+      }
+      .demo-header__mark {
+        width: 2rem;
+        height: 2rem;
+        border-radius: var(--radius-md);
+        background: linear-gradient(135deg, var(--color-accent), #06b6d4);
+        display: grid;
+        place-items: center;
+        color: var(--color-on-accent);
+        box-shadow: var(--shadow-sm);
+      }
+      .demo-header__nav {
+        display: flex;
+        align-items: center;
+        gap: var(--space-6);
+      }
+      .demo-header__links {
+        display: flex;
+        align-items: center;
+        gap: var(--space-6);
+        list-style: none;
+      }
+      .demo-header__links a {
+        font-size: var(--text-sm);
+        font-weight: 500;
+        color: var(--color-text-muted);
+      }
+      .demo-header__actions {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+      }
+      /* On narrow demo widths, hide the decorative nav links so the switcher and
+         CTAs still read clearly (the real mobile behavior is the Sheet below). */
+      @media (max-width: 760px) {
+        .demo-header__links,
+        .demo-header__actions .btn--ghost { display: none; }
+      }
+
+      /* ---- Mobile Sheet drawer specimen -------------------------------- */
+      .phone {
+        width: 340px;
+        max-width: 100%;
+        border: 1px solid var(--color-border-strong);
+        border-radius: var(--radius-xl);
+        background-color: var(--color-bg-subtle);
+        box-shadow: var(--shadow-lg);
+        overflow: hidden;
+      }
+      .phone__bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: var(--header-height);
+        padding-inline: var(--space-4);
+        border-bottom: 1px solid var(--color-border);
+      }
+      .phone__body {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-1);
+        padding: var(--space-4);
+      }
+      .phone__link {
+        padding: var(--space-3);
+        border-radius: var(--radius-md);
+        font-size: var(--text-base);
+        font-weight: 500;
+        color: var(--color-text-muted);
+      }
+      .drawer-lang {
+        margin-top: var(--space-4);
+        padding-top: var(--space-4);
+        border-top: 1px solid var(--color-border);
+      }
+      .drawer-lang__label {
+        display: block;
+        margin-bottom: var(--space-3);
+        font-size: var(--text-xs);
+        font-weight: 600;
+        letter-spacing: var(--tracking-wide);
+        text-transform: uppercase;
+        color: var(--color-text-subtle);
+      }
+      /* Full-width option rows inside the drawer. shadcn/ui: list of next/link
+         rows (not a DropdownMenu — the drawer itself is the disclosure). */
+      .drawer-lang__opt {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        width: 100%;
+        padding: var(--space-3);
+        border-radius: var(--radius-md);
+        font-size: var(--text-base);
+        color: var(--color-text-muted);
+      }
+      .drawer-lang__opt + .drawer-lang__opt {
+        margin-top: var(--space-1);
+      }
+      .drawer-lang__code {
+        font-family: var(--font-mono);
+        font-size: var(--text-xs);
+        font-weight: 600;
+        letter-spacing: var(--tracking-wide);
+        color: var(--color-text-subtle);
+      }
+      .drawer-lang__name {
+        flex: 1;
+      }
+      .drawer-lang__opt--active {
+        background-color: var(--color-accent-soft);
+        color: var(--color-text);
+      }
+      .drawer-lang__opt--active .drawer-lang__code {
+        color: var(--color-accent);
+      }
+      .drawer-lang__opt--active .check {
+        color: var(--color-accent);
+      }
+
+      .phones {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-6);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="specimen">
+      <header class="specimen__intro">
+        <span class="eyebrow">Component · Issue #114</span>
+        <h1>Language switcher</h1>
+        <p>
+          A compact locale switcher for the public marketing header (desktop
+          dropdown) and the mobile Sheet drawer (block list). It shows the
+          current locale code only — EN / FR, no flags — and each option is a
+          link to the equivalent page in the other locale
+          (<code class="mono">/en/pricing</code> &harr;
+          <code class="mono">/fr/pricing</code>). It is deliberately secondary:
+          "Sign in" and "Get started" remain the primary header actions. The
+          reusable <code class="mono">.lang-switch</code> component lives in
+          <code class="mono">styles.css</code>.
+        </p>
+      </header>
+
+      <!-- =================================================================
+           DESKTOP — CLOSED (EN active) + CLOSED (FR active)
+           shadcn/ui: DropdownMenu (trigger only, menu collapsed)
+           ============================================================== -->
+      <section class="demo-block">
+        <span class="demo-block__label">Desktop header &middot; closed</span>
+
+        <!-- EN active -->
+        <div class="demo-header">
+          <a class="demo-header__brand" href="landing.html">
+            <span class="demo-header__mark" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M6 5h12L11 12l7 7H6" />
+              </svg>
+            </span>
+            Augur
+          </a>
+          <nav class="demo-header__nav">
+            <ul class="demo-header__links">
+              <li><a href="landing.html">Features</a></li>
+              <li><a href="pricing.html">Pricing</a></li>
+              <li><a href="landing.html">Customers</a></li>
+            </ul>
+
+            <!-- CLOSED, EN active. shadcn/ui: DropdownMenu (collapsed). -->
+            <div class="lang-switch">
+              <button class="lang-switch__trigger" type="button"
+                aria-haspopup="menu" aria-expanded="false"
+                aria-label="Change language, current: English">
+                <svg class="lang-switch__globe" width="16" height="16"
+                  viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  aria-hidden="true">
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M3 12h18" />
+                  <path d="M12 3a15 15 0 0 1 0 18 15 15 0 0 1 0-18" />
+                </svg>
+                <span class="lang-switch__code">EN</span>
+                <svg class="lang-switch__chev" width="14" height="14"
+                  viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2.2" stroke-linecap="round"
+                  stroke-linejoin="round" aria-hidden="true">
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </button>
+            </div>
+
+            <div class="demo-header__actions">
+              <a class="btn btn--ghost" href="auth.html">Sign in</a>
+              <a class="btn btn--primary" href="auth.html?mode=signup">Get started</a>
+            </div>
+          </nav>
+        </div>
+
+        <!-- FR active -->
+        <div class="demo-header">
+          <a class="demo-header__brand" href="landing.html">
+            <span class="demo-header__mark" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M6 5h12L11 12l7 7H6" />
+              </svg>
+            </span>
+            Augur
+          </a>
+          <nav class="demo-header__nav">
+            <ul class="demo-header__links">
+              <li><a href="landing.html">Fonctionnalités</a></li>
+              <li><a href="pricing.html">Tarifs</a></li>
+              <li><a href="landing.html">Clients</a></li>
+            </ul>
+
+            <!-- CLOSED, FR active. -->
+            <div class="lang-switch">
+              <button class="lang-switch__trigger" type="button"
+                aria-haspopup="menu" aria-expanded="false"
+                aria-label="Changer de langue, actuelle : Français">
+                <svg class="lang-switch__globe" width="16" height="16"
+                  viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  aria-hidden="true">
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M3 12h18" />
+                  <path d="M12 3a15 15 0 0 1 0 18 15 15 0 0 1 0-18" />
+                </svg>
+                <span class="lang-switch__code">FR</span>
+                <svg class="lang-switch__chev" width="14" height="14"
+                  viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2.2" stroke-linecap="round"
+                  stroke-linejoin="round" aria-hidden="true">
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </button>
+            </div>
+
+            <div class="demo-header__actions">
+              <a class="btn btn--ghost" href="auth.html">Connexion</a>
+              <a class="btn btn--primary" href="auth.html?mode=signup">Commencer</a>
+            </div>
+          </nav>
+        </div>
+      </section>
+
+      <!-- =================================================================
+           DESKTOP — OPEN (EN active) + OPEN (FR active)
+           shadcn/ui: DropdownMenuContent + DropdownMenuRadioGroup / Items.
+           Each item is a Link to the equivalent page in the other locale.
+           Active locale = accent tint + accent code + check.
+           ============================================================== -->
+      <section class="demo-block">
+        <span class="demo-block__label">Desktop header &middot; open</span>
+
+        <!-- OPEN, EN active -->
+        <div class="demo-header demo-header--open">
+          <a class="demo-header__brand" href="landing.html">
+            <span class="demo-header__mark" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M6 5h12L11 12l7 7H6" />
+              </svg>
+            </span>
+            Augur
+          </a>
+          <nav class="demo-header__nav">
+            <ul class="demo-header__links">
+              <li><a href="landing.html">Features</a></li>
+              <li><a href="pricing.html">Pricing</a></li>
+              <li><a href="landing.html">Customers</a></li>
+            </ul>
+
+            <!-- OPEN — .lang-switch--open reveals the menu (static in mockup). -->
+            <div class="lang-switch lang-switch--open">
+              <button class="lang-switch__trigger" type="button"
+                aria-haspopup="menu" aria-expanded="true"
+                aria-label="Change language, current: English">
+                <svg class="lang-switch__globe" width="16" height="16"
+                  viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  aria-hidden="true">
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M3 12h18" />
+                  <path d="M12 3a15 15 0 0 1 0 18 15 15 0 0 1 0-18" />
+                </svg>
+                <span class="lang-switch__code">EN</span>
+                <svg class="lang-switch__chev" width="14" height="14"
+                  viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2.2" stroke-linecap="round"
+                  stroke-linejoin="round" aria-hidden="true">
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </button>
+              <ul class="lang-switch__menu" role="menu"
+                aria-label="Select language">
+                <li>
+                  <!-- active: current locale -->
+                  <a class="lang-switch__item lang-switch__item--active"
+                    role="menuitemradio" aria-checked="true" href="#" hreflang="en">
+                    <span class="lang-switch__item-name">English</span>
+                    <span class="lang-switch__item-code">EN</span>
+                    <svg class="check" width="16" height="16" viewBox="0 0 24 24"
+                      fill="none" stroke="currentColor" stroke-width="2.4"
+                      stroke-linecap="round" stroke-linejoin="round"
+                      aria-hidden="true">
+                      <path d="M20 6 9 17l-5-5" />
+                    </svg>
+                  </a>
+                </li>
+                <li>
+                  <!-- link to the equivalent page in FR -->
+                  <a class="lang-switch__item" role="menuitemradio"
+                    aria-checked="false" href="#" hreflang="fr">
+                    <span class="lang-switch__item-name">Français</span>
+                    <span class="lang-switch__item-code">FR</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <div class="demo-header__actions">
+              <a class="btn btn--ghost" href="auth.html">Sign in</a>
+              <a class="btn btn--primary" href="auth.html?mode=signup">Get started</a>
+            </div>
+          </nav>
+        </div>
+
+        <!-- OPEN, FR active -->
+        <div class="demo-header demo-header--open">
+          <a class="demo-header__brand" href="landing.html">
+            <span class="demo-header__mark" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M6 5h12L11 12l7 7H6" />
+              </svg>
+            </span>
+            Augur
+          </a>
+          <nav class="demo-header__nav">
+            <ul class="demo-header__links">
+              <li><a href="landing.html">Fonctionnalités</a></li>
+              <li><a href="pricing.html">Tarifs</a></li>
+              <li><a href="landing.html">Clients</a></li>
+            </ul>
+
+            <div class="lang-switch lang-switch--open">
+              <button class="lang-switch__trigger" type="button"
+                aria-haspopup="menu" aria-expanded="true"
+                aria-label="Changer de langue, actuelle : Français">
+                <svg class="lang-switch__globe" width="16" height="16"
+                  viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  aria-hidden="true">
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M3 12h18" />
+                  <path d="M12 3a15 15 0 0 1 0 18 15 15 0 0 1 0-18" />
+                </svg>
+                <span class="lang-switch__code">FR</span>
+                <svg class="lang-switch__chev" width="14" height="14"
+                  viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2.2" stroke-linecap="round"
+                  stroke-linejoin="round" aria-hidden="true">
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </button>
+              <ul class="lang-switch__menu" role="menu"
+                aria-label="Choisir la langue">
+                <li>
+                  <a class="lang-switch__item" role="menuitemradio"
+                    aria-checked="false" href="#" hreflang="en">
+                    <span class="lang-switch__item-name">English</span>
+                    <span class="lang-switch__item-code">EN</span>
+                  </a>
+                </li>
+                <li>
+                  <a class="lang-switch__item lang-switch__item--active"
+                    role="menuitemradio" aria-checked="true" href="#" hreflang="fr">
+                    <span class="lang-switch__item-name">Français</span>
+                    <span class="lang-switch__item-code">FR</span>
+                    <svg class="check" width="16" height="16" viewBox="0 0 24 24"
+                      fill="none" stroke="currentColor" stroke-width="2.4"
+                      stroke-linecap="round" stroke-linejoin="round"
+                      aria-hidden="true">
+                      <path d="M20 6 9 17l-5-5" />
+                    </svg>
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <div class="demo-header__actions">
+              <a class="btn btn--ghost" href="auth.html">Connexion</a>
+              <a class="btn btn--primary" href="auth.html?mode=signup">Commencer</a>
+            </div>
+          </nav>
+        </div>
+      </section>
+
+      <!-- =================================================================
+           MOBILE — Sheet drawer language block (EN active + FR active)
+           On <=680px the header switcher is hidden and the locale options
+           live inside the Sheet drawer as full-width link rows.
+           shadcn/ui: Sheet (drawer) + list of next/link rows.
+           ============================================================== -->
+      <section class="demo-block">
+        <span class="demo-block__label">Mobile Sheet drawer &middot; language block</span>
+        <div class="phones">
+          <!-- EN active -->
+          <div class="phone" role="dialog" aria-label="Menu (English)">
+            <div class="phone__bar">
+              <span class="demo-header__brand">
+                <span class="demo-header__mark" aria-hidden="true">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path d="M6 5h12L11 12l7 7H6" />
+                  </svg>
+                </span>
+                Augur
+              </span>
+              <button class="icon-btn" aria-label="Close menu"
+                style="width:2.25rem;height:2.25rem;border:1px solid var(--color-border);border-radius:var(--radius-md);background:var(--color-surface);color:var(--color-text-muted);display:inline-grid;place-items:center;cursor:pointer;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  aria-hidden="true">
+                  <path d="M6 6l12 12M18 6 6 18" />
+                </svg>
+              </button>
+            </div>
+            <div class="phone__body">
+              <a class="phone__link" href="landing.html">Features</a>
+              <a class="phone__link" href="pricing.html">Pricing</a>
+              <a class="phone__link" href="landing.html">Customers</a>
+
+              <a class="btn btn--ghost btn--block" href="auth.html"
+                style="margin-top:var(--space-3);justify-content:flex-start;">
+                Sign in
+              </a>
+              <a class="btn btn--primary btn--block" href="auth.html?mode=signup"
+                style="margin-top:var(--space-2);">
+                Get started
+              </a>
+
+              <!-- Language block. shadcn/ui: list of next/link rows. -->
+              <div class="drawer-lang">
+                <span class="drawer-lang__label">Language</span>
+                <a class="drawer-lang__opt drawer-lang__opt--active" href="#"
+                  hreflang="en" aria-current="true">
+                  <span class="drawer-lang__name">English</span>
+                  <span class="drawer-lang__code">EN</span>
+                  <svg class="check" width="18" height="18" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" stroke-width="2.4"
+                    stroke-linecap="round" stroke-linejoin="round"
+                    aria-hidden="true">
+                    <path d="M20 6 9 17l-5-5" />
+                  </svg>
+                </a>
+                <a class="drawer-lang__opt" href="#" hreflang="fr">
+                  <span class="drawer-lang__name">Français</span>
+                  <span class="drawer-lang__code">FR</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- FR active -->
+          <div class="phone" role="dialog" aria-label="Menu (Français)">
+            <div class="phone__bar">
+              <span class="demo-header__brand">
+                <span class="demo-header__mark" aria-hidden="true">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path d="M6 5h12L11 12l7 7H6" />
+                  </svg>
+                </span>
+                Augur
+              </span>
+              <button class="icon-btn" aria-label="Fermer le menu"
+                style="width:2.25rem;height:2.25rem;border:1px solid var(--color-border);border-radius:var(--radius-md);background:var(--color-surface);color:var(--color-text-muted);display:inline-grid;place-items:center;cursor:pointer;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  aria-hidden="true">
+                  <path d="M6 6l12 12M18 6 6 18" />
+                </svg>
+              </button>
+            </div>
+            <div class="phone__body">
+              <a class="phone__link" href="landing.html">Fonctionnalités</a>
+              <a class="phone__link" href="pricing.html">Tarifs</a>
+              <a class="phone__link" href="landing.html">Clients</a>
+
+              <a class="btn btn--ghost btn--block" href="auth.html"
+                style="margin-top:var(--space-3);justify-content:flex-start;">
+                Connexion
+              </a>
+              <a class="btn btn--primary btn--block" href="auth.html?mode=signup"
+                style="margin-top:var(--space-2);">
+                Commencer
+              </a>
+
+              <div class="drawer-lang">
+                <span class="drawer-lang__label">Langue</span>
+                <a class="drawer-lang__opt" href="#" hreflang="en">
+                  <span class="drawer-lang__name">English</span>
+                  <span class="drawer-lang__code">EN</span>
+                </a>
+                <a class="drawer-lang__opt drawer-lang__opt--active" href="#"
+                  hreflang="fr" aria-current="true">
+                  <span class="drawer-lang__name">Français</span>
+                  <span class="drawer-lang__code">FR</span>
+                  <svg class="check" width="18" height="18" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" stroke-width="2.4"
+                    stroke-linecap="round" stroke-linejoin="round"
+                    aria-hidden="true">
+                    <path d="M20 6 9 17l-5-5" />
+                  </svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>
