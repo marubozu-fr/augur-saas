@@ -27,7 +27,6 @@ export async function signIn(formData: FormData): Promise<void> {
     cookieStore.set(NO_PERSIST_COOKIE, "1", { path: "/" });
   }
 
-  revalidatePath("/", "layout");
   redirect("/dashboard");
 }
 
@@ -43,7 +42,6 @@ export async function signUp(formData: FormData): Promise<void> {
     redirect(`/sign-up?error=${encodeURIComponent(error.message)}`);
   }
 
-  revalidatePath("/", "layout");
   redirect("/dashboard");
 }
 
@@ -54,7 +52,7 @@ export async function signOut(): Promise<void> {
   // slate rather than inheriting a stale session-scoping preference.
   const cookieStore = await cookies();
   cookieStore.delete(NO_PERSIST_COOKIE);
-  revalidatePath("/", "layout");
+  revalidatePath("/dashboard", "layout");
   redirect("/sign-in");
 }
 
