@@ -51,19 +51,19 @@ export function LanguageSwitcherDesktop() {
         {locales.map((option) => {
           const isActive = option === locale;
           return (
-            // Highlight styles must sit on the item, not on the Link: only
-            // DropdownMenuItem runs them through cn()/tailwind-merge, which
-            // drops the base focus:bg-accent (invisible — it equals the popover
-            // background). Radix's Slot would merely concatenate them onto the
-            // Link, leaving focus:bg-accent to win on specificity. Radix
-            // highlights via focus, so focus: covers hover and arrow keys both.
+            // The active item's brand highlight must sit on the item, not on
+            // the Link: only DropdownMenuItem runs it through cn()/tailwind-
+            // merge, which drops the base focus:bg-card so focus:bg-brand-soft-
+            // strong wins. Radix's Slot would merely concatenate it onto the
+            // Link, leaving the base to win on specificity. Radix highlights
+            // via focus, so focus: covers hover and arrow keys both.
             <DropdownMenuItem
               key={option}
               asChild
               className={
                 isActive
                   ? "bg-brand-soft text-brand focus:bg-brand-soft-strong focus:text-brand"
-                  : "text-foreground focus:bg-card focus:text-foreground"
+                  : "text-foreground"
               }
             >
               <Link
