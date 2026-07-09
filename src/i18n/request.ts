@@ -1,6 +1,6 @@
 import { cookies, headers } from "next/headers";
 import { getRequestConfig } from "next-intl/server";
-import { defaultLocale, isLocale, type Locale } from "./config";
+import { defaultLocale, isLocale, LOCALE_HEADER, type Locale } from "./config";
 
 const LOCALE_COOKIE = "NEXT_LOCALE";
 
@@ -22,11 +22,26 @@ function pickFromAcceptLanguage(header: string | null): Locale | null {
 
 // Hybrid locale resolution, shared by every route in the app (marketing and
 // private alike) since there is a single root layout:
-//   (a) the `[locale]` URL segment (marketing routes only) — `requestLocale`
-//   (b) the `NEXT_LOCALE` cookie (private routes, or a marketing return visit)
-//   (c) the browser's Accept-Language header
-//   (d) the app default ("en")
+//   (a) the `LOCALE_HEADER` set by the middleware (src/lib/supabase/middleware.ts),
+//       which resolves the URL segment on marketing routes and this same
+//       cookie/Accept-Language chain everywhere else. This is authoritative
+//       because the root layout renders before `[locale]/layout.tsx` calls
+//       `setRequestLocale()`, so `requestLocale` below is empty on first render.
+//   (b) the `[locale]` URL segment (marketing routes only) — `requestLocale`
+//   (c) the `NEXT_LOCALE` cookie (private routes, or a marketing return visit)
+//   (d) the browser's Accept-Language header
+//   (e) the app default ("en")
 export default getRequestConfig(async ({ requestLocale }) => {
+  const headerStore = await headers();
+  const forwardedLocale = headerStore.get(LOCALE_HEADER);
+  if (forwardedLocale && isLocale(forwardedLocale)) {
+    return {
+      locale: forwardedLocale,
+      messages: (await import(`../../messages/${forwardedLocale}.json`))
+        .default,
+    };
+  }
+
   const urlLocale = await requestLocale;
   if (urlLocale && isLocale(urlLocale)) {
     return {
@@ -44,7 +59,6 @@ export default getRequestConfig(async ({ requestLocale }) => {
     };
   }
 
-  const headerStore = await headers();
   const acceptLanguageLocale = pickFromAcceptLanguage(
     headerStore.get("accept-language"),
   );

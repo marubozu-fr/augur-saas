@@ -2,7 +2,12 @@ import { createServerClient } from "@supabase/ssr";
 import { NextRequest, NextResponse } from "next/server";
 import { NO_PERSIST_COOKIE } from "@/lib/constants";
 import { selectActiveSubscription } from "@/lib/subscription";
-import { defaultLocale, isLocale, type Locale } from "@/i18n/config";
+import {
+  defaultLocale,
+  isLocale,
+  LOCALE_HEADER,
+  type Locale,
+} from "@/i18n/config";
 
 // Paths that require a valid session. /account is intentionally included so
 // unauthenticated users are sent to sign-in, but it is NOT subscription-gated
@@ -17,6 +22,7 @@ const SUBSCRIPTION_GATED_PREFIXES = ["/dashboard", "/stats"];
 // `[locale]` segment (src/app/[locale]/(marketing)/...). Every other route in
 // this repo is a private, cookie-locale-driven route (dashboard/account/stats)
 // or an auth/API route.
+// Keep in sync with src/app/[locale]/(marketing)/ routes.
 const MARKETING_PATHS = ["/", "/pricing"];
 
 // Top-level path segments owned by a real (non-marketing) route. Used to tell
@@ -114,10 +120,34 @@ function resolveLocaleRedirect(request: NextRequest): string | null {
   return null;
 }
 
+// Resolves the locale that will actually be rendered for this request: the
+// URL-prefixed segment on marketing routes, falling back to the existing
+// cookie → Accept-Language → default chain everywhere else. Forwarded to the
+// app via LOCALE_HEADER so the shared root layout (which renders before
+// `[locale]/layout.tsx` calls `setRequestLocale()`) resolves the same locale.
+function resolveLocale(request: NextRequest): Locale {
+  const { first } = splitFirstSegment(request.nextUrl.pathname);
+  if (first && isLocale(first)) {
+    return first;
+  }
+  return detectLocale(request);
+}
+
+// Builds a pass-through response carrying the resolved locale as a request
+// header. Clones `request.headers` fresh each call, since the Supabase
+// `setAll` callback mutates `request`'s cookies (and therefore its `cookie`
+// header) between the initial response and this one.
+function nextWithLocale(request: NextRequest, locale: Locale): NextResponse {
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set(LOCALE_HEADER, locale);
+  return NextResponse.next({ request: { headers: requestHeaders } });
+}
+
 export async function updateSession(
   request: NextRequest,
 ): Promise<NextResponse> {
-  let response = NextResponse.next({ request });
+  const locale = resolveLocale(request);
+  let response = nextWithLocale(request, locale);
 
   // When the user signed in with "Keep me signed in" unchecked, the sign-in
   // action sets this marker. Strip maxAge/expires on refresh so the auth cookies
@@ -136,7 +166,7 @@ export async function updateSession(
           cookiesToSet.forEach(({ name, value }) => {
             request.cookies.set(name, value);
           });
-          response = NextResponse.next({ request });
+          response = nextWithLocale(request, locale);
           cookiesToSet.forEach(({ name, value, options }) => {
             const cookieOptions = noPersist
               ? Object.fromEntries(
