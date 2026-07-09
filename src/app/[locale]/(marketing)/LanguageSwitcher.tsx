@@ -10,7 +10,7 @@
 // locale-aware) and also persists the choice into the NEXT_LOCALE cookie so
 // it carries over once the visitor reaches the cookie-driven private app.
 
-import { Globe, ChevronDown, Check } from "lucide-react";
+import { Globe, ChevronDown } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { locales, type Locale } from "@/i18n/config";
@@ -51,10 +51,11 @@ export function LanguageSwitcherDesktop() {
         {locales.map((option) => {
           const isActive = option === locale;
           return (
-            <DropdownMenuItem key={option} asChild>
+            <DropdownMenuItem key={option} asChild className="cursor-pointer">
               <Link
                 href={pathname}
                 locale={option}
+                aria-current={isActive ? "true" : undefined}
                 onClick={() => {
                   void setLocaleCookie(option);
                 }}
@@ -66,7 +67,6 @@ export function LanguageSwitcherDesktop() {
                 <span className="font-mono text-xs font-semibold uppercase text-subtle">
                   {option}
                 </span>
-                {isActive && <Check size={16} aria-hidden="true" />}
               </Link>
             </DropdownMenuItem>
           );
@@ -118,7 +118,6 @@ export function LanguageSwitcherMobile() {
               <span className="font-mono text-xs font-semibold uppercase text-subtle">
                 {option}
               </span>
-              {isActive && <Check size={16} aria-hidden="true" />}
             </Link>
           );
         })}
