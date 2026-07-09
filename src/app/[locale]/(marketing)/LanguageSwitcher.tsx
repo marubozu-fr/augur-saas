@@ -51,7 +51,21 @@ export function LanguageSwitcherDesktop() {
         {locales.map((option) => {
           const isActive = option === locale;
           return (
-            <DropdownMenuItem key={option} asChild>
+            // Highlight styles must sit on the item, not on the Link: only
+            // DropdownMenuItem runs them through cn()/tailwind-merge, which
+            // drops the base focus:bg-accent (invisible — it equals the popover
+            // background). Radix's Slot would merely concatenate them onto the
+            // Link, leaving focus:bg-accent to win on specificity. Radix
+            // highlights via focus, so focus: covers hover and arrow keys both.
+            <DropdownMenuItem
+              key={option}
+              asChild
+              className={
+                isActive
+                  ? "bg-brand-soft text-brand focus:bg-brand-soft-strong focus:text-brand"
+                  : "text-foreground focus:bg-card focus:text-foreground"
+              }
+            >
               <Link
                 href={pathname}
                 locale={option}
@@ -59,9 +73,6 @@ export function LanguageSwitcherDesktop() {
                 onClick={() => {
                   void setLocaleCookie(option);
                 }}
-                className={
-                  isActive ? "bg-brand-soft text-brand" : "text-foreground"
-                }
               >
                 <span className="flex-1">{LOCALE_NAMES[option]}</span>
                 <span className="font-mono text-xs font-semibold uppercase text-subtle">
@@ -110,7 +121,7 @@ export function LanguageSwitcherMobile() {
               }}
               className={`flex items-center gap-3 w-full px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                 isActive
-                  ? "bg-brand-soft text-brand"
+                  ? "bg-brand-soft text-brand hover:bg-brand-soft-strong"
                   : "text-muted-foreground hover:bg-card hover:text-foreground"
               }`}
             >

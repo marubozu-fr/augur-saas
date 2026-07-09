@@ -34,6 +34,7 @@
   --color-brand: var(--brand);
   --color-brand-hover: var(--brand-hover);
   --color-brand-soft: var(--brand-soft);
+  --color-brand-soft-strong: var(--brand-soft-strong);
   --color-brand-ring: var(--brand-ring);
   --color-on-brand: var(--on-brand);
 
@@ -72,6 +73,7 @@
   --brand: #0ea5e9;
   --brand-hover: #0284c7;
   --brand-soft: rgba(14, 165, 233, 0.14);
+  --brand-soft-strong: rgba(14, 165, 233, 0.22);
   --brand-ring: rgba(14, 165, 233, 0.45);
   --on-brand: #ffffff;
 
