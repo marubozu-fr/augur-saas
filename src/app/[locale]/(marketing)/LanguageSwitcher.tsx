@@ -51,7 +51,7 @@ export function LanguageSwitcherDesktop() {
         {locales.map((option) => {
           const isActive = option === locale;
           return (
-            <DropdownMenuItem key={option} asChild className="cursor-pointer">
+            <DropdownMenuItem key={option} asChild>
               <Link
                 href={pathname}
                 locale={option}
