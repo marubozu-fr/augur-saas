@@ -4,7 +4,6 @@
     "features": "Fonctionnalités",
     "howItWorks": "Fonctionnement",
     "pricing": "Tarifs",
-    "customers": "Clients",
     "signIn": "Connexion",
     "getStarted": "Commencer",
     "changeLanguage": "Changer de langue, actuelle : {language}"
@@ -17,7 +16,6 @@
       "headline": "Négociez les <hl>probabilités</hl>,<br></br>pas les prédictions.",
       "subtitle": "Augur transforme 18 ans de données futures NQ et ES en probabilités conditionnelles claires. Chaque avantage est comparé à sa référence, avec la taille d'échantillon bien visible — pour que vous sachiez exactement à quel point un setup est réellement solide.",
       "ctaPrimary": "Essai gratuit de 7 jours",
-      "ctaSecondary": "Voir les données",
       "checklist": {
         "noCard": "Sans carte bancaire",
         "cancelAnytime": "Annulation à tout moment",
@@ -78,28 +76,6 @@
       "step3": {
         "title": "Tradez avec du contexte",
         "description": "Lisez l'avantage par rapport à sa référence, vérifiez la taille de l'échantillon, et dimensionnez votre position en conséquence. Revenez après la clôture pour les chiffres actualisés du lendemain."
-      }
-    },
-    "proof": {
-      "eyebrow": "Adopté par des traders sérieux",
-      "heading": "Le desk d'avantages que les traders gardent ouvert toute la journée",
-      "metrics": {
-        "families": "Familles de statistiques distinctes",
-        "dataPoints": "Points de données analysés",
-        "history": "D'historique NQ et ES",
-        "instruments": "Instruments couverts (NQ et ES)"
-      },
-      "testimonial1": {
-        "quote": "J'ai arrêté de deviner si un gap allait se combler. Augur me donne le taux de continuation par taille de gap et jour de la semaine, avec le N juste à côté. C'est la première chose que je consulte avant l'ouverture.",
-        "role": "Trader indépendant de futures NQ"
-      },
-      "testimonial2": {
-        "quote": "Ce qui m'a convaincu, c'est l'honnêteté. Quand une tranche ne compte que 22 échantillons, c'est indiqué et l'avantage est grisé. Aucun autre produit de statistiques ne respecte autant la significativité.",
-        "role": "Analyste quantitatif, desk propriétaire"
-      },
-      "testimonial3": {
-        "quote": "Nous utilisons l'API Enterprise pour alimenter notre checklist pré-marché pour un petit book ES. L'actualisation quotidienne et des références propres nous ont fait économiser des semaines de développement.",
-        "role": "Responsable trading, fonds propriétaire"
       }
     },
     "cta": {

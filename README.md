@@ -1,6 +1,6 @@
 # Augur SaaS
 
-Member-facing subscription platform for [Augur](https://augur.marubozu.ovh) trading statistics.
+Member-facing subscription platform for [Augur](https://github.com/marubozu-fr/augur) trading statistics.
 
 ## Stack
 
@@ -25,3 +25,7 @@ any stats computation, data processing, or backend logic.
 
 See [CLAUDE.md](./CLAUDE.md) for full project documentation.
 See [docs/PLAN.md](./docs/PLAN.md) for milestones and issue plan.
+
+## License
+
+MIT — see [LICENSE](LICENSE).

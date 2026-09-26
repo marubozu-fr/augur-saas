@@ -26,7 +26,6 @@ export default async function MarketingLayout({
     { href: "/#features", label: t("features") },
     { href: "/#how", label: t("howItWorks") },
     { href: "/pricing", label: t("pricing") },
-    { href: "/#proof", label: t("customers") },
   ];
 
   return (

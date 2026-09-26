@@ -4,7 +4,6 @@
     "features": "Features",
     "howItWorks": "How it works",
     "pricing": "Pricing",
-    "customers": "Customers",
     "signIn": "Sign in",
     "getStarted": "Get started",
     "changeLanguage": "Change language, current: {language}"
@@ -17,7 +16,6 @@
       "headline": "Trade the <hl>probabilities</hl>,<br></br>not the predictions.",
       "subtitle": "Augur turns 18 years of NQ and ES futures data into clean, conditional probabilities. Every edge is shown against its baseline, with the sample size in plain sight — so you know exactly how strong a setup really is.",
       "ctaPrimary": "Start free 7-day trial",
-      "ctaSecondary": "See the data",
       "checklist": {
         "noCard": "No card required",
         "cancelAnytime": "Cancel anytime",
@@ -78,28 +76,6 @@
       "step3": {
         "title": "Trade with context",
         "description": "Read the edge against its baseline, check the sample size, and size your position accordingly. Come back after the close for the next day's refreshed numbers."
-      }
-    },
-    "proof": {
-      "eyebrow": "Loved by serious traders",
-      "heading": "The edge desk traders keep open all day",
-      "metrics": {
-        "families": "Distinct stat families",
-        "dataPoints": "Data points analyzed",
-        "history": "Of NQ & ES history",
-        "instruments": "Covered instruments (NQ & ES)"
-      },
-      "testimonial1": {
-        "quote": "I stopped guessing whether a gap would fill. Augur tells me the continuation rate by gap size and weekday, with the N right there. It's the first thing I check before the open.",
-        "role": "Independent NQ futures trader"
-      },
-      "testimonial2": {
-        "quote": "What sold me was the honesty. When a slice has 22 samples it says so and greys out the edge. No other stats product respects significance like this.",
-        "role": "Quant analyst, prop desk"
-      },
-      "testimonial3": {
-        "quote": "We use the Enterprise API to feed our pre-market checklist for a small ES book. Daily refresh and clean baselines saved us weeks of building this ourselves.",
-        "role": "Head of trading, proprietary fund"
       }
     },
     "cta": {

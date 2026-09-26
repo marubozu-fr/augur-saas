@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import {
   Zap,
-  ArrowRight,
   Check,
   TrendingUp,
   Table2,
@@ -82,13 +81,6 @@ export default async function LandingPage() {
                 >
                   {t("hero.ctaPrimary")}
                 </NextLink>
-                <a
-                  href="#proof"
-                  className="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-md border border-border-strong text-base font-semibold text-foreground hover:bg-card transition-colors"
-                >
-                  {t("hero.ctaSecondary")}
-                  <ArrowRight size={16} aria-hidden="true" />
-                </a>
               </div>
 
               {/* Meta check items */}
@@ -376,131 +368,6 @@ export default async function LandingPage() {
                 </p>
               </li>
             </ol>
-          </div>
-        </section>
-
-        {/* ===================================================================
-            SOCIAL PROOF — metrics + testimonials
-            =================================================================== */}
-        <section className="py-24" id="proof">
-          <div className={container}>
-            {/* Metrics row */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 text-center">
-              <div>
-                <div className="text-[3rem] font-bold tracking-tight font-mono tabular-nums text-foreground">
-                  54+
-                </div>
-                <div className="mt-2 text-sm text-muted-foreground">
-                  {t("proof.metrics.families")}
-                </div>
-              </div>
-              <div>
-                <div className="text-[3rem] font-bold tracking-tight font-mono tabular-nums text-foreground">
-                  1.2M
-                </div>
-                <div className="mt-2 text-sm text-muted-foreground">
-                  {t("proof.metrics.dataPoints")}
-                </div>
-              </div>
-              <div>
-                <div className="text-[3rem] font-bold tracking-tight font-mono tabular-nums text-foreground">
-                  18 yrs
-                </div>
-                <div className="mt-2 text-sm text-muted-foreground">
-                  {t("proof.metrics.history")}
-                </div>
-              </div>
-              <div>
-                <div className="text-[3rem] font-bold tracking-tight font-mono tabular-nums text-foreground">
-                  2
-                </div>
-                <div className="mt-2 text-sm text-muted-foreground">
-                  {t("proof.metrics.instruments")}
-                </div>
-              </div>
-            </div>
-
-            {/* Section head */}
-            <div className="max-w-[640px] mx-auto mt-24 mb-12 text-center">
-              <span className="inline-block text-sm font-semibold tracking-[0.06em] uppercase text-brand mb-3">
-                {t("proof.eyebrow")}
-              </span>
-              <h2 className="text-[2.25rem] font-bold tracking-tight text-foreground">
-                {t("proof.heading")}
-              </h2>
-            </div>
-
-            {/* Testimonials */}
-            <div className="grid md:grid-cols-3 gap-5">
-              {/* Testimonial 1 */}
-              <figure className="rounded-xl border border-border bg-card p-6">
-                <blockquote className="text-base text-foreground leading-[1.55]">
-                  &ldquo;{t("proof.testimonial1.quote")}&rdquo;
-                </blockquote>
-                <figcaption className="flex items-center gap-3 mt-5">
-                  <span
-                    className="w-10 h-10 rounded-full bg-gradient-to-br from-brand to-[#06b6d4] grid place-items-center text-sm font-bold text-on-brand flex-shrink-0"
-                    aria-hidden="true"
-                  >
-                    MK
-                  </span>
-                  <span>
-                    <span className="block text-sm font-semibold text-foreground">
-                      Marcus Kellner
-                    </span>
-                    <span className="text-xs text-subtle">
-                      {t("proof.testimonial1.role")}
-                    </span>
-                  </span>
-                </figcaption>
-              </figure>
-
-              {/* Testimonial 2 */}
-              <figure className="rounded-xl border border-border bg-card p-6">
-                <blockquote className="text-base text-foreground leading-[1.55]">
-                  &ldquo;{t("proof.testimonial2.quote")}&rdquo;
-                </blockquote>
-                <figcaption className="flex items-center gap-3 mt-5">
-                  <span
-                    className="w-10 h-10 rounded-full bg-gradient-to-br from-brand to-[#06b6d4] grid place-items-center text-sm font-bold text-on-brand flex-shrink-0"
-                    aria-hidden="true"
-                  >
-                    PD
-                  </span>
-                  <span>
-                    <span className="block text-sm font-semibold text-foreground">
-                      Priya Desai
-                    </span>
-                    <span className="text-xs text-subtle">
-                      {t("proof.testimonial2.role")}
-                    </span>
-                  </span>
-                </figcaption>
-              </figure>
-
-              {/* Testimonial 3 */}
-              <figure className="rounded-xl border border-border bg-card p-6">
-                <blockquote className="text-base text-foreground leading-[1.55]">
-                  &ldquo;{t("proof.testimonial3.quote")}&rdquo;
-                </blockquote>
-                <figcaption className="flex items-center gap-3 mt-5">
-                  <span
-                    className="w-10 h-10 rounded-full bg-gradient-to-br from-brand to-[#06b6d4] grid place-items-center text-sm font-bold text-on-brand flex-shrink-0"
-                    aria-hidden="true"
-                  >
-                    JR
-                  </span>
-                  <span>
-                    <span className="block text-sm font-semibold text-foreground">
-                      Jonas Reuter
-                    </span>
-                    <span className="text-xs text-subtle">
-                      {t("proof.testimonial3.role")}
-                    </span>
-                  </span>
-                </figcaption>
-              </figure>
-            </div>
           </div>
         </section>
 

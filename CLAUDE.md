@@ -3,7 +3,7 @@
 ## Project Overview
 Member-facing SaaS frontend for Augur, a trading probability platform.
 Displays statistical market probabilities to subscribed users. Consumes the
-Augur REST API (`augur.marubozu.ovh`) — this repo contains **no backend logic,
+Augur API (`AUGUR_API_URL`, source: https://github.com/marubozu-fr/augur) — this repo contains **no backend logic,
 no stats engine, no data processing**. Authentication, user management, and
 subscription billing are handled by Supabase and Stripe.
 
@@ -121,7 +121,7 @@ STRIPE_WEBHOOK_SECRET=
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
 
 # Augur API
-AUGUR_API_URL=https://augur.marubozu.ovh
+AUGUR_API_URL=http://localhost:8000
 AUGUR_API_KEY=              # Service-level key, server-side only
 
 # App
@@ -163,7 +163,7 @@ NEXT_PUBLIC_SITE_URL=       # Production URL for redirects
 - ALWAYS validate Stripe webhook signatures before processing events.
 
 ## External API Reference
-The Augur stats API at `augur.marubozu.ovh`:
+The Augur API (`AUGUR_API_URL`, source: https://github.com/marubozu-fr/augur):
 - `GET /health` — Health check (public)
 - `GET /api/v1/stats` — List all stat families (requires `X-API-Key`)
 - `GET /api/v1/stats/{stat_id}` — Get stat detail (requires `X-API-Key`)
