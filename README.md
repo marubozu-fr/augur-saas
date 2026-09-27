@@ -12,6 +12,8 @@ Member-facing subscription platform for [Augur](https://github.com/marubozu-fr/a
 
 ## Getting Started
 
+Requires pnpm 11.4.0 (see `packageManager` in `package.json`).
+
 ```bash
 pnpm install
 cp .env.local.example .env.local  # Fill in your keys
