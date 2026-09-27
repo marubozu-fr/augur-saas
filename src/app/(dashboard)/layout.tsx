@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUserTier } from "@/lib/subscription.server";
+import { isDemoMode } from "@/lib/demo-mode";
 import { Sidebar } from "./Sidebar";
 
 export default async function DashboardLayout({
@@ -8,14 +9,18 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Defense-in-depth auth check alongside middleware.
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Demo mode has no Supabase — /dashboard and /stats are open to everyone
+  // (see the middleware demo branch), so skip the auth check entirely.
+  if (!isDemoMode()) {
+    // Defense-in-depth auth check alongside middleware.
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-  if (!user) {
-    redirect("/sign-in");
+    if (!user) {
+      redirect("/sign-in");
+    }
   }
 
   // Fetch tier for the sidebar badge — fail open so the shell always renders.

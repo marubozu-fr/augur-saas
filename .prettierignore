@@ -7,3 +7,7 @@ pnpm-lock.yaml
 docs/
 CLAUDE.md
 README.md
+
+# Bundled demo-mode snapshot — must stay byte-identical to the upstream
+# marubozu-fr/augur results/ files (see scripts/sync-demo-snapshot.sh).
+demo-data/

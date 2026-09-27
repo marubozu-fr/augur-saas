@@ -1,0 +1,3 @@
+# Bundled demo-mode snapshot (see scripts/sync-demo-snapshot.sh) — generated
+# from the public Augur backend repository, not authored in this repo.
+demo-data/** linguist-generated=true

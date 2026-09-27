@@ -5,8 +5,13 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
-import { parseTier, selectActiveSubscription } from "@/lib/subscription";
+import {
+  parseTier,
+  selectActiveSubscription,
+  MAX_TIER,
+} from "@/lib/subscription";
 import type { Subscription } from "@/lib/subscription";
+import { isDemoMode } from "@/lib/demo-mode";
 
 /**
  * Returns the current user's active subscription, or null when the user is
@@ -32,8 +37,14 @@ export async function getActiveSubscription(): Promise<Subscription | null> {
  *
  *   const tier = await getCurrentUserTier();
  *   if (!canAccessStat(tier, stat.tier)) { ... show upgrade prompt ... }
+ *
+ * In demo mode, always returns MAX_TIER (no Supabase call at all) so every
+ * stat is unlocked for every visitor.
  */
 export async function getCurrentUserTier(): Promise<number | null> {
+  if (isDemoMode()) {
+    return MAX_TIER;
+  }
   const subscription = await getActiveSubscription();
   return parseTier(subscription?.tier);
 }

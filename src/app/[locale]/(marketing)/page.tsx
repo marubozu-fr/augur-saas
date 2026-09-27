@@ -12,6 +12,7 @@ import {
   ChevronUp,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { isDemoMode } from "@/lib/demo-mode";
 import { buildLanguageAlternates } from "@/i18n/metadata";
 
 // Title/description are inherited from the [locale] layout; this page adds its
@@ -24,12 +25,15 @@ export function generateMetadata(): Metadata {
 const container = "mx-auto w-full max-w-[1180px] px-6";
 
 export default async function LandingPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (user) {
-    redirect("/dashboard");
+  // No Supabase in demo mode, and no signed-in state to redirect from.
+  if (!isDemoMode()) {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) {
+      redirect("/dashboard");
+    }
   }
 
   const t = await getTranslations("landing");

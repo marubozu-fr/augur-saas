@@ -5,8 +5,16 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { NO_PERSIST_COOKIE } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/server";
+import { isDemoMode } from "@/lib/demo-mode";
+
+// Every one of these actions is bound to a page (/sign-in, /sign-up,
+// /forgot-password) that the demo-mode middleware redirects to /dashboard —
+// so they are not reachable through the UI. Guarded anyway (no Supabase
+// client may ever be created in demo mode).
 
 export async function signIn(formData: FormData): Promise<void> {
+  if (isDemoMode()) redirect("/dashboard");
+
   const remember = formData.get("remember") === "on";
   const supabase = await createClient(remember);
 
@@ -31,6 +39,8 @@ export async function signIn(formData: FormData): Promise<void> {
 }
 
 export async function signUp(formData: FormData): Promise<void> {
+  if (isDemoMode()) redirect("/dashboard");
+
   const supabase = await createClient();
 
   const email = formData.get("email") as string;
@@ -46,6 +56,8 @@ export async function signUp(formData: FormData): Promise<void> {
 }
 
 export async function signOut(): Promise<void> {
+  if (isDemoMode()) redirect("/dashboard");
+
   const supabase = await createClient();
   await supabase.auth.signOut();
   // Clear the "no persist" marker so a later sign-in starts from a clean
@@ -57,6 +69,8 @@ export async function signOut(): Promise<void> {
 }
 
 export async function resetPassword(formData: FormData): Promise<void> {
+  if (isDemoMode()) redirect("/dashboard");
+
   const supabase = await createClient();
 
   const email = formData.get("email") as string;

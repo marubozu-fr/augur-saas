@@ -5,6 +5,7 @@ import { LayoutDashboard, User, LogOut } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { signOut } from "@/app/(auth)/actions";
 import { NavLink } from "@/app/(dashboard)/NavLink";
+import { isDemoMode } from "@/lib/demo-mode";
 
 interface SidebarProps {
   userTier: number | null;
@@ -12,6 +13,7 @@ interface SidebarProps {
 
 export function Sidebar({ userTier }: SidebarProps) {
   const t = useTranslations("dashboard.sidebar");
+  const demo = isDemoMode();
   const tierLabel =
     userTier !== null ? t("tier", { tier: userTier }) : t("noPlan");
 
@@ -50,38 +52,44 @@ export function Sidebar({ userTier }: SidebarProps) {
           icon={LayoutDashboard}
           label={t("dashboard")}
         />
-        <NavLink href="/account" icon={User} label={t("account")} />
+        {/* No account/billing page in demo mode (no Supabase). */}
+        {!demo && <NavLink href="/account" icon={User} label={t("account")} />}
       </nav>
 
       {/* Spacer pushes tier badge + logout to bottom */}
       <div className="flex-1" />
 
       {/* Plan/Tier badge — full-width block row, just above Logout.
-          Matches mockup .tier-pill--sidebar: flex w-full, tier value pushed right. */}
-      <span
-        className="flex w-full items-center gap-2 px-3 py-3 rounded-lg border border-border bg-card text-xs font-semibold"
-        title={t("planTooltip")}
-      >
+          Matches mockup .tier-pill--sidebar: flex w-full, tier value pushed right.
+          Hidden in demo mode: there is no plan, every stat is unlocked. */}
+      {!demo && (
         <span
-          className="w-2 h-2 rounded-full bg-brand shadow-[0_0_0_3px_rgba(14,165,233,0.14)] flex-shrink-0"
-          aria-hidden="true"
-        />
-        <span className="text-muted-foreground">{t("plan")}</span>
-        <span className="ml-auto text-foreground">{tierLabel}</span>
-      </span>
+          className="flex w-full items-center gap-2 px-3 py-3 rounded-lg border border-border bg-card text-xs font-semibold"
+          title={t("planTooltip")}
+        >
+          <span
+            className="w-2 h-2 rounded-full bg-brand shadow-[0_0_0_3px_rgba(14,165,233,0.14)] flex-shrink-0"
+            aria-hidden="true"
+          />
+          <span className="text-muted-foreground">{t("plan")}</span>
+          <span className="ml-auto text-foreground">{tierLabel}</span>
+        </span>
+      )}
 
-      {/* Logout */}
-      <nav aria-label="Session">
-        <form action={signOut}>
-          <button
-            type="submit"
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:text-down hover:bg-card transition-colors"
-          >
-            <LogOut size={18} aria-hidden="true" />
-            {t("logout")}
-          </button>
-        </form>
-      </nav>
+      {/* Logout — hidden in demo mode: there is no session to sign out of. */}
+      {!demo && (
+        <nav aria-label="Session">
+          <form action={signOut}>
+            <button
+              type="submit"
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:text-down hover:bg-card transition-colors"
+            >
+              <LogOut size={18} aria-hidden="true" />
+              {t("logout")}
+            </button>
+          </form>
+        </nav>
+      )}
     </aside>
   );
 }

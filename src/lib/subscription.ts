@@ -12,6 +12,16 @@ export const ACTIVE_STATUSES = ["active", "trialing"] as const;
 
 export type SubscriptionStatus = (typeof ACTIVE_STATUSES)[number] | string;
 
+// Canonical tier list — mirrors the Stripe product metadata in
+// stripe-fixtures.json (Starter=1, Pro=2, Premium=3, Enterprise=4). The single
+// source of truth for "how many tiers exist", so callers never hardcode a
+// tier count or number.
+export const TIERS = [1, 2, 3, 4] as const;
+
+// Highest existing tier — demo mode (no Supabase/Stripe) grants this to every
+// visitor so every stat is unlocked. See getCurrentUserTier() in subscription.server.ts.
+export const MAX_TIER: number = TIERS[TIERS.length - 1];
+
 // ---------------------------------------------------------------------------
 // Subscription interface (camelCase, mirrors the subscriptions table columns)
 // ---------------------------------------------------------------------------
@@ -70,7 +80,7 @@ function mapSubscription(raw: RawSubscription): Subscription {
 export function parseTier(tier: string | null | undefined): number | null {
   if (!tier) return null;
   const parsed = parseInt(tier, 10);
-  if (isNaN(parsed) || parsed < 1) return null;
+  if (isNaN(parsed) || parsed < TIERS[0]) return null;
   return parsed;
 }
 

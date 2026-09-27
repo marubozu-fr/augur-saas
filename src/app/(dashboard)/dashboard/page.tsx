@@ -12,53 +12,64 @@ import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { normalizeInstrument } from "@/lib/instruments";
 import { getStatCatalog, AugurApiError } from "@/services/augur";
+import { getGlobalInstruments } from "@/lib/stat-context";
+import { isDemoMode } from "@/lib/demo-mode";
 import { setDefaultInstrument } from "./actions";
 
 export default async function DashboardPage() {
   const t = await getTranslations("dashboard.selectInstrument");
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
 
-  // Defense-in-depth: layout already guards this, but redirect here too.
-  if (!user) {
-    redirect("/sign-in");
+  // Demo mode has no Supabase, so there is no per-user stored preference to
+  // check — skip straight to the catalog fetch below.
+  if (!isDemoMode()) {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    // Defense-in-depth: layout already guards this, but redirect here too.
+    if (!user) {
+      redirect("/sign-in");
+    }
+
+    // Read the stored default instrument for this user.
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("default_instrument")
+      .eq("id", user.id)
+      .single();
+
+    const raw = profile?.default_instrument;
+    const defaultInstrument =
+      typeof raw === "string" ? normalizeInstrument(raw) : null;
+
+    if (defaultInstrument) {
+      redirect("/dashboard/" + defaultInstrument.toLowerCase());
+    }
   }
 
-  // Read the stored default instrument for this user.
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("default_instrument")
-    .eq("id", user.id)
-    .single();
-
-  const raw = profile?.default_instrument;
-  const defaultInstrument =
-    typeof raw === "string" ? normalizeInstrument(raw) : null;
-
-  if (defaultInstrument) {
-    redirect("/dashboard/" + defaultInstrument.toLowerCase());
-  }
-
-  // No default set — fetch the catalog to derive the instrument list.
+  // No default set (live mode) — fetch the catalog to derive the instrument
+  // list. Demo mode goes through the exact same fetch + error handling: the
+  // only difference is what happens afterwards (see below).
   let instruments: string[];
   let catalogError: string | null = null;
 
   try {
     const families = await getStatCatalog();
-    const instrumentSet = new Set<string>();
-    for (const f of families) {
-      for (const tf of f.timeframes) {
-        instrumentSet.add(tf.instrument);
-      }
-    }
-    instruments = Array.from(instrumentSet).sort();
+    instruments = getGlobalInstruments(families);
   } catch (err) {
     const message =
       err instanceof AugurApiError ? err.message : t("loadFailed");
     catalogError = message;
     instruments = [];
+  }
+
+  // Demo mode has no per-user preference to set, so it skips the selector
+  // grid entirely and always goes straight to the first available
+  // instrument. A catalog failure or an empty catalog falls through to the
+  // same rendering as live mode below, instead of a silently degraded state.
+  if (isDemoMode() && !catalogError && instruments.length > 0) {
+    redirect("/dashboard/" + instruments[0].toLowerCase());
   }
 
   return (

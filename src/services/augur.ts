@@ -1,13 +1,38 @@
-// Server-side Augur API client.
+// Server-side Augur data client.
 // Import this only in Server Components, API routes, and server actions.
 // NEVER import from client components — AUGUR_API_KEY is a service-level secret
 // that must never reach the browser.
+//
+// Two data sources, selected by isDemoMode() (src/lib/demo-mode.ts):
+//   - Live mode (default): fetches the live Augur API (AUGUR_API_URL/AUGUR_API_KEY).
+//   - Demo mode (NEXT_PUBLIC_DEMO_MODE=true): reads the bundled snapshot in
+//     demo-data/results/ via src/services/augur-snapshot.ts. AUGUR_API_URL and
+//     AUGUR_API_KEY are never read in this mode. Both paths funnel through the
+//     same mapper functions below — there is exactly one snake_case → camelCase
+//     mapping path, not two.
 //
 // Functions read process.env at call time (not at module load time) so that
 // `next build` does not fail when secrets are absent from the build environment.
 
 import "server-only";
 
+import { isDemoMode } from "@/lib/demo-mode";
+import { AugurApiError } from "@/services/augur-errors";
+import {
+  getSnapshotResult,
+  listSnapshotResults,
+} from "@/services/augur-snapshot";
+import type {
+  RawI18nString,
+  RawLabels,
+  RawSliceGroupResult,
+  RawSliceResult,
+  RawStatFamilyMeta,
+  RawStatResultRow,
+  RawStatRunResult,
+  RawTimeframeMeta,
+  RawTimeframeResult,
+} from "@/services/augur-wire";
 import type {
   HealthStatus,
   I18nString,
@@ -21,22 +46,12 @@ import type {
   TimeframeResult,
 } from "@/types/stats";
 
+// Re-exported so existing `import { AugurApiError } from "@/services/augur"`
+// call sites keep working unchanged.
+export { AugurApiError } from "@/services/augur-errors";
+
 // How long ISR caches stats data (seconds). Tune here if freshness needs change.
 const STATS_REVALIDATE = 300; // 5 minutes
-
-// ---------------------------------------------------------------------------
-// Typed error
-// ---------------------------------------------------------------------------
-
-export class AugurApiError extends Error {
-  constructor(
-    message: string,
-    public readonly status?: number,
-  ) {
-    super(message);
-    this.name = "AugurApiError";
-  }
-}
 
 // ---------------------------------------------------------------------------
 // Environment helpers
@@ -59,76 +74,10 @@ function getApiKey(): string {
 }
 
 // ---------------------------------------------------------------------------
-// Raw wire types (snake_case, as received from the API)
-// ---------------------------------------------------------------------------
-
-interface RawI18nString {
-  en: string;
-  fr: string;
-}
-
-interface RawTimeframeMeta {
-  instrument: string;
-  timeframe: string;
-  data_range: string[];
-  total_samples: number;
-}
-
-interface RawStatFamilyMeta {
-  family: string;
-  title: RawI18nString;
-  definition: RawI18nString;
-  timeframes: RawTimeframeMeta[];
-}
-
-interface RawStatResultRow {
-  condition: string;
-  outcome: string;
-  count: number;
-  total: number;
-  probability: number;
-  baseline_prob: number;
-  baseline_n: number;
-  value?: number | null;
-  value_baseline?: number | null;
-}
-
-interface RawSliceGroupResult {
-  label: RawI18nString;
-  total_samples: number;
-  results: RawStatResultRow[];
-}
-
-interface RawSliceResult {
-  dimension: string;
-  groups: Record<string, RawSliceGroupResult>;
-}
-
-interface RawTimeframeResult {
-  data_range: string[];
-  total_samples: number;
-  results: RawStatResultRow[];
-  slices?: Record<string, RawSliceResult>;
-}
-
-interface RawLabels {
-  conditions: Record<string, RawI18nString>;
-  outcomes: Record<string, RawI18nString>;
-  dimensions?: Record<string, RawI18nString>;
-}
-
-interface RawStatRunResult {
-  stat_name: string;
-  title: RawI18nString;
-  definition: RawI18nString;
-  labels: RawLabels;
-  instruments: Record<string, Record<string, RawTimeframeResult>>;
-}
-
-// ---------------------------------------------------------------------------
 // Mapper functions (explicit, typed — no blanket deep-camelCaser)
 // Dynamic map keys (instrument codes, timeframe codes, condition/outcome/dimension
-// codes, slice/group keys) are passed through verbatim.
+// codes, slice/group keys) are passed through verbatim. Shared by both the live
+// API path and the demo snapshot path below — there is no second mapping path.
 // ---------------------------------------------------------------------------
 
 function mapI18nString(raw: RawI18nString): I18nString {
@@ -233,8 +182,44 @@ function mapStatRunResult(raw: RawStatRunResult): StatRunResult {
   };
 }
 
+// Demo-mode only: builds a StatFamilyMeta straight from a snapshot file's
+// parsed RawStatRunResult. The snapshot has no equivalent of the live API's
+// dedicated /api/v1/stats catalog endpoint (RawStatFamilyMeta), so this
+// flattens instrument → timeframe into the same flat `timeframes` array,
+// reusing mapI18nString and mapTimeframeMeta above for every field — the only
+// new logic is the flattening loop itself, not a second field-mapping path.
+//
+// `family` is passed in explicitly (the file stem, from the snapshot
+// directory listing) rather than read from `raw.stat_name`: the backend's
+// StatsLoader.list_families() keys families by file stem, and the file
+// content should not be trusted to agree with its own file name.
+function mapRunResultToFamilyMeta(
+  raw: RawStatRunResult,
+  family: string,
+): StatFamilyMeta {
+  const timeframes: TimeframeMeta[] = [];
+  for (const [instrument, byTimeframe] of Object.entries(raw.instruments)) {
+    for (const [timeframe, result] of Object.entries(byTimeframe)) {
+      timeframes.push(
+        mapTimeframeMeta({
+          instrument,
+          timeframe,
+          data_range: result.data_range,
+          total_samples: result.total_samples,
+        }),
+      );
+    }
+  }
+  return {
+    family,
+    title: mapI18nString(raw.title),
+    definition: mapI18nString(raw.definition),
+    timeframes,
+  };
+}
+
 // ---------------------------------------------------------------------------
-// Fetch helper
+// Fetch helper (live API only)
 // ---------------------------------------------------------------------------
 
 interface ApiEnvelope<T> {
@@ -285,11 +270,23 @@ async function fetchAugur<T>(
 // ---------------------------------------------------------------------------
 
 export async function getHealth(): Promise<HealthStatus> {
+  // Demo mode has no backend to check — report healthy. Callers must hide any
+  // "live API status" display in demo mode rather than surface this value.
+  if (isDemoMode()) {
+    return { status: "ok" };
+  }
   // Public endpoint — no API key. Never cached, so it reflects live status.
   return fetchAugur<HealthStatus>("/health", { cache: "no-store" });
 }
 
 export async function getStatCatalog(): Promise<StatFamilyMeta[]> {
+  if (isDemoMode()) {
+    const results = await listSnapshotResults(); // already sorted by family
+    return results.map(({ family, result }) =>
+      mapRunResultToFamilyMeta(result, family),
+    );
+  }
+
   const apiKey = getApiKey();
   const raw = await fetchAugur<RawStatFamilyMeta[]>("/api/v1/stats", {
     headers: { "X-API-Key": apiKey },
@@ -299,6 +296,11 @@ export async function getStatCatalog(): Promise<StatFamilyMeta[]> {
 }
 
 export async function getStatDetail(statId: string): Promise<StatRunResult> {
+  if (isDemoMode()) {
+    const raw = await getSnapshotResult(statId);
+    return mapStatRunResult(raw);
+  }
+
   const apiKey = getApiKey();
   const raw = await fetchAugur<RawStatRunResult>(
     `/api/v1/stats/${encodeURIComponent(statId)}`,
@@ -321,8 +323,37 @@ export async function getStatTimeframe(
   timeframe: string,
   options?: { start?: string; end?: string },
 ): Promise<TimeframeResult> {
-  const apiKey = getApiKey();
   const { start, end } = options ?? {};
+
+  if (isDemoMode()) {
+    // The snapshot has aggregates only (no per-session samples), so a period
+    // label over full-history numbers would be misleading — refuse instead.
+    if (start || end) {
+      throw new AugurApiError(
+        "Date filtering is not available in demo mode",
+        400,
+      );
+    }
+    const raw = await getSnapshotResult(statId);
+    // `instrument` and `timeframe` are untrusted (URL / server-action input).
+    // raw.instruments is a plain object parsed from JSON, so an object-level
+    // lookup with a key like "constructor" or "__proto__" would silently
+    // resolve to an inherited property instead of undefined — check ownership
+    // explicitly at both levels instead of indexing directly.
+    if (
+      !Object.hasOwn(raw.instruments, instrument) ||
+      !Object.hasOwn(raw.instruments[instrument], timeframe)
+    ) {
+      throw new AugurApiError(
+        `Unknown instrument/timeframe: ${instrument}/${timeframe}`,
+        404,
+      );
+    }
+    const timeframeResult = raw.instruments[instrument][timeframe];
+    return mapTimeframeResult(timeframeResult);
+  }
+
+  const apiKey = getApiKey();
 
   let endpoint = `/api/v1/stats/${encodeURIComponent(statId)}/${encodeURIComponent(instrument)}/${encodeURIComponent(timeframe)}`;
   const dateFiltered = Boolean(start && end);

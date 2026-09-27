@@ -32,6 +32,31 @@ The Next.js server calls the Augur API with a **service-level API key** stored
 in `AUGUR_API_KEY` env var. This key is NEVER exposed to the browser. Stats data
 flows: server component → Augur API → filter by user tier → render.
 
+### Demo Mode
+`NEXT_PUBLIC_DEMO_MODE` (`src/lib/demo-mode.ts`, `isDemoMode()`) switches the
+whole app into a free public demo with no backend and no database. It is a
+build-time flag (`NEXT_PUBLIC_`-prefixed, inlined at build time) — changing it
+requires a rebuild, not just a restart.
+
+`src/services/augur.ts` has **two data sources**, selected per-call by
+`isDemoMode()`, both funneled through the same snake_case → camelCase mappers
+(there is exactly one mapping path, not two):
+- **Live mode** (default): calls the live Augur API with `AUGUR_API_URL` /
+  `AUGUR_API_KEY`, as described above.
+- **Demo mode**: reads the bundled snapshot in `demo-data/results/*.json` via
+  the server-only `src/services/augur-snapshot.ts` module. `AUGUR_API_URL` and
+  `AUGUR_API_KEY` are never read in this mode. The snapshot has aggregates
+  only (no per-session samples), so date-range filtering is unavailable and
+  throws `AugurApiError` (400) instead of silently ignoring the range.
+  Refresh the snapshot with `scripts/sync-demo-snapshot.sh` — see
+  `README.md § Demo mode`.
+
+In demo mode, no code path creates a Supabase or Stripe client (enforced both
+by routing — `src/lib/supabase/middleware.ts` skips Supabase and opens
+`/dashboard`/`/stats` — and, defensively, inside the client factories
+themselves in `src/lib/supabase/*.ts` and `src/lib/stripe.ts`), and
+`getCurrentUserTier()` returns the highest tier so every stat is unlocked.
+
 ### Subscription Tiers
 | Plan       | Stats Access   | Stripe Product |
 |------------|----------------|----------------|

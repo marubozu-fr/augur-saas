@@ -5,7 +5,12 @@ import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { createStripeClient } from "@/lib/stripe";
 import { getActiveSubscription } from "@/lib/subscription.server";
+import { isDemoMode } from "@/lib/demo-mode";
 import type { Locale } from "@/i18n/config";
+
+// Every one of these actions is bound to /account, which the demo-mode
+// middleware redirects to /dashboard — so they are not reachable through the
+// UI. Guarded anyway (no Supabase/Stripe client may ever be created in demo mode).
 
 // ---------------------------------------------------------------------------
 // Billing portal — Stripe Customer Portal redirect.
@@ -15,6 +20,8 @@ import type { Locale } from "@/i18n/config";
 // ---------------------------------------------------------------------------
 
 export async function redirectToBillingPortal(): Promise<void> {
+  if (isDemoMode()) redirect("/dashboard");
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -60,6 +67,8 @@ export async function redirectToBillingPortal(): Promise<void> {
 export async function changeEmail(
   formData: FormData,
 ): Promise<{ error: string | null }> {
+  if (isDemoMode()) return { error: "Not available in demo mode." };
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -92,6 +101,8 @@ export async function changeEmail(
 export async function changePassword(
   formData: FormData,
 ): Promise<{ error: string | null }> {
+  if (isDemoMode()) return { error: "Not available in demo mode." };
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -134,6 +145,8 @@ const ONE_YEAR_SECONDS = 60 * 60 * 24 * 365;
 export async function updateLocalePreference(
   locale: Locale | null,
 ): Promise<{ error: string | null }> {
+  if (isDemoMode()) return { error: "Not available in demo mode." };
+
   const supabase = await createClient();
   const {
     data: { user },

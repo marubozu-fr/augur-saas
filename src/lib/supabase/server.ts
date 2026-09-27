@@ -1,7 +1,18 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { isDemoMode } from "@/lib/demo-mode";
 
 export async function createClient(rememberSession: boolean = true) {
+  // Defense in depth: demo mode never has Supabase env vars configured, and no
+  // call site should reach this in demo mode (see the isDemoMode() guards in
+  // proxy/middleware, dashboard layout, actions, etc.) — fail loudly rather
+  // than silently constructing a broken client if one is missed.
+  if (isDemoMode()) {
+    throw new Error(
+      "Supabase is disabled in demo mode (NEXT_PUBLIC_DEMO_MODE=true)",
+    );
+  }
+
   const cookieStore = await cookies();
 
   return createServerClient(

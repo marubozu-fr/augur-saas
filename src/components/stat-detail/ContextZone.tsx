@@ -45,6 +45,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { isIsoDate } from "@/lib/stat-context";
+import { isDemoMode } from "@/lib/demo-mode";
 import type { PeriodPreset } from "@/lib/period";
 import type { StatFamilyMeta } from "@/types/stats";
 
@@ -226,129 +227,132 @@ export function ContextZone({
         </div>
       </div>
 
-      {/* Row 2 — period */}
-      <div className="flex flex-col md:flex-row md:items-center gap-3 pt-4 border-t border-border">
-        <span
-          id="lbl-period"
-          className="text-xs font-semibold tracking-wider uppercase text-subtle"
-        >
-          {t("period")}
-        </span>
-        <div className="flex items-center gap-3 flex-nowrap md:flex-wrap overflow-x-auto md:overflow-visible pb-1 md:pb-0">
-          <ToggleGroup
-            type="single"
-            value={!isCustomRange && period === "all" ? "all" : ""}
-            onValueChange={(value) => value && onPeriodChange("all")}
-            aria-label={t("fullHistory")}
-            className="p-[3px] gap-[2px] rounded-md border border-border bg-card shrink-0"
+      {/* Row 2 — period. Hidden in demo mode: the snapshot has aggregates only
+          (no per-session samples), so period filtering is unavailable. */}
+      {!isDemoMode() && (
+        <div className="flex flex-col md:flex-row md:items-center gap-3 pt-4 border-t border-border">
+          <span
+            id="lbl-period"
+            className="text-xs font-semibold tracking-wider uppercase text-subtle"
           >
-            <ToggleGroupItem value="all" className={TOGGLE_ITEM_CLASS}>
-              {t("all")}
-            </ToggleGroupItem>
-          </ToggleGroup>
-
-          <span className="w-px h-5 bg-border shrink-0" aria-hidden="true" />
-
-          <ToggleGroup
-            type="single"
-            value={!isCustomRange ? period : ""}
-            onValueChange={(value) =>
-              value && onPeriodChange(value as PeriodPreset)
-            }
-            aria-label={t("lookBackPeriod")}
-            className="p-[3px] gap-[2px] rounded-md border border-border bg-card shrink-0"
-          >
-            {PERIOD_PRESET_ITEMS.map((item) => (
-              <ToggleGroupItem
-                key={item.value}
-                value={item.value}
-                className={TOGGLE_ITEM_CLASS}
-              >
-                {item.label}
+            {t("period")}
+          </span>
+          <div className="flex items-center gap-3 flex-nowrap md:flex-wrap overflow-x-auto md:overflow-visible pb-1 md:pb-0">
+            <ToggleGroup
+              type="single"
+              value={!isCustomRange && period === "all" ? "all" : ""}
+              onValueChange={(value) => value && onPeriodChange("all")}
+              aria-label={t("fullHistory")}
+              className="p-[3px] gap-[2px] rounded-md border border-border bg-card shrink-0"
+            >
+              <ToggleGroupItem value="all" className={TOGGLE_ITEM_CLASS}>
+                {t("all")}
               </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
+            </ToggleGroup>
 
-          <span className="w-px h-5 bg-border shrink-0" aria-hidden="true" />
+            <span className="w-px h-5 bg-border shrink-0" aria-hidden="true" />
 
-          <Popover open={customOpen} onOpenChange={openCustom}>
-            <PopoverTrigger asChild>
-              <button
-                type="button"
-                aria-haspopup="dialog"
-                aria-expanded={customOpen}
-                className={[
-                  "inline-flex items-center gap-2 h-9 px-3 rounded-md border text-xs font-semibold shrink-0 transition-colors",
-                  isCustomRange
-                    ? "border-brand bg-brand-soft text-brand"
-                    : "border-border bg-card text-muted-foreground hover:text-foreground hover:border-border-strong",
-                ].join(" ")}
-              >
-                <CalendarIcon className="size-3.5" aria-hidden="true" />
-                {t("custom")}
-                <ChevronDownIcon className="size-3.5" aria-hidden="true" />
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80 p-4" align="end">
-              <div className="grid grid-cols-2 gap-3 mb-4">
-                <label className="flex flex-col gap-2">
-                  <span className="text-xs font-semibold text-subtle">
-                    {t("startDate")}
-                  </span>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    placeholder="YYYY-MM-DD"
-                    value={startInput}
-                    onChange={(e) => setStartInput(e.target.value)}
-                    className="h-9 px-3 rounded-md border border-border bg-background text-foreground font-mono text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:border-brand"
-                  />
-                </label>
-                <label className="flex flex-col gap-2">
-                  <span className="text-xs font-semibold text-subtle">
-                    {t("endDate")}
-                  </span>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    placeholder="YYYY-MM-DD"
-                    value={endInput}
-                    onChange={(e) => setEndInput(e.target.value)}
-                    className="h-9 px-3 rounded-md border border-border bg-background text-foreground font-mono text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:border-brand"
-                  />
-                </label>
-              </div>
-
-              <Calendar
-                mode="range"
-                selected={pendingRange}
-                onSelect={handleCalendarSelect}
-                numberOfMonths={1}
-                defaultMonth={pendingRange?.from}
-              />
-
-              <div className="flex justify-end gap-2 mt-4 pt-3 border-t border-border">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setCustomOpen(false)}
+            <ToggleGroup
+              type="single"
+              value={!isCustomRange ? period : ""}
+              onValueChange={(value) =>
+                value && onPeriodChange(value as PeriodPreset)
+              }
+              aria-label={t("lookBackPeriod")}
+              className="p-[3px] gap-[2px] rounded-md border border-border bg-card shrink-0"
+            >
+              {PERIOD_PRESET_ITEMS.map((item) => (
+                <ToggleGroupItem
+                  key={item.value}
+                  value={item.value}
+                  className={TOGGLE_ITEM_CLASS}
                 >
-                  {t("cancel")}
-                </Button>
-                <Button
+                  {item.label}
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+
+            <span className="w-px h-5 bg-border shrink-0" aria-hidden="true" />
+
+            <Popover open={customOpen} onOpenChange={openCustom}>
+              <PopoverTrigger asChild>
+                <button
                   type="button"
-                  size="sm"
-                  disabled={!isIsoDate(startInput) || !isIsoDate(endInput)}
-                  onClick={handleApply}
+                  aria-haspopup="dialog"
+                  aria-expanded={customOpen}
+                  className={[
+                    "inline-flex items-center gap-2 h-9 px-3 rounded-md border text-xs font-semibold shrink-0 transition-colors",
+                    isCustomRange
+                      ? "border-brand bg-brand-soft text-brand"
+                      : "border-border bg-card text-muted-foreground hover:text-foreground hover:border-border-strong",
+                  ].join(" ")}
                 >
-                  {t("applyRange")}
-                </Button>
-              </div>
-            </PopoverContent>
-          </Popover>
+                  <CalendarIcon className="size-3.5" aria-hidden="true" />
+                  {t("custom")}
+                  <ChevronDownIcon className="size-3.5" aria-hidden="true" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-4" align="end">
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <label className="flex flex-col gap-2">
+                    <span className="text-xs font-semibold text-subtle">
+                      {t("startDate")}
+                    </span>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      placeholder="YYYY-MM-DD"
+                      value={startInput}
+                      onChange={(e) => setStartInput(e.target.value)}
+                      className="h-9 px-3 rounded-md border border-border bg-background text-foreground font-mono text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:border-brand"
+                    />
+                  </label>
+                  <label className="flex flex-col gap-2">
+                    <span className="text-xs font-semibold text-subtle">
+                      {t("endDate")}
+                    </span>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      placeholder="YYYY-MM-DD"
+                      value={endInput}
+                      onChange={(e) => setEndInput(e.target.value)}
+                      className="h-9 px-3 rounded-md border border-border bg-background text-foreground font-mono text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:border-brand"
+                    />
+                  </label>
+                </div>
+
+                <Calendar
+                  mode="range"
+                  selected={pendingRange}
+                  onSelect={handleCalendarSelect}
+                  numberOfMonths={1}
+                  defaultMonth={pendingRange?.from}
+                />
+
+                <div className="flex justify-end gap-2 mt-4 pt-3 border-t border-border">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setCustomOpen(false)}
+                  >
+                    {t("cancel")}
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    disabled={!isIsoDate(startInput) || !isIsoDate(endInput)}
+                    onClick={handleApply}
+                  >
+                    {t("applyRange")}
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
-      </div>
+      )}
     </section>
   );
 }

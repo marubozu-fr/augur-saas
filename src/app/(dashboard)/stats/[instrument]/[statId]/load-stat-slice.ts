@@ -17,6 +17,7 @@ import {
   AugurApiError,
 } from "@/services/augur";
 import { getCurrentUserTier } from "@/lib/subscription.server";
+import { isDemoMode } from "@/lib/demo-mode";
 import { canAccessStat } from "@/lib/subscription";
 import { getStatTier } from "@/lib/stat-tiers";
 import { pickLocale } from "@/lib/i18n/pick";
@@ -68,11 +69,22 @@ export async function loadStatSlice({
   statId,
   instrument,
   timeframe,
-  period,
-  isCustomRange,
-  start,
-  end,
+  period: requestedPeriod,
+  isCustomRange: requestedIsCustomRange,
+  start: requestedStart,
+  end: requestedEnd,
 }: StatSliceInput): Promise<StatSliceResult> {
+  // The snapshot backing demo mode has aggregates only (no per-session
+  // samples), so period filtering is unavailable — ignore whatever the caller
+  // asked for and always load the full history. ContextZone hides the period
+  // presets/custom range controls in demo mode, but this is enforced here too
+  // regardless of what a caller passes in.
+  const demoMode = isDemoMode();
+  const period: PeriodPreset = demoMode ? "all" : requestedPeriod;
+  const isCustomRange = demoMode ? false : requestedIsCustomRange;
+  const start = demoMode ? null : requestedStart;
+  const end = demoMode ? null : requestedEnd;
+
   // -------------------------------------------------------------------------
   // Fetch strategy:
   //   • getStatDetail(statId) — the full family response (labels, title,

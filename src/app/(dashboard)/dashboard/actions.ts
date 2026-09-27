@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { normalizeInstrument } from "@/lib/instruments";
+import { isDemoMode } from "@/lib/demo-mode";
 
 // ---------------------------------------------------------------------------
 // Set default instrument — persists the user's preferred instrument to
@@ -11,6 +12,11 @@ import { normalizeInstrument } from "@/lib/instruments";
 // ---------------------------------------------------------------------------
 
 export async function setDefaultInstrument(formData: FormData): Promise<void> {
+  // No per-user preference in demo mode (no Supabase) — DashboardPage never
+  // renders the form that calls this action, but guard the action itself too
+  // (it stays reachable since /dashboard is not gated in demo mode).
+  if (isDemoMode()) return;
+
   const supabase = await createClient();
   const {
     data: { user },

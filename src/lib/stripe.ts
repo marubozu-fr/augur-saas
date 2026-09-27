@@ -10,8 +10,16 @@
 import "server-only";
 
 import Stripe from "stripe";
+import { isDemoMode } from "@/lib/demo-mode";
 
 export function createStripeClient(): Stripe {
+  // Defense in depth — see the equivalent guard in lib/supabase/server.ts.
+  if (isDemoMode()) {
+    throw new Error(
+      "Stripe is disabled in demo mode (NEXT_PUBLIC_DEMO_MODE=true)",
+    );
+  }
+
   const secretKey = process.env.STRIPE_SECRET_KEY;
   if (!secretKey) {
     throw new Error("STRIPE_SECRET_KEY is not configured");

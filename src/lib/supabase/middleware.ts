@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextRequest, NextResponse } from "next/server";
 import { NO_PERSIST_COOKIE } from "@/lib/constants";
 import { selectActiveSubscription } from "@/lib/subscription";
+import { isDemoMode } from "@/lib/demo-mode";
 import {
   defaultLocale,
   isLocale,
@@ -41,6 +42,27 @@ const KNOWN_APP_SEGMENTS = new Set([
 ]);
 
 const LOCALE_COOKIE = "NEXT_LOCALE";
+
+// Demo mode: full-SaaS routes that no longer make sense with no Supabase/Stripe
+// (sign-in, billing, auth callbacks, pricing) redirect to /dashboard instead.
+// Checked against the pathname with any locale prefix stripped, so locale-
+// prefixed forms (e.g. "/en/pricing") redirect too — see isDemoRedirectTarget.
+const DEMO_EXACT_REDIRECT_PATHS = new Set([
+  "/sign-in",
+  "/sign-up",
+  "/forgot-password",
+  "/pricing",
+]);
+const DEMO_PREFIX_REDIRECT_PATHS = ["/account", "/auth"];
+
+function isDemoRedirectTarget(pathname: string): boolean {
+  const { first, rest } = splitFirstSegment(pathname);
+  const candidate = first && isLocale(first) ? rest : pathname;
+  if (DEMO_EXACT_REDIRECT_PATHS.has(candidate)) return true;
+  return DEMO_PREFIX_REDIRECT_PATHS.some(
+    (prefix) => candidate === prefix || candidate.startsWith(`${prefix}/`),
+  );
+}
 
 // Redirects build a brand-new NextResponse, which does not carry the auth
 // cookies accumulated on `response` (e.g. a token refreshed by getUser()).
@@ -143,9 +165,43 @@ function nextWithLocale(request: NextRequest, locale: Locale): NextResponse {
   return NextResponse.next({ request: { headers: requestHeaders } });
 }
 
+// Demo mode: no Supabase client is ever created here, and no auth/subscription
+// gate runs on /dashboard or /stats. Locale handling is unchanged — it reuses
+// resolveLocaleRedirect/resolveLocale/nextWithLocale exactly as the live-mode
+// path below does.
+function updateSessionDemo(request: NextRequest): NextResponse {
+  const { pathname } = request.nextUrl;
+
+  // Every /api/* route requires Supabase/Stripe/Augur credentials that demo
+  // mode doesn't have — respond 404 rather than let the route handler run.
+  if (pathname === "/api" || pathname.startsWith("/api/")) {
+    return new NextResponse(null, { status: 404 });
+  }
+
+  if (isDemoRedirectTarget(pathname)) {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = "/dashboard";
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  // Same hybrid locale routing as live mode (marketing pages only).
+  const localeRedirectPathname = resolveLocaleRedirect(request);
+  if (localeRedirectPathname !== null) {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = localeRedirectPathname;
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  return nextWithLocale(request, resolveLocale(request));
+}
+
 export async function updateSession(
   request: NextRequest,
 ): Promise<NextResponse> {
+  if (isDemoMode()) {
+    return updateSessionDemo(request);
+  }
+
   const locale = resolveLocale(request);
   let response = nextWithLocale(request, locale);
 
