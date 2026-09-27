@@ -8,6 +8,23 @@
     "getStarted": "Commencer",
     "changeLanguage": "Changer de langue, actuelle : {language}"
   },
+  "demo": {
+    "banner": {
+      "text": "Démo — données figées au {date}. Ce projet n'est plus maintenu.",
+      "sourceCode": "Code source"
+    },
+    "nav": {
+      "openDemo": "Ouvrir la démo"
+    },
+    "footer": {
+      "openDemo": "Ouvrir la démo",
+      "projectHeading": "Projet",
+      "sourceCode": "Code source",
+      "statsEngine": "Moteur de statistiques",
+      "license": "Licence (MIT)",
+      "copyright": "© 2026 The Augur authors · Licence MIT"
+    }
+  },
   "landing": {
     "metaTitle": "Augur — Probabilités statistiques de marché pour traders de futures",
     "metaDescription": "Augur transforme 18 ans de données futures NQ et ES en probabilités conditionnelles claires. Chaque avantage est comparé à sa référence, avec la taille d'échantillon bien visible.",

@@ -57,6 +57,25 @@ by routing — `src/lib/supabase/middleware.ts` skips Supabase and opens
 themselves in `src/lib/supabase/*.ts` and `src/lib/stripe.ts`), and
 `getCurrentUserTier()` returns the highest tier so every stat is unlocked.
 
+`DemoBanner` (`src/components/DemoBanner.tsx`) is rendered by the root layout
+(`src/app/layout.tsx`) at the top of `<body>`, on every route, only when
+`isDemoMode()`. It states the data is frozen as of `getSnapshotDataEnd()`
+(`src/services/augur-snapshot.ts` — the latest `data_range` end across the
+whole snapshot, never hardcoded) and links to this repository. It stays in
+normal document flow (never `sticky`/`fixed`) so it never collides with the
+marketing header or the dashboard sidebar, both `sticky top-0`.
+
+The marketing header/footer (`src/app/[locale]/(marketing)/layout.tsx`) drop
+every link to a page that doesn't exist in demo mode — "Pricing", "Sign in",
+and the footer's Company/Legal columns (all `href="#"` placeholders) — in
+favor of an "Open the demo" CTA to `/dashboard` and a single "Project" footer
+column (source code, stats engine, license).
+
+`/dashboard` in demo mode redirects to `pickPrimaryInstrument()`
+(`src/lib/stat-context.ts`) — the instrument covering the most stat families
+in the catalog, ties broken alphabetically — instead of the alphabetically
+first instrument, since not every instrument covers every family.
+
 ### Subscription Tiers
 | Plan       | Stats Access   | Stripe Product |
 |------------|----------------|----------------|

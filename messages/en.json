@@ -8,6 +8,23 @@
     "getStarted": "Get started",
     "changeLanguage": "Change language, current: {language}"
   },
+  "demo": {
+    "banner": {
+      "text": "Demo — data frozen as of {date}. This project is no longer maintained.",
+      "sourceCode": "Source code"
+    },
+    "nav": {
+      "openDemo": "Open the demo"
+    },
+    "footer": {
+      "openDemo": "Open the demo",
+      "projectHeading": "Project",
+      "sourceCode": "Source code",
+      "statsEngine": "Stats engine",
+      "license": "License (MIT)",
+      "copyright": "© 2026 The Augur authors · MIT License"
+    }
+  },
   "landing": {
     "metaTitle": "Augur — Statistical Market Probabilities for Futures Traders",
     "metaDescription": "Augur turns 18 years of NQ and ES futures data into clean, conditional probabilities. Every edge is shown against its baseline, with the sample size in plain sight.",

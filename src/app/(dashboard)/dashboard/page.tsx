@@ -12,7 +12,10 @@ import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { normalizeInstrument } from "@/lib/instruments";
 import { getStatCatalog, AugurApiError } from "@/services/augur";
-import { getGlobalInstruments } from "@/lib/stat-context";
+import {
+  getGlobalInstruments,
+  pickPrimaryInstrument,
+} from "@/lib/stat-context";
 import { isDemoMode } from "@/lib/demo-mode";
 import { setDefaultInstrument } from "./actions";
 
@@ -52,11 +55,13 @@ export default async function DashboardPage() {
   // list. Demo mode goes through the exact same fetch + error handling: the
   // only difference is what happens afterwards (see below).
   let instruments: string[];
+  let primaryInstrument = "";
   let catalogError: string | null = null;
 
   try {
     const families = await getStatCatalog();
     instruments = getGlobalInstruments(families);
+    primaryInstrument = pickPrimaryInstrument(families);
   } catch (err) {
     const message =
       err instanceof AugurApiError ? err.message : t("loadFailed");
@@ -65,11 +70,13 @@ export default async function DashboardPage() {
   }
 
   // Demo mode has no per-user preference to set, so it skips the selector
-  // grid entirely and always goes straight to the first available
-  // instrument. A catalog failure or an empty catalog falls through to the
-  // same rendering as live mode below, instead of a silently degraded state.
-  if (isDemoMode() && !catalogError && instruments.length > 0) {
-    redirect("/dashboard/" + instruments[0].toLowerCase());
+  // grid entirely and always goes straight to the instrument that covers the
+  // most stat families (see pickPrimaryInstrument) — not just the
+  // alphabetically first one. A catalog failure or an empty catalog falls
+  // through to the same rendering as live mode below, instead of a silently
+  // degraded state.
+  if (isDemoMode() && !catalogError && primaryInstrument) {
+    redirect("/dashboard/" + primaryInstrument.toLowerCase());
   }
 
   return (

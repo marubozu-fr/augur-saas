@@ -55,6 +55,22 @@ scripts/sync-demo-snapshot.sh [ref]   # ref defaults to "main"
 (the period presets and custom date range on the stat detail page) is
 unavailable in demo mode — every stat always shows its full history.
 
+**Site chrome.** A `DemoBanner` (`src/components/DemoBanner.tsx`) is rendered
+on every page, stating the data is frozen as of the latest `data_range` end
+date across the snapshot (`getSnapshotDataEnd()` in
+`src/services/augur-snapshot.ts`) and linking to this repository. The
+marketing header and footer (`src/app/[locale]/(marketing)/layout.tsx`) drop
+"Pricing"/"Sign in" and every link to a page that doesn't exist in demo mode
+(billing, about, terms…), replacing them with an "Open the demo" CTA and a
+"Project" footer column linking to this repo, the
+[stats engine repo](https://github.com/marubozu-fr/augur) and the license.
+
+**Primary instrument.** `/dashboard` redirects to the instrument covering the
+most stat families in the snapshot (`pickPrimaryInstrument()` in
+`src/lib/stat-context.ts`, ties broken alphabetically) instead of the
+alphabetically first one — NQ has full family coverage, ES is missing the
+initial-balance variants.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).

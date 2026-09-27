@@ -57,6 +57,36 @@ export function getGlobalInstruments(catalog: StatFamilyMeta[]): string[] {
 }
 
 /**
+ * Picks the instrument that best serves as a single entry point into the
+ * catalog: the one present in the most stat families, ties broken
+ * alphabetically. No hardcoded instrument — used by the demo-mode
+ * `/dashboard` redirect (src/app/(dashboard)/dashboard/page.tsx), where a
+ * single instrument is chosen up front instead of asking the visitor.
+ */
+export function pickPrimaryInstrument(catalog: StatFamilyMeta[]): string {
+  const familyCounts = new Map<string, number>();
+  for (const family of catalog) {
+    const instruments = new Set(family.timeframes.map((tf) => tf.instrument));
+    for (const instrument of instruments) {
+      familyCounts.set(instrument, (familyCounts.get(instrument) ?? 0) + 1);
+    }
+  }
+
+  let best: string | null = null;
+  let bestCount = -1;
+  for (const [instrument, count] of familyCounts) {
+    if (
+      count > bestCount ||
+      (count === bestCount && best !== null && instrument < best)
+    ) {
+      best = instrument;
+      bestCount = count;
+    }
+  }
+  return best ?? "";
+}
+
+/**
  * Timeframe codes available for a given family + instrument, in the API's
  * semantic order (smallest to largest). We deliberately do NOT sort: a
  * lexicographic sort would break the order (e.g. "1h" < "30min").
