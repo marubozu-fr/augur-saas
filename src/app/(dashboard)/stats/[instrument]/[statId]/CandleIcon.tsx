@@ -3,19 +3,21 @@
 // docs/mockups/stat-visual-display.html (the single-candle specimen).
 
 import type { IconColor } from "./stat-icon-map";
+import type { Translator } from "@/lib/stat-format";
 
 interface CandleIconProps {
   color: IconColor;
-  timeframe: string;
+  label: string;
+  fullLabel: string;
+  t: Translator;
 }
 
-export function CandleIcon({ color, timeframe }: CandleIconProps) {
+export function CandleIcon({ color, label, fullLabel, t }: CandleIconProps) {
   const strokeClass = color === "up" ? "stroke-up" : "stroke-down";
   const fillClass = color === "up" ? "fill-up" : "fill-down";
-  const label =
-    color === "up"
-      ? `Single green (bullish) candlestick, ${timeframe} timeframe`
-      : `Single red (bearish) candlestick, ${timeframe} timeframe`;
+  const ariaLabel = t(color === "up" ? "iconCandleUp" : "iconCandleDown", {
+    timeframe: fullLabel,
+  });
 
   return (
     <svg
@@ -24,7 +26,7 @@ export function CandleIcon({ color, timeframe }: CandleIconProps) {
       height={108}
       viewBox="0 0 64 72"
       role="img"
-      aria-label={label}
+      aria-label={ariaLabel}
     >
       <line
         className={strokeClass}
@@ -52,7 +54,7 @@ export function CandleIcon({ color, timeframe }: CandleIconProps) {
         textAnchor="middle"
         dominantBaseline="middle"
       >
-        {timeframe}
+        {label}
       </text>
     </svg>
   );

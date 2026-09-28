@@ -3,6 +3,7 @@ import { BarChart3, ArrowRight, Lock } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { getActiveLocale } from "@/lib/i18n/get-locale";
 import { pickLocale } from "@/lib/i18n/pick";
+import { fmtNum, formatTimeframeLabel } from "@/lib/stat-format";
 import type { StatFamilyMeta, TimeframeMeta } from "@/types/stats";
 
 interface StatCardProps {
@@ -24,11 +25,14 @@ export async function StatCard({
   // timeframes is guaranteed non-empty (StatCatalog skips families with no
   // matching timeframe), so [0] is safe for the shared instrument code.
   const instrument = timeframes[0].instrument;
-  const timeframeLabel = timeframes.map((tf) => tf.timeframe).join(" · ");
   const totalSamples = timeframes.reduce((sum, tf) => sum + tf.totalSamples, 0);
-  const n = totalSamples.toLocaleString("en-US");
   const locale = await getActiveLocale();
   const t = await getTranslations("dashboard.statCard");
+  const tTimeframes = await getTranslations("timeframes");
+  const timeframeLabel = timeframes
+    .map((tf) => formatTimeframeLabel(tf.timeframe, tTimeframes))
+    .join(" · ");
+  const n = fmtNum(totalSamples, locale);
 
   return (
     // The whole card is the click target — a single destination (stat detail for

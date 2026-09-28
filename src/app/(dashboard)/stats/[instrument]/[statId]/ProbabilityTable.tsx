@@ -10,6 +10,7 @@ import type { StatResultRow } from "@/types/stats";
 import type { LabelResolver } from "@/lib/stat-format";
 import { computeEdge, edgeDirection, fmtPct, fmtNum } from "@/lib/stat-format";
 import { EdgePill } from "@/components/stat-detail/EdgePill";
+import type { Locale } from "@/i18n/config";
 
 export interface TableRow {
   row: StatResultRow;
@@ -20,6 +21,7 @@ export interface TableRow {
 interface ProbabilityTableProps {
   rows: TableRow[];
   resolver: LabelResolver;
+  locale: Locale;
   /** Background class for the thead cells — slices use bg-background, main uses bg-muted. */
   headBg?: string;
 }
@@ -27,6 +29,7 @@ interface ProbabilityTableProps {
 export function ProbabilityTable({
   rows,
   resolver,
+  locale,
   headBg = "bg-muted",
 }: ProbabilityTableProps) {
   const t = useTranslations("statDetail");
@@ -98,16 +101,16 @@ export function ProbabilityTable({
                     probClass,
                   ].join(" ")}
                 >
-                  {fmtPct(row.probability)}
+                  {fmtPct(row.probability, locale)}
                 </td>
                 <td className="px-4 py-3 text-right font-mono tabular-nums text-subtle">
-                  {fmtPct(row.baselineProb)}
+                  {fmtPct(row.baselineProb, locale)}
                 </td>
                 <td className="px-4 py-3 text-right font-mono tabular-nums text-muted-foreground">
-                  {fmtNum(row.total)}
+                  {fmtNum(row.total, locale)}
                 </td>
                 <td className="px-4 py-3 text-right">
-                  <EdgePill row={row} />
+                  <EdgePill row={row} locale={locale} />
                 </td>
               </tr>
             );

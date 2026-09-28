@@ -6,7 +6,7 @@
 
 import { AlertTriangle } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { makeLabelResolver } from "@/lib/stat-format";
+import { formatTimeframeLabel, makeLabelResolver } from "@/lib/stat-format";
 import { LockedState } from "./LockedState";
 import { MagnitudeCards } from "./MagnitudeCards";
 import { ProbabilityTable } from "./ProbabilityTable";
@@ -24,6 +24,7 @@ interface StatDetailContentProps {
 
 export function StatDetailContent({ result, locale }: StatDetailContentProps) {
   const t = useTranslations("statDetail");
+  const tTimeframes = useTranslations("timeframes");
 
   switch (result.kind) {
     case "locked":
@@ -105,6 +106,19 @@ export function StatDetailContent({ result, locale }: StatDetailContentProps) {
         conditionGroups.length > 0 &&
         conditionGroups.every(([, rows]) => rows.length === 2);
 
+      // Resolved once — reused by the "continuation" caption below and by
+      // every ConditionCard/glyph in the grid (all share the same timeframe).
+      const timeframeLabel = formatTimeframeLabel(timeframe, tTimeframes);
+      // Compact form (e.g. "1D") for the bespoke glyph's fixed-size body —
+      // only ConditionCard/renderStatIcon use this one, never the caption.
+      const timeframeLabelCompact = formatTimeframeLabel(
+        timeframe,
+        tTimeframes,
+        {
+          compact: true,
+        },
+      );
+
       return (
         <>
           {/* Metadata strip — period-aware: dataRange/totalSamples come from the
@@ -118,6 +132,7 @@ export function StatDetailContent({ result, locale }: StatDetailContentProps) {
               totalSamples={totalSamples}
               isCustomRange={isCustomRange}
               period={period}
+              locale={locale}
             />
           )}
 
@@ -127,10 +142,14 @@ export function StatDetailContent({ result, locale }: StatDetailContentProps) {
               <h2 className="flex items-center gap-3 text-lg font-bold tracking-tight text-foreground mt-6 mb-4">
                 {t("summarisedMagnitudes")}
                 <span className="text-xs font-medium text-subtle ml-auto">
-                  {t("continuation")} · {instrument} {timeframe}
+                  {t("continuation")} · {instrument} {timeframeLabel}
                 </span>
               </h2>
-              <MagnitudeCards rows={magnitudeRows} resolver={resolver} />
+              <MagnitudeCards
+                rows={magnitudeRows}
+                resolver={resolver}
+                locale={locale}
+              />
             </>
           )}
 
@@ -150,7 +169,10 @@ export function StatDetailContent({ result, locale }: StatDetailContentProps) {
                       rows={rows}
                       resolver={resolver}
                       statName={statName}
-                      timeframe={timeframe}
+                      timeframeLabel={timeframeLabel}
+                      timeframeLabelCompact={timeframeLabelCompact}
+                      locale={locale}
+                      t={t}
                     />
                   ))}
                 </div>
@@ -159,6 +181,7 @@ export function StatDetailContent({ result, locale }: StatDetailContentProps) {
                   <ProbabilityTable
                     rows={probRows.map((row) => ({ row }))}
                     resolver={resolver}
+                    locale={locale}
                   />
                 </div>
               )}
@@ -202,12 +225,14 @@ export function StatDetailContent({ result, locale }: StatDetailContentProps) {
                       totalSamples={totalSamples}
                       isCustomRange={isCustomRange}
                       period={period}
+                      locale={locale}
                     />
 
                     <div className="border border-border rounded-xl bg-card overflow-x-auto">
                       <ProbabilityTable
                         rows={probRows.map((row) => ({ row }))}
                         resolver={resolver}
+                        locale={locale}
                       />
                     </div>
                   </div>

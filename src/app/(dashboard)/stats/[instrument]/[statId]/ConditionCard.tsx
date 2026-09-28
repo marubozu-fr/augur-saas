@@ -7,12 +7,17 @@
 // with the unrelated dashboard StatCard.tsx.
 
 import type { StatResultRow } from "@/types/stats";
-import type { EdgeDirection, LabelResolver } from "@/lib/stat-format";
+import type {
+  EdgeDirection,
+  LabelResolver,
+  Translator,
+} from "@/lib/stat-format";
 import { computeEdge, edgeDirection, fmtEdgePts } from "@/lib/stat-format";
 import { DivergingBars } from "./DivergingBars";
 import { DefaultStatCard } from "./DefaultStatCard";
 import { renderStatIcon } from "./stat-icon-map";
 import type { IconColor } from "./stat-icon-map";
+import type { Locale } from "@/i18n/config";
 
 interface ConditionCardProps {
   conditionCode: string;
@@ -20,7 +25,13 @@ interface ConditionCardProps {
   rows: StatResultRow[];
   resolver: LabelResolver;
   statName: string;
-  timeframe: string;
+  /** Full timeframe label, already resolved via formatTimeframeLabel in StatDetailContent. */
+  timeframeLabel: string;
+  /** Compact glyph-friendly timeframe notation (e.g. "1D"), via formatTimeframeLabel(..., { compact: true }) in StatDetailContent — only used inside the bespoke glyph's fixed-size body. */
+  timeframeLabelCompact: string;
+  locale: Locale;
+  /** "statDetail" namespace translator — threaded down to the glyph/DivergingBars/DefaultStatCard aria-labels, which stay hook-free. */
+  t: Translator;
 }
 
 export function ConditionCard({
@@ -28,7 +39,10 @@ export function ConditionCard({
   rows,
   resolver,
   statName,
-  timeframe,
+  timeframeLabel,
+  timeframeLabelCompact,
+  locale,
+  t,
 }: ConditionCardProps) {
   const [rowA, rowB] = rows;
 
@@ -96,7 +110,12 @@ export function ConditionCard({
   const iconColor: IconColor =
     conditionIdentity ??
     (edgeDirection(computeEdge(rowA)) === "down" ? "down" : "up");
-  const icon = renderStatIcon(statName, { color: iconColor, timeframe });
+  const icon = renderStatIcon(statName, {
+    color: iconColor,
+    label: timeframeLabelCompact,
+    fullLabel: timeframeLabel,
+    t,
+  });
 
   // Title-badge direction — mirror the condition identity so a red opening
   // candle reads red even though its dominant (above-baseline) outcome has a
@@ -123,7 +142,7 @@ export function ConditionCard({
               badgeClass,
             ].join(" ")}
           >
-            {fmtEdgePts(computeEdge(dominantRow))}
+            {fmtEdgePts(computeEdge(dominantRow), locale)}
           </span>
         </div>
       </div>
@@ -139,6 +158,8 @@ export function ConditionCard({
             upProbability={upRow.probability}
             downLabel={resolver.outcome(downRow.outcome)}
             downProbability={downRow.probability}
+            locale={locale}
+            t={t}
           />
         </div>
       ) : (
@@ -147,6 +168,8 @@ export function ConditionCard({
           upProbability={upRow.probability}
           downLabel={resolver.outcome(downRow.outcome)}
           downProbability={downRow.probability}
+          locale={locale}
+          t={t}
         />
       )}
     </article>

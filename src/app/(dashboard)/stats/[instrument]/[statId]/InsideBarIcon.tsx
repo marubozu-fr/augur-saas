@@ -8,18 +8,27 @@
 // down inside) and keeping the glyph visually coherent with EngulfingIcon.
 
 import type { IconColor } from "./stat-icon-map";
+import type { Translator } from "@/lib/stat-format";
 
 interface InsideBarIconProps {
   color: IconColor;
-  timeframe: string;
+  label: string;
+  fullLabel: string;
+  t: Translator;
 }
 
-export function InsideBarIcon({ color, timeframe }: InsideBarIconProps) {
+export function InsideBarIcon({
+  color,
+  label,
+  fullLabel,
+  t,
+}: InsideBarIconProps) {
   const motherStroke = color === "up" ? "stroke-up" : "stroke-down";
   const motherFill = color === "up" ? "fill-up" : "fill-down";
   const insideColor: IconColor = color === "up" ? "down" : "up";
   const insideStroke = insideColor === "up" ? "stroke-up" : "stroke-down";
   const insideFill = insideColor === "up" ? "fill-up" : "fill-down";
+  const ariaLabel = t("iconInsideBar", { timeframe: fullLabel });
 
   return (
     <svg
@@ -28,7 +37,7 @@ export function InsideBarIcon({ color, timeframe }: InsideBarIconProps) {
       height={108}
       viewBox="0 0 64 72"
       role="img"
-      aria-label={`Large candle followed by a smaller inside candle contained within its range, ${timeframe} timeframe`}
+      aria-label={ariaLabel}
     >
       {/* Mother candle */}
       <line
@@ -76,7 +85,7 @@ export function InsideBarIcon({ color, timeframe }: InsideBarIconProps) {
         textAnchor="middle"
         dominantBaseline="middle"
       >
-        {timeframe}
+        {label}
       </text>
     </svg>
   );

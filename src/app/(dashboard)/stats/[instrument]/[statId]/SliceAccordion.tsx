@@ -109,6 +109,7 @@ export function SliceAccordion({
           <ProbabilityTable
             rows={rows}
             resolver={resolver}
+            locale={locale}
             headBg="bg-background"
           />
         )}

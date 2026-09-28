@@ -1,11 +1,13 @@
 import type { StatResultRow } from "@/types/stats";
 import { computeEdge, edgeDirection, fmtEdgePts } from "@/lib/stat-format";
+import type { Locale } from "@/i18n/config";
 
 interface EdgePillProps {
   row: StatResultRow;
+  locale: Locale;
 }
 
-export function EdgePill({ row }: EdgePillProps) {
+export function EdgePill({ row, locale }: EdgePillProps) {
   const edge = computeEdge(row);
   const dir = edgeDirection(edge);
 
@@ -55,7 +57,7 @@ export function EdgePill({ row }: EdgePillProps) {
       ].join(" ")}
     >
       {chevron}
-      {fmtEdgePts(edge)}
+      {fmtEdgePts(edge, locale)}
     </span>
   );
 }

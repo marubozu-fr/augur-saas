@@ -2,14 +2,20 @@ import { TrendingUp, TrendingDown } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { StatResultRow } from "@/types/stats";
 import type { LabelResolver } from "@/lib/stat-format";
-import { fmtValue, fmtNum } from "@/lib/stat-format";
+import { fmtValue, fmtNum, pctSign } from "@/lib/stat-format";
+import type { Locale } from "@/i18n/config";
 
 interface MagnitudeCardsProps {
   rows: StatResultRow[];
   resolver: LabelResolver;
+  locale: Locale;
 }
 
-export function MagnitudeCards({ rows, resolver }: MagnitudeCardsProps) {
+export function MagnitudeCards({
+  rows,
+  resolver,
+  locale,
+}: MagnitudeCardsProps) {
   const t = useTranslations("statDetail");
   // Only rows that carry a numeric value (the magnitude sentinel pattern)
   const magnitudeRows = rows.filter(
@@ -57,10 +63,10 @@ export function MagnitudeCards({ rows, resolver }: MagnitudeCardsProps) {
             </div>
             <div className="flex items-baseline gap-2">
               <span className="font-mono text-4xl font-bold text-foreground tabular-nums">
-                {fmtValue(row.value!)}
+                {fmtValue(row.value!, locale)}
               </span>
               <span className="text-lg font-semibold text-muted-foreground">
-                %
+                {pctSign(locale)}
               </span>
             </div>
             <div className="flex items-center gap-3 text-xs text-subtle pt-3 border-t border-border">
@@ -69,7 +75,7 @@ export function MagnitudeCards({ rows, resolver }: MagnitudeCardsProps) {
                   mono: (chunks) => (
                     <span className="font-mono tabular-nums">{chunks}</span>
                   ),
-                  count: fmtNum(row.count),
+                  count: fmtNum(row.count, locale),
                 })}
               </span>
               {hasBaseline ? (
@@ -78,7 +84,7 @@ export function MagnitudeCards({ rows, resolver }: MagnitudeCardsProps) {
                     mono: (chunks) => (
                       <span className="font-mono tabular-nums">{chunks}</span>
                     ),
-                    value: `${fmtValue(row.valueBaseline!)}%`,
+                    value: `${fmtValue(row.valueBaseline!, locale)}${pctSign(locale)}`,
                   })}
                 </span>
               ) : (

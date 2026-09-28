@@ -55,6 +55,7 @@ export async function HeroPreviewCard() {
   const locale = await getActiveLocale();
   const t = await getTranslations("landing");
   const tStat = await getTranslations("statDetail");
+  const tTimeframes = await getTranslations("timeframes");
   const demo = isDemoMode();
 
   let result: StatRunResult;
@@ -115,7 +116,7 @@ export async function HeroPreviewCard() {
           <div className="text-xs text-subtle mt-[2px]">
             {resolver.condition(mainRow.condition)} →{" "}
             {resolver.outcome(mainRow.outcome)} · {PREVIEW_INSTRUMENT}{" "}
-            {formatTimeframeLabel(PREVIEW_TIMEFRAME)}
+            {formatTimeframeLabel(PREVIEW_TIMEFRAME, tTimeframes)}
           </div>
         </div>
         {/* Tier badge — hidden in demo mode (every stat is unlocked there);
@@ -132,10 +133,10 @@ export async function HeroPreviewCard() {
         <span
           className={`text-[3rem] font-bold leading-none font-mono tabular-nums ${edgeTextClass(mainRow)}`}
         >
-          {fmtPct1(mainRow.probability)}
+          {fmtPct1(mainRow.probability, locale)}
         </span>
         <span className="whitespace-nowrap">
-          <EdgePill row={mainRow} />
+          <EdgePill row={mainRow} locale={locale} />
         </span>
       </div>
 
@@ -145,14 +146,14 @@ export async function HeroPreviewCard() {
           mono: (chunks) => (
             <span className="font-mono tabular-nums">{chunks}</span>
           ),
-          value: fmtPct1(mainRow.baselineProb),
+          value: fmtPct1(mainRow.baselineProb, locale),
         })}
         {" · "}
         {tStat.rich("nEquals", {
           mono: (chunks) => (
             <span className="font-mono tabular-nums">{chunks}</span>
           ),
-          count: fmtNum(mainRow.total),
+          count: fmtNum(mainRow.total, locale),
         })}
       </div>
 
@@ -168,15 +169,15 @@ export async function HeroPreviewCard() {
             >
               <span className="truncate text-muted-foreground">{label}</span>
               <span className="row-span-2 sm:row-span-1 font-semibold font-mono tabular-nums text-foreground">
-                {fmtPct1(row.probability)}
+                {fmtPct1(row.probability, locale)}
               </span>
               <span className="row-span-2 sm:row-span-1">
-                <EdgePill row={row} />
+                <EdgePill row={row} locale={locale} />
               </span>
               <span className="col-start-1 sm:col-start-auto whitespace-nowrap text-xs text-subtle font-mono tabular-nums">
                 {tStat.rich("nEquals", {
                   mono: (chunks) => <>{chunks}</>,
-                  count: fmtNum(row.total),
+                  count: fmtNum(row.total, locale),
                 })}
               </span>
             </div>

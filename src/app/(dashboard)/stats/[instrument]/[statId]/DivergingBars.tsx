@@ -5,12 +5,17 @@
 
 import type { CSSProperties } from "react";
 import { fmtPct1 } from "@/lib/stat-format";
+import type { Locale } from "@/i18n/config";
+import type { Translator } from "@/lib/stat-format";
 
 interface DivergingBarsProps {
   upLabel: string;
   upProbability: number;
   downLabel: string;
   downProbability: number;
+  locale: Locale;
+  /** "statDetail" namespace translator, for the aria-label sentence. */
+  t: Translator;
 }
 
 // Scales a probability fraction (0..1) to the bar's pixel height. Matches the
@@ -23,20 +28,24 @@ export function DivergingBars({
   upProbability,
   downLabel,
   downProbability,
+  locale,
+  t,
 }: DivergingBarsProps) {
   const upHeight = Math.round(upProbability * MAX_BAR_PX);
   const downHeight = Math.round(downProbability * MAX_BAR_PX);
+  const ariaLabel = t("divergingBarsAriaLabel", {
+    upLabel,
+    upValue: fmtPct1(upProbability, locale),
+    downLabel,
+    downValue: fmtPct1(downProbability, locale),
+  });
 
   return (
     <div className="flex-1 min-w-0">
-      <div
-        role="img"
-        aria-label={`${upLabel} ${fmtPct1(upProbability)} (green, up); ${downLabel} ${fmtPct1(downProbability)} (red, down)`}
-        className="flex flex-col"
-      >
+      <div role="img" aria-label={ariaLabel} className="flex flex-col">
         <div className="flex flex-col items-center justify-end h-[120px]">
           <span className="text-2xl font-bold leading-none mb-2 text-up">
-            {fmtPct1(upProbability)}
+            {fmtPct1(upProbability, locale)}
           </span>
           <div
             style={{ "--bar-h": `${upHeight}px` } as CSSProperties}
@@ -53,7 +62,7 @@ export function DivergingBars({
             className="w-16 max-w-[72%] h-[var(--bar-h)] bg-down rounded-b-sm"
           />
           <span className="text-2xl font-bold leading-none mt-2 text-down">
-            {fmtPct1(downProbability)}
+            {fmtPct1(downProbability, locale)}
           </span>
         </div>
       </div>

@@ -6,7 +6,9 @@
 // loading placeholder — see StatDetailSkeleton.
 
 import { useTranslations } from "next-intl";
+import { fmtNum } from "@/lib/stat-format";
 import type { PeriodPreset } from "@/lib/period";
+import type { Locale } from "@/i18n/config";
 
 const PERIOD_LABEL_KEYS: Record<PeriodPreset, string> = {
   all: "periods.all",
@@ -27,6 +29,7 @@ interface MetadataStripProps {
   /** Set when a custom start/end range is active (takes precedence over `period`). */
   isCustomRange: boolean;
   period: PeriodPreset;
+  locale: Locale;
 }
 
 export function MetadataStrip({
@@ -34,6 +37,7 @@ export function MetadataStrip({
   totalSamples,
   isCustomRange,
   period,
+  locale,
 }: MetadataStripProps) {
   const t = useTranslations("statDetail");
   const [rangeStart, rangeEnd] = dataRange;
@@ -58,7 +62,7 @@ export function MetadataStrip({
           {t("totalSessions")}
         </div>
         <div className="text-sm font-semibold font-mono tabular-nums text-foreground mt-0.5">
-          {totalSamples.toLocaleString("en-US")}
+          {fmtNum(totalSamples, locale)}
         </div>
       </div>
       <div>

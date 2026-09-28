@@ -1,5 +1,29 @@
 {
   "common": {},
+  "timeframes": {
+    "5min": "5 min",
+    "15min": "15 min",
+    "30min": "30 min",
+    "1h": "1 h",
+    "daily": "Quotidien",
+    "weekly": "Hebdomadaire",
+    "monthly": "Mensuel",
+    "1d": "1 j",
+    "2d": "2 j",
+    "windowTime": "{h}h{m}",
+    "window": "{start}–{end}",
+    "compact": {
+      "5min": "5m",
+      "15min": "15m",
+      "30min": "30m",
+      "1h": "1h",
+      "daily": "1J",
+      "weekly": "1S",
+      "monthly": "1M",
+      "1d": "1J",
+      "2d": "2J"
+    }
+  },
   "nav": {
     "features": "Fonctionnalités",
     "howItWorks": "Fonctionnement",
@@ -397,6 +421,13 @@
     "upgradeToUnlock": "Mettez à niveau pour débloquer",
     "bullish": "Haussier",
     "bearish": "Baissier",
+    "iconCandleUp": "Chandelier haussier (vert) unique, unité de temps : {timeframe}",
+    "iconCandleDown": "Chandelier baissier (rouge) unique, unité de temps : {timeframe}",
+    "iconEngulfingUp": "Petit chandelier baissier englobé par un grand chandelier haussier, unité de temps : {timeframe}",
+    "iconEngulfingDown": "Petit chandelier haussier englobé par un grand chandelier baissier, unité de temps : {timeframe}",
+    "iconInsideBar": "Grand chandelier suivi d'un plus petit chandelier contenu dans son amplitude, unité de temps : {timeframe}",
+    "divergingBarsAriaLabel": "{upLabel} {upValue} (vert, haussier) ; {downLabel} {downValue} (rouge, baissier)",
+    "defaultStatCardAriaLabel": "{upLabel} {upValue} (vert) ; {downLabel} {downValue} (rouge)",
     "nEquals": "N = <mono>{count}</mono>",
     "vsBaseline": "vs <mono>{value}</mono> de référence",
     "noBaselineAvailable": "aucune référence disponible",

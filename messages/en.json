@@ -1,5 +1,29 @@
 {
   "common": {},
+  "timeframes": {
+    "5min": "5min",
+    "15min": "15min",
+    "30min": "30min",
+    "1h": "1h",
+    "daily": "Daily",
+    "weekly": "Weekly",
+    "monthly": "Monthly",
+    "1d": "1d",
+    "2d": "2d",
+    "windowTime": "{h}:{m}",
+    "window": "{start}–{end}",
+    "compact": {
+      "5min": "5m",
+      "15min": "15m",
+      "30min": "30m",
+      "1h": "1h",
+      "daily": "1D",
+      "weekly": "1W",
+      "monthly": "1M",
+      "1d": "1D",
+      "2d": "2D"
+    }
+  },
   "nav": {
     "features": "Features",
     "howItWorks": "How it works",
@@ -397,6 +421,13 @@
     "upgradeToUnlock": "Upgrade to unlock",
     "bullish": "Bullish",
     "bearish": "Bearish",
+    "iconCandleUp": "Single green (bullish) candlestick, {timeframe} timeframe",
+    "iconCandleDown": "Single red (bearish) candlestick, {timeframe} timeframe",
+    "iconEngulfingUp": "Small bearish candle engulfed by a large bullish candle, {timeframe} timeframe",
+    "iconEngulfingDown": "Small bullish candle engulfed by a large bearish candle, {timeframe} timeframe",
+    "iconInsideBar": "Large candle followed by a smaller inside candle contained within its range, {timeframe} timeframe",
+    "divergingBarsAriaLabel": "{upLabel} {upValue} (green, up); {downLabel} {downValue} (red, down)",
+    "defaultStatCardAriaLabel": "{upLabel} {upValue} (green); {downLabel} {downValue} (red)",
     "nEquals": "N = <mono>{count}</mono>",
     "vsBaseline": "vs <mono>{value}</mono> baseline",
     "noBaselineAvailable": "no baseline available",

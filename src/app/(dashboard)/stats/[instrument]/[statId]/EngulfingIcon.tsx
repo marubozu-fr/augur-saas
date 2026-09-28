@@ -8,22 +8,32 @@
 // always the inverse of the `color` prop (the large/signal candle's colour).
 
 import type { IconColor } from "./stat-icon-map";
+import type { Translator } from "@/lib/stat-format";
 
 interface EngulfingIconProps {
   color: IconColor;
-  timeframe: string;
+  label: string;
+  fullLabel: string;
+  t: Translator;
 }
 
-export function EngulfingIcon({ color, timeframe }: EngulfingIconProps) {
+export function EngulfingIcon({
+  color,
+  label,
+  fullLabel,
+  t,
+}: EngulfingIconProps) {
   const largeStroke = color === "up" ? "stroke-up" : "stroke-down";
   const largeFill = color === "up" ? "fill-up" : "fill-down";
   const smallColor: IconColor = color === "up" ? "down" : "up";
   const smallStroke = smallColor === "up" ? "stroke-up" : "stroke-down";
   const smallFill = smallColor === "up" ? "fill-up" : "fill-down";
-  const label =
-    color === "up"
-      ? `Small bearish candle engulfed by a large bullish candle, ${timeframe} timeframe`
-      : `Small bullish candle engulfed by a large bearish candle, ${timeframe} timeframe`;
+  const ariaLabel = t(
+    color === "up" ? "iconEngulfingUp" : "iconEngulfingDown",
+    {
+      timeframe: fullLabel,
+    },
+  );
 
   return (
     <svg
@@ -32,7 +42,7 @@ export function EngulfingIcon({ color, timeframe }: EngulfingIconProps) {
       height={108}
       viewBox="0 0 64 72"
       role="img"
-      aria-label={label}
+      aria-label={ariaLabel}
     >
       {/* Small, engulfed candle */}
       <line
@@ -80,7 +90,7 @@ export function EngulfingIcon({ color, timeframe }: EngulfingIconProps) {
         textAnchor="middle"
         dominantBaseline="middle"
       >
-        {timeframe}
+        {label}
       </text>
     </svg>
   );
