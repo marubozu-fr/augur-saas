@@ -1,5 +1,5 @@
 import type { StatResultRow } from "@/types/stats";
-import { computeEdge, edgeDirection, fmtEdgePts } from "./helpers";
+import { computeEdge, edgeDirection, fmtEdgePts } from "@/lib/stat-format";
 
 interface EdgePillProps {
   row: StatResultRow;

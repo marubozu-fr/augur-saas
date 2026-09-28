@@ -80,29 +80,3 @@ export async function getSnapshotResult(
   }
   return result;
 }
-
-/**
- * The latest `data_range` end date (ISO "YYYY-MM-DD") across every
- * instrument/timeframe of every family in the snapshot — i.e. how fresh the
- * frozen demo data is. Used by DemoBanner. Computed from the parsed files on
- * every call (no hardcoded date); the snapshot itself is only ever parsed
- * once per server lifetime (see loadSnapshot above).
- */
-export async function getSnapshotDataEnd(): Promise<string> {
-  const snapshot = await loadSnapshot();
-  let latest: string | null = null;
-  for (const result of snapshot.values()) {
-    for (const timeframes of Object.values(result.instruments)) {
-      for (const timeframeResult of Object.values(timeframes)) {
-        const end = timeframeResult.data_range[1];
-        if (end && (latest === null || end > latest)) {
-          latest = end;
-        }
-      }
-    }
-  }
-  if (!latest) {
-    throw new AugurApiError("Snapshot has no data_range", 500);
-  }
-  return latest;
-}

@@ -6,7 +6,7 @@
 
 import { AlertTriangle } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { makeLabelResolver } from "./helpers";
+import { makeLabelResolver } from "@/lib/stat-format";
 import { LockedState } from "./LockedState";
 import { MagnitudeCards } from "./MagnitudeCards";
 import { ProbabilityTable } from "./ProbabilityTable";

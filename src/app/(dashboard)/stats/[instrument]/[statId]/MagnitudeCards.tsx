@@ -1,8 +1,8 @@
 import { TrendingUp, TrendingDown } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { StatResultRow } from "@/types/stats";
-import type { LabelResolver } from "./helpers";
-import { fmtValue, fmtNum } from "./helpers";
+import type { LabelResolver } from "@/lib/stat-format";
+import { fmtValue, fmtNum } from "@/lib/stat-format";
 
 interface MagnitudeCardsProps {
   rows: StatResultRow[];

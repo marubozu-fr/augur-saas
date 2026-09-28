@@ -57,8 +57,8 @@ unavailable in demo mode — every stat always shows its full history.
 
 **Site chrome.** A `DemoBanner` (`src/components/DemoBanner.tsx`) is rendered
 on every page, stating the data is frozen as of the latest `data_range` end
-date across the snapshot (`getSnapshotDataEnd()` in
-`src/services/augur-snapshot.ts`) and linking to this repository. The
+date across the snapshot (`getCatalogCoverage()` in `src/lib/stat-context.ts`,
+fed by `getStatCatalog()`) and linking to this repository. The
 marketing header and footer (`src/app/[locale]/(marketing)/layout.tsx`) drop
 "Pricing"/"Sign in" and every link to a page that doesn't exist in demo mode
 (billing, about, terms…), replacing them with an "Open the demo" CTA and a

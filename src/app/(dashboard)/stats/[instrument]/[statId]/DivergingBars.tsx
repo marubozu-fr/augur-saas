@@ -4,7 +4,7 @@
 // the up/down assignment rule documented there.
 
 import type { CSSProperties } from "react";
-import { fmtPct1 } from "./helpers";
+import { fmtPct1 } from "@/lib/stat-format";
 
 interface DivergingBarsProps {
   upLabel: string;

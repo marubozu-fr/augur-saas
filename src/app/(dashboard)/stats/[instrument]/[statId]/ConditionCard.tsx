@@ -7,8 +7,8 @@
 // with the unrelated dashboard StatCard.tsx.
 
 import type { StatResultRow } from "@/types/stats";
-import type { EdgeDirection, LabelResolver } from "./helpers";
-import { computeEdge, edgeDirection, fmtEdgePts } from "./helpers";
+import type { EdgeDirection, LabelResolver } from "@/lib/stat-format";
+import { computeEdge, edgeDirection, fmtEdgePts } from "@/lib/stat-format";
 import { DivergingBars } from "./DivergingBars";
 import { DefaultStatCard } from "./DefaultStatCard";
 import { renderStatIcon } from "./stat-icon-map";

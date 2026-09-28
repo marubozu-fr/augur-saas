@@ -59,9 +59,10 @@ themselves in `src/lib/supabase/*.ts` and `src/lib/stripe.ts`), and
 
 `DemoBanner` (`src/components/DemoBanner.tsx`) is rendered by the root layout
 (`src/app/layout.tsx`) at the top of `<body>`, on every route, only when
-`isDemoMode()`. It states the data is frozen as of `getSnapshotDataEnd()`
-(`src/services/augur-snapshot.ts` — the latest `data_range` end across the
-whole snapshot, never hardcoded) and links to this repository. It stays in
+`isDemoMode()`. It states the data is frozen as of the latest `data_range` end
+across the whole catalog — `getCatalogCoverage(catalog).latestEnd`
+(`src/lib/stat-context.ts`, fed by `getStatCatalog()`), never hardcoded — and
+links to this repository. It stays in
 normal document flow (never `sticky`/`fixed`) so it never collides with the
 marketing header or the dashboard sidebar, both `sticky top-0`.
 
@@ -74,7 +75,11 @@ column (source code, stats engine, license).
 `/dashboard` in demo mode redirects to `pickPrimaryInstrument()`
 (`src/lib/stat-context.ts`) — the instrument covering the most stat families
 in the catalog, ties broken alphabetically — instead of the alphabetically
-first instrument, since not every instrument covers every family.
+first instrument, since not every instrument covers every family. Both
+`pickPrimaryInstrument()` and `getCatalogCoverage().instruments` (used by the
+demo landing page) share the same ranking logic
+(`rankInstrumentsByFamilyCoverage()`), so instrument order is consistent
+everywhere it's shown.
 
 ### Subscription Tiers
 | Plan       | Stats Access   | Stripe Product |

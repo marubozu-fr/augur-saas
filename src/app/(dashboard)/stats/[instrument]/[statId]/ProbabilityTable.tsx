@@ -7,9 +7,9 @@
 
 import { useTranslations } from "next-intl";
 import type { StatResultRow } from "@/types/stats";
-import type { LabelResolver } from "./helpers";
-import { computeEdge, edgeDirection, fmtPct, fmtNum } from "./helpers";
-import { EdgePill } from "./EdgePill";
+import type { LabelResolver } from "@/lib/stat-format";
+import { computeEdge, edgeDirection, fmtPct, fmtNum } from "@/lib/stat-format";
+import { EdgePill } from "@/components/stat-detail/EdgePill";
 
 export interface TableRow {
   row: StatResultRow;

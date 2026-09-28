@@ -1,5 +1,6 @@
 import { getFormatter, getTranslations } from "next-intl/server";
-import { getSnapshotDataEnd } from "@/services/augur-snapshot";
+import { getStatCatalog } from "@/services/augur";
+import { getCatalogCoverage } from "@/lib/stat-context";
 import { AUGUR_SAAS_REPO_URL } from "@/lib/constants";
 
 // Full-width strip announcing demo mode, rendered by the root layout at the
@@ -15,8 +16,9 @@ import { AUGUR_SAAS_REPO_URL } from "@/lib/constants";
 export async function DemoBanner() {
   const t = await getTranslations("demo.banner");
   const format = await getFormatter();
-  const dataEnd = await getSnapshotDataEnd();
-  const formattedDate = format.dateTime(new Date(`${dataEnd}T00:00:00Z`), {
+  const catalog = await getStatCatalog();
+  const { latestEnd } = getCatalogCoverage(catalog);
+  const formattedDate = format.dateTime(new Date(`${latestEnd}T00:00:00Z`), {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",

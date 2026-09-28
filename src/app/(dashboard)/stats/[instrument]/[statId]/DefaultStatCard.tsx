@@ -8,7 +8,7 @@
 // outcome label, so that label is reused as the hero caption here.
 
 import type { CSSProperties } from "react";
-import { fmtPct1 } from "./helpers";
+import { fmtPct1 } from "@/lib/stat-format";
 
 interface DefaultStatCardProps {
   upLabel: string;

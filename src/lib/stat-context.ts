@@ -57,13 +57,14 @@ export function getGlobalInstruments(catalog: StatFamilyMeta[]): string[] {
 }
 
 /**
- * Picks the instrument that best serves as a single entry point into the
- * catalog: the one present in the most stat families, ties broken
- * alphabetically. No hardcoded instrument — used by the demo-mode
- * `/dashboard` redirect (src/app/(dashboard)/dashboard/page.tsx), where a
- * single instrument is chosen up front instead of asking the visitor.
+ * Ranks instrument codes by the number of stat families that cover them,
+ * descending, ties broken alphabetically. The single source of truth for
+ * "which instrument matters most" — pickPrimaryInstrument just takes the
+ * first entry, getCatalogCoverage exposes the full ranked list so the
+ * landing page lists instruments in the same order everywhere (hero
+ * subtitle, checklist, meta description).
  */
-export function pickPrimaryInstrument(catalog: StatFamilyMeta[]): string {
+function rankInstrumentsByFamilyCoverage(catalog: StatFamilyMeta[]): string[] {
   const familyCounts = new Map<string, number>();
   for (const family of catalog) {
     const instruments = new Set(family.timeframes.map((tf) => tf.instrument));
@@ -71,19 +72,73 @@ export function pickPrimaryInstrument(catalog: StatFamilyMeta[]): string {
       familyCounts.set(instrument, (familyCounts.get(instrument) ?? 0) + 1);
     }
   }
+  return Array.from(familyCounts.keys()).sort((a, b) => {
+    const countDiff = (familyCounts.get(b) ?? 0) - (familyCounts.get(a) ?? 0);
+    if (countDiff !== 0) return countDiff;
+    return a < b ? -1 : a > b ? 1 : 0;
+  });
+}
 
-  let best: string | null = null;
-  let bestCount = -1;
-  for (const [instrument, count] of familyCounts) {
-    if (
-      count > bestCount ||
-      (count === bestCount && best !== null && instrument < best)
-    ) {
-      best = instrument;
-      bestCount = count;
+/**
+ * Picks the instrument that best serves as a single entry point into the
+ * catalog: the one present in the most stat families, ties broken
+ * alphabetically. No hardcoded instrument — used by the demo-mode
+ * `/dashboard` redirect (src/app/(dashboard)/dashboard/page.tsx), where a
+ * single instrument is chosen up front instead of asking the visitor.
+ */
+export function pickPrimaryInstrument(catalog: StatFamilyMeta[]): string {
+  return rankInstrumentsByFamilyCoverage(catalog)[0] ?? "";
+}
+
+export interface CatalogCoverage {
+  /** Number of stat families in the catalog. */
+  familyCount: number;
+  /** Instrument codes covered by at least one family/timeframe, ranked by
+   *  the number of families that cover them (descending, ties alphabetical)
+   *  — see rankInstrumentsByFamilyCoverage. */
+  instruments: string[];
+  /** Earliest `data_range` start (ISO "YYYY-MM-DD") across every family and
+   *  timeframe. Empty string when the catalog is empty. */
+  earliestStart: string;
+  /** Latest `data_range` end (ISO "YYYY-MM-DD") across every family and
+   *  timeframe. Empty string when the catalog is empty. */
+  latestEnd: string;
+  /** Calendar year of earliestStart, derived once here. 0 when the catalog is empty. */
+  startYear: number;
+  /** Calendar year of latestEnd, derived once here. 0 when the catalog is empty. */
+  endYear: number;
+}
+
+/**
+ * Derives the coverage figures shown on the demo-mode landing page (family
+ * count, instrument list, year range) and by DemoBanner (latest data date)
+ * straight from the stat catalog — never hardcoded. Pure: no React, no
+ * server-only import; callers fetch the catalog via getStatCatalog().
+ */
+export function getCatalogCoverage(catalog: StatFamilyMeta[]): CatalogCoverage {
+  let earliestStart: string | null = null;
+  let latestEnd: string | null = null;
+
+  for (const family of catalog) {
+    for (const tf of family.timeframes) {
+      const [start, end] = tf.dataRange;
+      if (start && (earliestStart === null || start < earliestStart)) {
+        earliestStart = start;
+      }
+      if (end && (latestEnd === null || end > latestEnd)) {
+        latestEnd = end;
+      }
     }
   }
-  return best ?? "";
+
+  return {
+    familyCount: catalog.length,
+    instruments: rankInstrumentsByFamilyCoverage(catalog),
+    earliestStart: earliestStart ?? "",
+    latestEnd: latestEnd ?? "",
+    startYear: earliestStart ? Number(earliestStart.slice(0, 4)) : 0,
+    endYear: latestEnd ? Number(latestEnd.slice(0, 4)) : 0,
+  };
 }
 
 /**

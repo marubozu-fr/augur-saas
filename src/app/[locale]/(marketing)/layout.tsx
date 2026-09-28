@@ -120,7 +120,7 @@ export default async function MarketingLayout({
             <div className="col-span-2 md:col-span-1">
               <AugurLogo />
               <p className="mt-4 text-sm text-muted-foreground max-w-[22rem] leading-[1.55]">
-                {tFooter("tagline")}
+                {demo ? tDemo("landing.footer.tagline") : tFooter("tagline")}
               </p>
             </div>
 

@@ -1,5 +1,8 @@
-// Pure helpers and label resolver for the stat detail page.
-// No React, no server-only imports — safe to import from any component in this route.
+// Pure helpers and label resolver for rendering a StatResultRow: edge
+// computation, formatting, and raw-code → human-readable label resolution.
+// Shared by the stat detail page (src/app/(dashboard)/stats/[instrument]/[statId]/)
+// and the marketing landing page's HeroPreviewCard — no React, no
+// server-only imports, safe to import from any component.
 
 import type { Labels } from "@/types/stats";
 import type { StatResultRow } from "@/types/stats";
@@ -52,6 +55,18 @@ export function fmtNum(n: number): string {
 
 export function fmtValue(v: number): string {
   return v.toFixed(2);
+}
+
+/**
+ * Display label for a raw timeframe code — capitalizes the first letter,
+ * lowercases the rest (e.g. "daily" -> "Daily", "5min" -> "5min"). Codes
+ * aren't translated (no locale-specific timeframe vocabulary), so this is
+ * the same in every locale. Matches the stat detail page's timeframe toggle
+ * (src/components/stat-detail/DataFilterZone.tsx) — the only other place a
+ * timeframe code is shown as a label.
+ */
+export function formatTimeframeLabel(timeframe: string): string {
+  return timeframe.charAt(0).toUpperCase() + timeframe.slice(1).toLowerCase();
 }
 
 // ---------------------------------------------------------------------------

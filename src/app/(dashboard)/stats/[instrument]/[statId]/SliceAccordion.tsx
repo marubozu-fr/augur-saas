@@ -5,7 +5,7 @@
 
 import { useTranslations } from "next-intl";
 import type { SliceResult } from "@/types/stats";
-import type { LabelResolver } from "./helpers";
+import type { LabelResolver } from "@/lib/stat-format";
 import { ProbabilityTable } from "./ProbabilityTable";
 import type { TableRow } from "./ProbabilityTable";
 import { pickLocale } from "@/lib/i18n/pick";

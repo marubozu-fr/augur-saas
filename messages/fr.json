@@ -23,6 +23,44 @@
       "statsEngine": "Moteur de statistiques",
       "license": "Licence (MIT)",
       "copyright": "© 2026 The Augur authors · Licence MIT"
+    },
+    "landing": {
+      "metaDescription": "Augur transforme un instantané figé de données futures NQ et ES ({startYear}–{endYear}) en probabilités conditionnelles claires. Ceci est une démo open source — sans compte, sans backend, toutes les statistiques débloquées.",
+      "hero": {
+        "subtitle": "Données futures NQ et ES de {startYear} à {endYear}. Chaque avantage est comparé à sa référence, avec la taille d'échantillon bien visible — pour que vous sachiez exactement à quel point un setup est réellement solide.",
+        "checklist": {
+          "statFamilies": "{count} familles de statistiques",
+          "instruments": "Données futures {list}",
+          "openSource": "Open source · MIT"
+        }
+      },
+      "trustStrip": {
+        "history": "{startYear} – {endYear}"
+      },
+      "features": {
+        "openSource": {
+          "title": "Open source, de bout en bout",
+          "description": "Le moteur de statistiques (Python) et ce site (Next.js) sont tous deux sous licence MIT sur GitHub. Cette démo tourne sur un instantané figé de résultats agrégés — sans backend, sans base de données."
+        }
+      },
+      "howItWorks": {
+        "heading": "Du catalogue à une statistique en deux clics",
+        "step1": {
+          "title": "Ouvrez la démo",
+          "description": "Sans compte — toutes les statistiques sont débloquées."
+        },
+        "step3": {
+          "description": "Lisez l'avantage par rapport à sa référence, vérifiez la taille de l'échantillon."
+        }
+      },
+      "cta": {
+        "heading": "Open source, de bout en bout",
+        "description": "Le moteur de statistiques et ce site sont tous deux open source sur GitHub, et cette démo tourne entièrement sur un instantané figé de résultats agrégés — sans inscription, sans backend.",
+        "viewOnGithub": "Voir sur GitHub"
+      },
+      "footer": {
+        "tagline": "Probabilités statistiques de marché pour les traders de futures NQ et ES. Des avantages transparents, des références réelles — servis depuis un instantané figé, pas un flux en direct."
+      }
     }
   },
   "landing": {
@@ -39,44 +77,35 @@
         "updatedDaily": "Mis à jour chaque jour après la clôture"
       },
       "preview": {
-        "ariaLabel": "Exemple de statistique",
-        "title": "Continuation de gap haussier — NQ",
-        "subtitle": "P(clôture au-dessus de l'ouverture | gap > 0,30 %) · séance RTH",
-        "tier": "Palier 1",
-        "edge": "+9,8 pts d'avantage",
-        "baselineLabel": "Référence (toutes séances) :",
-        "row1Label": "Ouverture du lundi",
-        "row2Label": "Gap > 0,75 %",
-        "row3Label": "Ouverture du vendredi",
-        "row4Label": "Jour de FOMC"
+        "ariaLabel": "Exemple de statistique"
       }
     },
     "trustStrip": {
       "heading": "Une couverture sur les instruments que vous tradez vraiment",
       "ariaLabel": "Instruments couverts",
       "sessions": "Séances RTH et ETH",
-      "history": "2007 – aujourd'hui",
-      "timeframes": "1m · 5m · quotidien"
+      "history": "2008 – aujourd'hui",
+      "timeframes": "5 min → mensuel"
     },
     "features": {
       "eyebrow": "Pourquoi Augur",
       "heading": "Des avantages en qui vous pouvez vraiment avoir confiance",
-      "subtitle": "Pas de boîte noire, pas de signaux surajustés. Juste des statistiques conditionnelles transparentes, avec le contexte nécessaire pour dimensionner un trade en toute confiance.",
+      "subtitle": "Pas de boîte noire, pas de signaux surajustés. Juste des statistiques conditionnelles transparentes, avec le contexte nécessaire pour juger un setup en toute confiance.",
       "baseline": {
         "title": "Avantages relatifs à une référence",
-        "description": "Chaque probabilité est présentée à côté de sa référence inconditionnelle. Un taux de réussite de 56 % ne veut rien dire tant que vous ne connaissez pas le taux de base — nous les mettons toujours côte à côte."
+        "description": "Chaque probabilité est présentée à côté de sa référence inconditionnelle quand il y en a une. Un taux de réussite de 56 % ne veut rien dire tant que vous ne connaissez pas le taux de base — nous les mettons côte à côte."
       },
       "sliced": {
         "title": "Découpé de toutes les façons",
-        "description": "Explorez chaque statistique par jour de la semaine, taille de gap, range de la veille, séance ou régime de volatilité. Chaque tranche affiche sa propre taille d'échantillon pour que les groupes trop petits ne vous induisent jamais en erreur."
+        "description": "Explorez les statistiques par jour de la semaine, tranche de taille, bougie de la session précédente ou couleur de clôture de session. Chaque tranche affiche sa propre taille d'échantillon pour que les groupes trop petits ne vous induisent jamais en erreur."
       },
       "refreshed": {
         "title": "Actualisé chaque jour",
         "description": "Les statistiques se recalculent automatiquement après chaque clôture, en intégrant la dernière séance pour que vos avantages reflètent le marché de cette semaine — pas un backtest figé en 2019."
       },
       "significance": {
-        "title": "Significativité intégrée",
-        "description": "Les intervalles de confiance et les seuils de N minimum éliminent le bruit du chiffre principal. Nous grisons les avantages qui ne sont pas statistiquement significatifs plutôt que de les survendre."
+        "title": "La taille d'échantillon à côté de chaque avantage",
+        "description": "Chaque probabilité est livrée avec son N — le nombre exact d'observations derrière elle — juste à côté de l'avantage par rapport à la référence, pour que vous puissiez juger vous-même une tranche trop mince."
       }
     },
     "howItWorks": {
@@ -92,7 +121,7 @@
       },
       "step3": {
         "title": "Tradez avec du contexte",
-        "description": "Lisez l'avantage par rapport à sa référence, vérifiez la taille de l'échantillon, et dimensionnez votre position en conséquence. Revenez après la clôture pour les chiffres actualisés du lendemain."
+        "description": "Lisez l'avantage par rapport à sa référence, vérifiez la taille de l'échantillon. Revenez après la clôture pour les chiffres actualisés du lendemain."
       }
     },
     "cta": {

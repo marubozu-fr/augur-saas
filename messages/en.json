@@ -23,6 +23,44 @@
       "statsEngine": "Stats engine",
       "license": "License (MIT)",
       "copyright": "© 2026 The Augur authors · MIT License"
+    },
+    "landing": {
+      "metaDescription": "Augur turns a frozen snapshot of NQ and ES futures data ({startYear}–{endYear}) into clean, conditional probabilities. This is an open-source demo — no account, no backend, every stat unlocked.",
+      "hero": {
+        "subtitle": "NQ and ES futures data from {startYear} to {endYear}. Every edge is shown against its baseline, with the sample size in plain sight — so you know exactly how strong a setup really is.",
+        "checklist": {
+          "statFamilies": "{count} stat families",
+          "instruments": "{list} futures data",
+          "openSource": "Open source · MIT"
+        }
+      },
+      "trustStrip": {
+        "history": "{startYear} – {endYear}"
+      },
+      "features": {
+        "openSource": {
+          "title": "Open source, end to end",
+          "description": "The stats engine (Python) and this site (Next.js) are both MIT-licensed on GitHub. This demo runs on a frozen snapshot of aggregated results — no live backend, no database."
+        }
+      },
+      "howItWorks": {
+        "heading": "From the catalog to a stat in two clicks",
+        "step1": {
+          "title": "Open the demo",
+          "description": "No account required — every stat is unlocked."
+        },
+        "step3": {
+          "description": "Read the edge against its baseline, check the sample size."
+        }
+      },
+      "cta": {
+        "heading": "Open source, end to end",
+        "description": "The stats engine and this site are both open source on GitHub, and this demo runs entirely on a frozen snapshot of aggregated results — no signup, no backend.",
+        "viewOnGithub": "View on GitHub"
+      },
+      "footer": {
+        "tagline": "Statistical market probabilities for NQ and ES futures traders. Transparent edges, real baselines — served from a frozen snapshot, not a live feed."
+      }
     }
   },
   "landing": {
@@ -39,44 +77,35 @@
         "updatedDaily": "Updated daily after the close"
       },
       "preview": {
-        "ariaLabel": "Sample statistic preview",
-        "title": "Gap-up continuation — NQ",
-        "subtitle": "P(close above open | gap > 0.30%) · RTH session",
-        "tier": "Tier 1",
-        "edge": "+9.8 pts edge",
-        "baselineLabel": "Baseline (all sessions):",
-        "row1Label": "Monday open",
-        "row2Label": "Gap > 0.75%",
-        "row3Label": "Friday open",
-        "row4Label": "FOMC day"
+        "ariaLabel": "Sample statistic preview"
       }
     },
     "trustStrip": {
       "heading": "Coverage across the instruments you actually trade",
       "ariaLabel": "Covered instruments",
       "sessions": "RTH & ETH sessions",
-      "history": "2007 – present",
-      "timeframes": "1m · 5m · daily"
+      "history": "2008 – present",
+      "timeframes": "5min → monthly"
     },
     "features": {
       "eyebrow": "Why Augur",
       "heading": "Edges you can actually trust",
-      "subtitle": "No black boxes, no curve-fit signals. Just transparent conditional statistics with the context you need to size a trade with confidence.",
+      "subtitle": "No black boxes, no curve-fit signals. Just transparent conditional statistics with the context you need to judge a setup with confidence.",
       "baseline": {
         "title": "Baseline-relative edges",
-        "description": "Every probability is shown next to its unconditional baseline. A 56% hit rate means nothing until you know the base rate — we put both side by side, always."
+        "description": "Every probability is shown next to its unconditional baseline whenever one applies. A 56% hit rate means nothing until you know the base rate — we put both side by side."
       },
       "sliced": {
         "title": "Sliced every way",
-        "description": "Drill into any stat by weekday, gap size, prior-day range, session, or volatility regime. Each slice carries its own sample size so thin buckets never mislead you."
+        "description": "Drill into stats by weekday, size bucket, prior-session candle, or session close color. Each slice carries its own sample size so thin buckets never mislead you."
       },
       "refreshed": {
         "title": "Refreshed daily",
         "description": "Stats recompute automatically after each cash close, rolling in the latest session so your edges reflect this week's market — not a backtest frozen in 2019."
       },
       "significance": {
-        "title": "Significance built in",
-        "description": "Confidence intervals and minimum-N thresholds keep noise out of the headline number. We grey out edges that aren't statistically meaningful instead of overselling them."
+        "title": "Sample size next to every edge",
+        "description": "Every probability ships with its N — the exact number of observations behind it — right next to the edge versus baseline, so you can judge a thin slice for yourself."
       }
     },
     "howItWorks": {
@@ -92,7 +121,7 @@
       },
       "step3": {
         "title": "Trade with context",
-        "description": "Read the edge against its baseline, check the sample size, and size your position accordingly. Come back after the close for the next day's refreshed numbers."
+        "description": "Read the edge against its baseline, check the sample size. Come back after the close for the next day's refreshed numbers."
       }
     },
     "cta": {

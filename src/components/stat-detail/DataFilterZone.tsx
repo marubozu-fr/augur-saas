@@ -6,6 +6,7 @@
 
 import { useTranslations } from "next-intl";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { formatTimeframeLabel } from "@/lib/stat-format";
 
 interface DataFilterZoneProps {
   timeframes: string[];
@@ -47,7 +48,7 @@ export function DataFilterZone({
               value={tf}
               className="h-7 rounded-[calc(var(--radius-md)-2px)] font-mono text-xs font-semibold tracking-wide text-muted-foreground hover:text-foreground data-[state=on]:bg-brand data-[state=on]:text-on-brand"
             >
-              {tf.charAt(0).toUpperCase() + tf.slice(1).toLowerCase()}
+              {formatTimeframeLabel(tf)}
             </ToggleGroupItem>
           ))}
         </ToggleGroup>
