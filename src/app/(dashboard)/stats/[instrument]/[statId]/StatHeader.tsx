@@ -11,6 +11,7 @@
 // but it does mean the title/definition render twice on a locked stat page.
 
 import { useTranslations } from "next-intl";
+import { isDemoMode } from "@/lib/demo-mode";
 
 interface StatHeaderProps {
   title: string;
@@ -20,6 +21,7 @@ interface StatHeaderProps {
 
 export function StatHeader({ title, definition, tier }: StatHeaderProps) {
   const t = useTranslations("statDetail");
+  const demo = isDemoMode();
 
   return (
     <div className="flex items-start gap-5 flex-wrap mb-5">
@@ -28,9 +30,13 @@ export function StatHeader({ title, definition, tier }: StatHeaderProps) {
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
             {title}
           </h1>
-          <span className="inline-flex items-center px-3 py-[5px] rounded-full text-xs font-semibold bg-brand-soft text-brand">
-            {t("tier", { tier })}
-          </span>
+          {/* Tier badge — hidden in demo mode: there is no plan, every stat is
+              unlocked. */}
+          {!demo && (
+            <span className="inline-flex items-center px-3 py-[5px] rounded-full text-xs font-semibold bg-brand-soft text-brand">
+              {t("tier", { tier })}
+            </span>
+          )}
         </div>
         {definition && (
           <p className="mt-3 text-sm text-muted-foreground leading-normal">

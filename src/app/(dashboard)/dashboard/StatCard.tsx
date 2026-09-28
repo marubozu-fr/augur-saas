@@ -3,6 +3,7 @@ import { BarChart3, ArrowRight, Lock } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { getActiveLocale } from "@/lib/i18n/get-locale";
 import { pickLocale } from "@/lib/i18n/pick";
+import { isDemoMode } from "@/lib/demo-mode";
 import { fmtNum, formatTimeframeLabel } from "@/lib/stat-format";
 import type { StatFamilyMeta, TimeframeMeta } from "@/types/stats";
 
@@ -26,6 +27,7 @@ export async function StatCard({
   // matching timeframe), so [0] is safe for the shared instrument code.
   const instrument = timeframes[0].instrument;
   const totalSamples = timeframes.reduce((sum, tf) => sum + tf.totalSamples, 0);
+  const demo = isDemoMode();
   const locale = await getActiveLocale();
   const t = await getTranslations("dashboard.statCard");
   const tTimeframes = await getTranslations("timeframes");
@@ -59,7 +61,8 @@ export async function StatCard({
             : undefined
         }
       >
-        {/* Top row: icon + tier badge */}
+        {/* Top row: icon + tier badge — badge hidden in demo mode: there is
+            no plan, every stat is unlocked. */}
         <div className="flex items-start justify-between gap-3 mb-4">
           <span
             className="inline-grid place-items-center w-10 h-10 rounded-md bg-surface-2 text-muted-foreground flex-shrink-0"
@@ -67,9 +70,11 @@ export async function StatCard({
           >
             <BarChart3 size={20} />
           </span>
-          <span className="inline-flex items-center px-3 py-[5px] rounded-full text-xs font-semibold border border-border bg-surface-2 text-muted-foreground flex-shrink-0">
-            {t("tier", { tier })}
-          </span>
+          {!demo && (
+            <span className="inline-flex items-center px-3 py-[5px] rounded-full text-xs font-semibold border border-border bg-surface-2 text-muted-foreground flex-shrink-0">
+              {t("tier", { tier })}
+            </span>
+          )}
         </div>
 
         {/* Title + instrument · timeframe */}
