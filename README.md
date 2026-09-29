@@ -2,6 +2,16 @@
 
 Member-facing subscription platform for [Augur](https://github.com/marubozu-fr/augur) trading statistics.
 
+This is an **unmaintained open-source demo**: it is published as a reference
+and is no longer actively developed.
+
+- **Live demo**: <https://augur-saas.marubozu.ovh>
+- **Stats engine**: [marubozu-fr/augur](https://github.com/marubozu-fr/augur)
+
+The demo serves a **frozen snapshot of aggregated results** from the stats
+engine repository, not live data — see `demo-data/SOURCE` for the exact
+commit it was taken from, and [Demo mode](#demo-mode) below.
+
 ## Stack
 
 - **Next.js** (App Router) on Vercel
@@ -26,13 +36,15 @@ This frontend consumes the Augur REST API for stats data. It does not contain
 any stats computation, data processing, or backend logic.
 
 See [CLAUDE.md](./CLAUDE.md) for full project documentation.
-See [docs/PLAN.md](./docs/PLAN.md) for milestones and issue plan.
+See [docs/PLAN.md](./docs/PLAN.md) for the original development plan, kept for
+history (it no longer matches the code in places).
 
 ## Demo mode
 
-`NEXT_PUBLIC_DEMO_MODE=true` runs the app as a free public demo, with no
-backend and no database: Supabase and Stripe are never touched (no client is
-ever created, no env var is required), auth/subscription gates on
+The live demo is this app built with `NEXT_PUBLIC_DEMO_MODE=true`, which runs
+it as a free public demo with no backend and no database: Supabase and Stripe
+are never touched (no client is ever created, no env var is required),
+auth/subscription gates on
 `/dashboard` and `/stats` are lifted, and stats are served from a bundled
 JSON snapshot instead of the live Augur API. The flag is inlined at build
 time, so toggling it requires a rebuild — not just a restart:

@@ -7,7 +7,7 @@ Augur API (`AUGUR_API_URL`, source: https://github.com/marubozu-fr/augur) — th
 no stats engine, no data processing**. Authentication, user management, and
 subscription billing are handled by Supabase and Stripe.
 
-Repository: `marubozu-fr/augur-saas` — Private
+Repository: `marubozu-fr/augur-saas` — Public (unmaintained open-source demo, live at https://augur-saas.marubozu.ovh)
 
 ## Tech Stack
 - **Framework**: Next.js (App Router, React Server Components)
