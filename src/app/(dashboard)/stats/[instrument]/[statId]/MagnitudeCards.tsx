@@ -24,7 +24,7 @@ export function MagnitudeCards({
   if (magnitudeRows.length === 0) return null;
 
   return (
-    <div className="grid grid-cols-2 min-[861px]:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 min-[480px]:grid-cols-2 min-[861px]:grid-cols-4 gap-4">
       {magnitudeRows.map((row, i) => {
         const hasBaseline = row.valueBaseline != null && row.baselineN > 0;
         // Bull/bear detection stays on the raw API code (stable identifiers).
@@ -61,15 +61,15 @@ export function MagnitudeCards({
                 </span>
               )}
             </div>
-            <div className="flex items-baseline gap-2">
-              <span className="font-mono text-4xl font-bold text-foreground tabular-nums">
+            <div className="flex items-baseline gap-2 min-w-0">
+              <span className="font-mono text-3xl min-[480px]:text-4xl font-bold text-foreground tabular-nums break-all min-w-0">
                 {fmtValue(row.value!, locale)}
               </span>
               <span className="text-lg font-semibold text-muted-foreground">
                 {pctSign(locale)}
               </span>
             </div>
-            <div className="flex items-center gap-3 text-xs text-subtle pt-3 border-t border-border">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-subtle pt-3 border-t border-border">
               <span>
                 {t.rich("nEquals", {
                   mono: (chunks) => (

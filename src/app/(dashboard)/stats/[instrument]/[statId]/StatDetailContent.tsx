@@ -161,7 +161,7 @@ export function StatDetailContent({ result, locale }: StatDetailContentProps) {
               </h2>
 
               {isVisualShape ? (
-                <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-5">
+                <div className="grid grid-cols-[repeat(auto-fit,minmax(min(300px,100%),1fr))] gap-5">
                   {conditionGroups.map(([conditionCode, rows]) => (
                     <ConditionCard
                       key={conditionCode}
