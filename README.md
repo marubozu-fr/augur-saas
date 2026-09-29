@@ -83,6 +83,30 @@ most stat families in the snapshot (`pickPrimaryInstrument()` in
 alphabetically first one — NQ has full family coverage, ES is missing the
 initial-balance variants.
 
+## Deploying the demo
+
+The demo is deployed manually (Vercel project `augur-saas`, no Git
+integration) with:
+
+```bash
+scripts/deploy-demo.sh [--dry-run] [ref]   # ref defaults to "main"
+```
+
+It runs from any directory. It first runs `git fetch origin` and aborts if
+`origin/<ref>` exists and differs from the local `ref` (pull first). It then
+exports `ref` with `git archive` into a temporary directory and runs
+`vercel pull` there, aborting unless the pulled `.vercel/.env.production.local`
+sets `NEXT_PUBLIC_DEMO_MODE` to `true` (the build is in demo mode), then
+`pnpm install --frozen-lockfile` and `vercel build --prod`. Because the build starts from a clean archive (no
+`.git`, no untracked files), your local `.env.local` never reaches it; only
+`.vercel/project.json` is copied over, so the project must be linked first
+(`vercel link`). Two checks must pass before anything is uploaded: the
+functions' `.vc-config.json` files must reference
+`demo-data/results/gap_fill.json` (the snapshot is bundled), and `supabase.co`
+must not appear anywhere in `.vercel/output/static` (no Supabase URL in the
+public bundle). Then it runs `vercel deploy --prebuilt --prod --archive=tgz`.
+`--dry-run` does everything up to that last step and stops right before it.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
