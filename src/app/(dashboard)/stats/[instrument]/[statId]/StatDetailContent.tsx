@@ -147,6 +147,7 @@ export function StatDetailContent({ result, locale }: StatDetailContentProps) {
               </h2>
               <MagnitudeCards
                 rows={magnitudeRows}
+                statName={statName}
                 resolver={resolver}
                 locale={locale}
               />

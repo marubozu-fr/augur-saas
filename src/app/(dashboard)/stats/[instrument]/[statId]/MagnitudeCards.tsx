@@ -2,17 +2,24 @@ import { TrendingUp, TrendingDown } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { StatResultRow } from "@/types/stats";
 import type { LabelResolver } from "@/lib/stat-format";
-import { fmtValue, fmtNum, pctSign } from "@/lib/stat-format";
+import { fmtNum } from "@/lib/stat-format";
+import {
+  formatMagnitude,
+  formatMagnitudeInline,
+  getMagnitudeUnit,
+} from "@/lib/stat-units";
 import type { Locale } from "@/i18n/config";
 
 interface MagnitudeCardsProps {
   rows: StatResultRow[];
+  statName: string;
   resolver: LabelResolver;
   locale: Locale;
 }
 
 export function MagnitudeCards({
   rows,
+  statName,
   resolver,
   locale,
 }: MagnitudeCardsProps) {
@@ -26,6 +33,8 @@ export function MagnitudeCards({
   return (
     <div className="grid grid-cols-1 min-[480px]:grid-cols-2 min-[861px]:grid-cols-4 gap-4">
       {magnitudeRows.map((row, i) => {
+        const unit = getMagnitudeUnit(statName, row.outcome);
+        const value = formatMagnitude(row.value!, unit, locale, t);
         const hasBaseline = row.valueBaseline != null && row.baselineN > 0;
         // Bull/bear detection stays on the raw API code (stable identifiers).
         const isUp = row.outcome.toLowerCase().includes("bull");
@@ -63,11 +72,13 @@ export function MagnitudeCards({
             </div>
             <div className="flex items-baseline gap-2 min-w-0">
               <span className="font-mono text-3xl min-[480px]:text-4xl font-bold text-foreground tabular-nums break-all min-w-0">
-                {fmtValue(row.value!, locale)}
+                {value.number}
               </span>
-              <span className="text-lg font-semibold text-muted-foreground">
-                {pctSign(locale)}
-              </span>
+              {value.suffix !== null && (
+                <span className="text-lg font-semibold text-muted-foreground">
+                  {value.suffix}
+                </span>
+              )}
             </div>
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-subtle pt-3 border-t border-border">
               <span>
@@ -84,7 +95,9 @@ export function MagnitudeCards({
                     mono: (chunks) => (
                       <span className="font-mono tabular-nums">{chunks}</span>
                     ),
-                    value: `${fmtValue(row.valueBaseline!, locale)}${pctSign(locale)}`,
+                    value: formatMagnitudeInline(
+                      formatMagnitude(row.valueBaseline!, unit, locale, t),
+                    ),
                   })}
                 </span>
               ) : (

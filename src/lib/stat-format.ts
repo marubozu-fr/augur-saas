@@ -73,7 +73,7 @@ export function fmtPct1Value(n: number, locale: Locale): string {
 
 /**
  * The separator + percent sign a split display should render after a bare
- * numeral (`fmtPct1Value`, `fmtValue`) shown in its own DOM node, so the
+ * numeral (`fmtPct1Value`) shown in its own DOM node, so the
  * combined text matches `fmtPct1`'s single-string spacing — a trailing sign
  * with no separator in en ("%"), a no-break space + sign in fr (" %") —
  * without a per-locale literal. Derived from `Intl.NumberFormat`'s own
@@ -101,14 +101,6 @@ export function fmtEdgePts(edge: number, locale: Locale): string {
 
 export function fmtNum(n: number, locale: Locale): string {
   return new Intl.NumberFormat(locale).format(n);
-}
-
-export function fmtValue(v: number, locale: Locale): string {
-  return new Intl.NumberFormat(locale, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-    useGrouping: false,
-  }).format(v);
 }
 
 // ---------------------------------------------------------------------------
